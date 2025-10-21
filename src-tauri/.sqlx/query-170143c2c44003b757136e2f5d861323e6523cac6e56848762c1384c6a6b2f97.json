@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        DELETE FROM user\n        WHERE id = ?\n        RETURNING id AS \"id!: i64\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "170143c2c44003b757136e2f5d861323e6523cac6e56848762c1384c6a6b2f97"
+}

@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE contact_note\n        SET\n            contact_id = ?,\n            note_type = ?,\n            content = ?\n        WHERE id = ?\n        RETURNING\n            id AS \"id!: i64\",\n            contact_id,\n            note_type AS \"note_type: NoteType\",\n            content,\n            created_at,\n            updated_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "contact_id",
+        "ordinal": 1,
+        "type_info": "Int64"
+      },
+      {
+        "name": "note_type: NoteType",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "content",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "updated_at",
+        "ordinal": 5,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      true,
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "6c2927f26dbeefc6ea945ba6e0e698fcbaadbb0f24e0af6e038f41bf19e0284d"
+}

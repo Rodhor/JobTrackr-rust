@@ -1,0 +1,68 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE person\n        SET\n            first_name = ?,\n            last_name = ?,\n            email = ?,\n            phone_number = ?,\n            role = ?,\n            linkedin_url = ?\n        WHERE id = ?\n        RETURNING\n            id AS \"id!: i64\",\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            role AS \"role: Role\",\n            linkedin_url,\n            created_at,\n            updated_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "first_name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "last_name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "email",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "phone_number",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "role: Role",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "linkedin_url",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "updated_at",
+        "ordinal": 8,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "4f17589897b48d48c52e8e63dc0b264ed3e2e38d80c816c3d248b272eac59262"
+}

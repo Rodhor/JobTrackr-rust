@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        DELETE FROM job_listing_contact\n        WHERE id = ?\n        RETURNING id AS \"id!: i64\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "de9a7cac4ba5ff8e4033411a22c689756cbe5bbd01691747df79304fc638af27"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        DELETE FROM application\n        WHERE id = ?\n        RETURNING id AS \"id!: i64\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "cdcb42969aeaef5e80fdcdd426cc09c4f2d4280bdcdec7f82b540c919ad309df"
+}

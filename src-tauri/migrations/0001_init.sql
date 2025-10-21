@@ -2,21 +2,24 @@
 -- DATABASE SCHEMA: Job Tracking / Application Manager
 -- ======================================================
 
+-- Enable Foreign Keys
+PRAGMA foreign_keys = ON;
+
 -- ======================================================
 -- 1. Users Table
 -- ======================================================
 CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone_number VARCHAR(50),
-    street_address VARCHAR(255),
-    zip_code VARCHAR(20),
-    city VARCHAR(255),
-    country VARCHAR(255),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone_number TEXT,
+    street_address TEXT,
+    zip_code TEXT,
+    city TEXT,
+    country TEXT,
+    created_at TEXT NOT NULL DEFAULT current_timestamp,
+    updated_at TEXT NOT NULL DEFAULT current_timestamp
 );
 
 -- ======================================================
@@ -24,17 +27,17 @@ CREATE TABLE IF NOT EXISTS user (
 -- ======================================================
 CREATE TABLE IF NOT EXISTS company (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(255) NOT NULL,
-    street_address VARCHAR(255),
-    zip_code VARCHAR(20),
-    city VARCHAR(255),
-    country VARCHAR(255),
-    default_work_type VARCHAR(50),
-    industry VARCHAR(100),
+    name TEXT NOT NULL,
+    street_address TEXT,
+    zip_code TEXT,
+    city TEXT,
+    country TEXT,
+    default_work_type TEXT,
+    industry TEXT,
     website TEXT,
-    phone_number VARCHAR(50) UNIQUE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    phone_number TEXT,
+    created_at TEXT NOT NULL DEFAULT current_timestamp,
+    updated_at TEXT NOT NULL DEFAULT current_timestamp,
     CHECK (
         default_work_type IN (
             'full_time',
@@ -53,17 +56,17 @@ CREATE TABLE IF NOT EXISTS company (
 CREATE TABLE IF NOT EXISTS job_listing (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id INTEGER NOT NULL REFERENCES company(id) ON DELETE CASCADE,
-    title VARCHAR(255) NOT NULL,
-    work_type VARCHAR(50),
-    category VARCHAR(50),
-    seniority_level VARCHAR(100),
+    title TEXT NOT NULL,
+    work_type TEXT,
+    category TEXT,
+    seniority_level TEXT,
     salary_min INTEGER,
     salary_max INTEGER,
-    currency VARCHAR(10),
+    currency TEXT,
     description TEXT,
     url TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TEXT NOT NULL DEFAULT current_timestamp,
+    updated_at TEXT NOT NULL DEFAULT current_timestamp,
     CHECK (
         work_type IN (
             'full_time',
@@ -94,14 +97,14 @@ CREATE TABLE IF NOT EXISTS job_listing (
 -- ======================================================
 CREATE TABLE IF NOT EXISTS person (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE,
-    phone_number VARCHAR(50),
-    role VARCHAR(100),
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT,
+    phone_number TEXT,
+    role TEXT,
     linkedin_url TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at TEXT NOT NULL DEFAULT current_timestamp,
+    updated_at TEXT NOT NULL DEFAULT current_timestamp
 );
 
 -- ======================================================
@@ -109,11 +112,11 @@ CREATE TABLE IF NOT EXISTS person (
 -- ======================================================
 CREATE TABLE IF NOT EXISTS job_listing_contact (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    joblisting_id INTEGER NOT NULL REFERENCES job_listing(id) ON DELETE CASCADE,
+    job_listing_id INTEGER NOT NULL REFERENCES job_listing(id) ON DELETE CASCADE,
     person_id INTEGER NOT NULL REFERENCES person(id) ON DELETE CASCADE,
-    role VARCHAR(50),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    role TEXT,
+    created_at TEXT NOT NULL DEFAULT current_timestamp,
+    updated_at TEXT NOT NULL DEFAULT current_timestamp,
     CHECK (role IN ('recruiter', 'hr', 'manager', 'other'))
 );
 
@@ -123,14 +126,14 @@ CREATE TABLE IF NOT EXISTS job_listing_contact (
 CREATE TABLE IF NOT EXISTS application (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
-    joblisting_id INTEGER REFERENCES job_listing(id) ON DELETE SET NULL,
-    status VARCHAR(50),
-    applied_date DATETIME,
+    job_listing_id INTEGER NOT NULL REFERENCES job_listing(id) ON DELETE CASCADE,
+    status TEXT,
+    applied_date TEXT NOT NULL DEFAULT current_timestamp,
     cv_file_path TEXT,
     cover_letter_file_path TEXT,
     application_notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TEXT NOT NULL DEFAULT current_timestamp,
+    updated_at TEXT NOT NULL DEFAULT current_timestamp,
     CHECK (
         status IN (
             'applied',
@@ -148,13 +151,13 @@ CREATE TABLE IF NOT EXISTS application (
 -- ======================================================
 CREATE TABLE IF NOT EXISTS contact (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    contact_type VARCHAR(50) NOT NULL,
-    contact_date DATETIME NOT NULL,
-    location VARCHAR(255),
-    user_id INTEGER REFERENCES user(id) ON DELETE CASCADE,
+    contact_type TEXT NOT NULL,
+    contact_date TEXT NOT NULL DEFAULT current_timestamp,
+    location TEXT,
+    user_id INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
     person_id INTEGER REFERENCES person(id) ON DELETE CASCADE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TEXT NOT NULL DEFAULT current_timestamp,
+    updated_at TEXT NOT NULL DEFAULT current_timestamp,
     CHECK (
         contact_type IN ('phone', 'email', 'in_person', 'other')
     )
@@ -166,16 +169,11 @@ CREATE TABLE IF NOT EXISTS contact (
 CREATE TABLE IF NOT EXISTS contact_note (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     contact_id INTEGER NOT NULL REFERENCES contact(id) ON DELETE CASCADE,
-    note_type VARCHAR(50),
+    note_type TEXT,
     content TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TEXT NOT NULL DEFAULT current_timestamp,
+    updated_at TEXT NOT NULL DEFAULT current_timestamp,
     CHECK (
         note_type IN ('before', 'during', 'after', 'other')
     )
 );
-
--- ======================================================
--- Foreign Key Enforcement
--- ======================================================
-PRAGMA foreign_keys = ON;
