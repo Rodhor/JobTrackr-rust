@@ -25,7 +25,7 @@ async fn test_user_crud_flow() -> Result<(), sqlx::Error> {
     assert_eq!(created.email, "alice@example.com");
 
     // 2. READ BY ID
-    let fetched = get_user_by_id(&pool, &created.id).await?;
+    let fetched = get_user_by_id(&pool, created.id).await?;
     assert_eq!(fetched.email, "alice@example.com");
 
     // 3. READ ALL
@@ -35,10 +35,10 @@ async fn test_user_crud_flow() -> Result<(), sqlx::Error> {
     // 4. UPDATE
     let updated = update_user(
         &pool,
-        &created.id,
-        "Alice",
-        "Updated",
-        "alice.new@example.com",
+        created.id,
+        Some("Alice"),
+        Some("Updated"),
+        Some("alice.new@example.com"),
         Some("555-9999"),
         Some("Second St 5"),
         Some("54321"),
@@ -51,7 +51,7 @@ async fn test_user_crud_flow() -> Result<(), sqlx::Error> {
     assert_eq!(updated.city.as_deref(), Some("Munich"));
 
     // 5. DELETE
-    let deleted_id = delete_user(&pool, &created.id).await?;
+    let deleted_id = delete_user(&pool, created.id).await?;
     assert_eq!(deleted_id, created.id);
 
     Ok(())

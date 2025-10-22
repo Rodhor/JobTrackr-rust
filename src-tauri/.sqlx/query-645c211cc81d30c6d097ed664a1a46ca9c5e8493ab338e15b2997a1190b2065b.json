@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        INSERT INTO user (\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            street_address,\n            zip_code,\n            city,\n            country,\n            created_at,\n            updated_at\n        )\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n        RETURNING\n            id AS \"id!: i64\",\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            street_address,\n            zip_code,\n            city,\n            country,\n            created_at,\n            updated_at\n        ",
+  "query": "\n        INSERT INTO user (\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            street_address,\n            zip_code,\n            city,\n            country,\n            created_at,\n            updated_at\n        )\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n        RETURNING\n            id              AS \"id!: i64\",\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            street_address,\n            zip_code,\n            city,\n            country,\n            created_at,\n            updated_at\n        ",
   "describe": {
     "columns": [
       {
@@ -76,5 +76,5 @@
       false
     ]
   },
-  "hash": "196a66a316a42a8e332c1ed4ae2f59af925a39997c44ad3d1bcca46726e36bb1"
+  "hash": "645c211cc81d30c6d097ed664a1a46ca9c5e8493ab338e15b2997a1190b2065b"
 }

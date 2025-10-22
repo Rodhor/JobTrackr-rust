@@ -1,8 +1,10 @@
 use crate::db::models::enums::WorkType;
+use crate::utils::sql_utils::build_update_sql;
 use chrono::Utc;
+use serde::Serialize;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
-#[derive(FromRow, Debug)]
+#[derive(FromRow, Debug, Serialize)]
 pub struct Company {
     pub id: i64,
     pub name: String,
@@ -82,12 +84,12 @@ pub async fn create_company(
     Ok(company)
 }
 
-pub async fn get_company_by_id(pool: &SqlitePool, id: &i64) -> Result<Company, Error> {
+pub async fn get_company_by_id(pool: &SqlitePool, id: i64) -> Result<Company, Error> {
     let company = query_as!(
         Company,
         r#"
         SELECT
-            id,
+            id AS "id!: i64",
             name,
             street_address,
             zip_code,
@@ -115,7 +117,7 @@ pub async fn get_all_companies(pool: &SqlitePool) -> Result<Vec<Company>, Error>
         Company,
         r#"
         SELECT
-            id,
+            id AS "id!: i64",
             name,
             street_address,
             zip_code,
@@ -138,8 +140,8 @@ pub async fn get_all_companies(pool: &SqlitePool) -> Result<Vec<Company>, Error>
 
 pub async fn update_company(
     pool: &SqlitePool,
-    id: &i64,
-    name: &str,
+    id: i64,
+    name: Option<&str>,
     street_address: Option<&str>,
     zip_code: Option<&str>,
     city: Option<&str>,
@@ -149,58 +151,36 @@ pub async fn update_company(
     website: Option<&str>,
     phone_number: Option<&str>,
 ) -> Result<Company, Error> {
-    let now = Utc::now().to_rfc3339();
-    let worktype = default_work_type.map(|t| t.as_str());
+    let worktype_str = default_work_type.map(|t| t.as_str());
 
-    let company = query_as!(
-        Company,
-        r#"
-        UPDATE company
-        SET
-            name = ?,
-            street_address = ?,
-            zip_code = ?,
-            city = ?,
-            country = ?,
-            default_work_type = ?,
-            industry = ?,
-            website = ?,
-            phone_number = ?,
-            updated_at = ?
-        WHERE id = ?
-        RETURNING
-            id AS "id!: i64",
-            name,
-            street_address,
-            zip_code,
-            city,
-            country,
-            default_work_type AS "default_work_type: WorkType",
-            industry,
-            website,
-            phone_number,
-            created_at,
-            updated_at
-        "#,
-        name,
-        street_address,
-        zip_code,
-        city,
-        country,
-        worktype,
-        industry,
-        website,
-        phone_number,
-        now,
-        id
-    )
-    .fetch_one(pool)
-    .await?;
+    // 1. Build dynamic SQL
+    let fields = vec![
+        ("name", name),
+        ("street_address", street_address),
+        ("zip_code", zip_code),
+        ("city", city),
+        ("country", country),
+        ("default_work_type", worktype_str),
+        ("industry", industry),
+        ("website", website),
+        ("phone_number", phone_number),
+    ];
 
+    let (sql, binds) = build_update_sql("company", "id", id, fields);
+
+    // 2. Bind parameters in order
+    let mut query = sqlx::query_as::<_, Company>(&sql);
+    for val in binds.iter().take(binds.len() - 1) {
+        query = query.bind(val);
+    }
+    query = query.bind(binds.last().unwrap());
+
+    // 3. Execute and return updated record
+    let company = query.fetch_one(pool).await?;
     Ok(company)
 }
 
-pub async fn delete_company(pool: &SqlitePool, id: &i64) -> Result<i64, Error> {
+pub async fn delete_company(pool: &SqlitePool, id: i64) -> Result<i64, Error> {
     let row = query!(
         r#"
         DELETE FROM company

@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        INSERT INTO person (\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            role,\n            linkedin_url\n        )\n        VALUES (?, ?, ?, ?, ?, ?)\n        RETURNING\n            id AS \"id!: i64\",\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            role AS \"role: Role\",\n            linkedin_url,\n            created_at,\n            updated_at\n        ",
+  "query": "\n        INSERT INTO person (\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            role,\n            linkedin_url,\n            created_at,\n            updated_at\n        )\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?)\n        RETURNING\n            id AS \"id!: i64\",\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            role AS \"role: Role\",\n            linkedin_url,\n            created_at,\n            updated_at\n        ",
   "describe": {
     "columns": [
       {
@@ -50,7 +50,7 @@
       }
     ],
     "parameters": {
-      "Right": 6
+      "Right": 8
     },
     "nullable": [
       false,
@@ -64,5 +64,5 @@
       false
     ]
   },
-  "hash": "93b76daac91f8d92dd4375203a6c47f95d218f2f2d4850418a7d23d7cb4f93be"
+  "hash": "ebd16fc7d16323dd472d61f050e7e0498be5dfa60ed65a60d5980433386aa8e0"
 }

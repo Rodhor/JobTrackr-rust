@@ -1,7 +1,9 @@
 use crate::db::models::enums::Status;
+use crate::utils::sql_utils::build_update_sql;
+use serde::Serialize;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
-#[derive(FromRow, Debug)]
+#[derive(FromRow, Debug, Serialize)]
 pub struct Application {
     pub id: i64,
     pub user_id: i64,
@@ -25,7 +27,7 @@ pub async fn create_application(
     cover_letter_file_path: Option<&str>,
     application_notes: Option<&str>,
 ) -> Result<Application, Error> {
-    let status = status.map(|s| s.as_str());
+    let status_str = status.map(|s| s.as_str());
 
     let application = query_as!(
         Application,
@@ -54,7 +56,7 @@ pub async fn create_application(
         "#,
         user_id,
         job_listing_id,
-        status,
+        status_str,
         applied_date,
         cv_file_path,
         cover_letter_file_path,
@@ -177,53 +179,40 @@ pub async fn get_applications_by_job_listing_id(
 pub async fn update_application(
     pool: &SqlitePool,
     id: i64,
-    user_id: i64,
-    job_listing_id: i64,
+    user_id: Option<i64>,
+    job_listing_id: Option<i64>,
     status: Option<&Status>,
-    applied_date: &str,
+    applied_date: Option<&str>,
     cv_file_path: Option<&str>,
     cover_letter_file_path: Option<&str>,
     application_notes: Option<&str>,
 ) -> Result<Application, Error> {
-    let status = status.map(|s| s.as_str());
+    let status_str = status.map(|s| s.as_str());
+    let user_id_s = user_id.map(|v| v.to_string());
+    let job_listing_id_s = job_listing_id.map(|v| v.to_string());
 
-    let application = query_as!(
-        Application,
-        r#"
-        UPDATE application
-        SET
-            user_id = ?,
-            job_listing_id = ?,
-            status = ?,
-            applied_date = ?,
-            cv_file_path = ?,
-            cover_letter_file_path = ?,
-            application_notes = ?
-        WHERE id = ?
-        RETURNING
-            id AS "id!: i64",
-            user_id,
-            job_listing_id,
-            status AS "status: Status",
-            applied_date,
-            cv_file_path,
-            cover_letter_file_path,
-            application_notes,
-            created_at,
-            updated_at
-        "#,
-        user_id,
-        job_listing_id,
-        status,
-        applied_date,
-        cv_file_path,
-        cover_letter_file_path,
-        application_notes,
-        id
-    )
-    .fetch_one(pool)
-    .await?;
+    // Build SQL dynamically
+    let fields = vec![
+        ("user_id", user_id_s.as_deref()),
+        ("job_listing_id", job_listing_id_s.as_deref()),
+        ("status", status_str),
+        ("applied_date", applied_date),
+        ("cv_file_path", cv_file_path),
+        ("cover_letter_file_path", cover_letter_file_path),
+        ("application_notes", application_notes),
+    ];
 
+    let (sql, binds) = build_update_sql("application", "id", id, fields);
+
+    // Bind parameters
+    let mut query = sqlx::query_as::<_, Application>(&sql);
+    for val in binds.iter().take(binds.len() - 1) {
+        query = query.bind(val);
+    }
+    query = query.bind(binds.last().unwrap());
+
+    // Execute update and return record
+    let application = query.fetch_one(pool).await?;
     Ok(application)
 }
 

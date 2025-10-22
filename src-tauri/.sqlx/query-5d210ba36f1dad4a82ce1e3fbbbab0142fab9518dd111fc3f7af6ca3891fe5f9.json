@@ -1,10 +1,10 @@
 {
   "db_name": "SQLite",
-  "query": "\n        SELECT\n            id,\n            name,\n            street_address,\n            zip_code,\n            city,\n            country,\n            default_work_type AS \"default_work_type: WorkType\",\n            industry,\n            website,\n            phone_number,\n            created_at,\n            updated_at\n        FROM company\n        WHERE id = ?\n        ",
+  "query": "\n        SELECT\n            id AS \"id!: i64\",\n            name,\n            street_address,\n            zip_code,\n            city,\n            country,\n            default_work_type AS \"default_work_type: WorkType\",\n            industry,\n            website,\n            phone_number,\n            created_at,\n            updated_at\n        FROM company\n        WHERE id = ?\n        ",
   "describe": {
     "columns": [
       {
-        "name": "id",
+        "name": "id!: i64",
         "ordinal": 0,
         "type_info": "Int64"
       },
@@ -82,5 +82,5 @@
       false
     ]
   },
-  "hash": "7bd9b20d0cb6a40cf0ac652b3428d5cfb1d3dacd455616af67502be106483a43"
+  "hash": "5d210ba36f1dad4a82ce1e3fbbbab0142fab9518dd111fc3f7af6ca3891fe5f9"
 }

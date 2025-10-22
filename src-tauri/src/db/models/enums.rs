@@ -1,19 +1,26 @@
+use serde::{Deserialize, Serialize};
 use sqlx::Type;
 
-#[derive(Type, Debug, Clone, PartialEq, Eq)]
+#[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum WorkType {
     #[sqlx(rename = "full_time")]
+    #[serde(rename = "full_time")]
     FullTime,
     #[sqlx(rename = "part_time")]
+    #[serde(rename = "part_time")]
     PartTime,
     #[sqlx(rename = "internship")]
+    #[serde(rename = "internship")]
     Internship,
     #[sqlx(rename = "contract")]
+    #[serde(rename = "contract")]
     Contract,
     #[sqlx(rename = "freelance")]
+    #[serde(rename = "freelance")]
     Freelance,
     #[sqlx(rename = "other")]
+    #[serde(rename = "other")]
     Other,
 }
 
@@ -30,20 +37,26 @@ impl WorkType {
     }
 }
 
-#[derive(Type, Debug, Clone, PartialEq, Eq)]
+#[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum SeniorityLevel {
     #[sqlx(rename = "junior")]
+    #[serde(rename = "junior")]
     Junior,
     #[sqlx(rename = "mid")]
+    #[serde(rename = "mid")]
     Mid,
     #[sqlx(rename = "senior")]
+    #[serde(rename = "senior")]
     Senior,
     #[sqlx(rename = "lead")]
+    #[serde(rename = "lead")]
     Lead,
     #[sqlx(rename = "manager")]
+    #[serde(rename = "manager")]
     Manager,
     #[sqlx(rename = "other")]
+    #[serde(rename = "other")]
     Other,
 }
 
@@ -59,18 +72,24 @@ impl SeniorityLevel {
         }
     }
 }
-#[derive(Type, Debug, Clone, PartialEq, Eq)]
+
+#[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum Currency {
     #[sqlx(rename = "USD")]
+    #[serde(rename = "USD")]
     USD,
     #[sqlx(rename = "EUR")]
+    #[serde(rename = "EUR")]
     EUR,
     #[sqlx(rename = "GBP")]
+    #[serde(rename = "GBP")]
     GBP,
     #[sqlx(rename = "DKK")]
+    #[serde(rename = "DKK")]
     DKK,
     #[sqlx(rename = "other")]
+    #[serde(rename = "other")]
     Other,
 }
 
@@ -86,16 +105,20 @@ impl Currency {
     }
 }
 
-#[derive(Type, Debug, Clone, PartialEq, Eq)]
+#[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum Role {
     #[sqlx(rename = "recruiter")]
+    #[serde(rename = "recruiter")]
     Recruiter,
     #[sqlx(rename = "hr")]
+    #[serde(rename = "hr")]
     HR,
     #[sqlx(rename = "manager")]
+    #[serde(rename = "manager")]
     Manager,
     #[sqlx(rename = "other")]
+    #[serde(rename = "other")]
     Other,
 }
 
@@ -109,20 +132,27 @@ impl Role {
         }
     }
 }
-#[derive(Type, Debug, Clone, PartialEq, Eq)]
+
+#[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum Status {
     #[sqlx(rename = "applied")]
+    #[serde(rename = "applied")]
     Applied,
     #[sqlx(rename = "interviewing")]
+    #[serde(rename = "interviewing")]
     Interviewing,
     #[sqlx(rename = "offered")]
+    #[serde(rename = "offered")]
     Offered,
     #[sqlx(rename = "rejected")]
+    #[serde(rename = "rejected")]
     Rejected,
     #[sqlx(rename = "withdrawn")]
+    #[serde(rename = "withdrawn")]
     Withdrawn,
     #[sqlx(rename = "other")]
+    #[serde(rename = "other")]
     Other,
 }
 
@@ -138,16 +168,21 @@ impl Status {
         }
     }
 }
-#[derive(Type, Debug, Clone, PartialEq, Eq)]
+
+#[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum ContactType {
     #[sqlx(rename = "phone")]
+    #[serde(rename = "phone")]
     Phone,
     #[sqlx(rename = "email")]
+    #[serde(rename = "email")]
     Email,
     #[sqlx(rename = "in_person")]
+    #[serde(rename = "in_person")]
     InPerson,
     #[sqlx(rename = "other")]
+    #[serde(rename = "other")]
     Other,
 }
 
@@ -161,16 +196,21 @@ impl ContactType {
         }
     }
 }
-#[derive(Type, Debug, Clone, PartialEq, Eq)]
+
+#[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum NoteType {
     #[sqlx(rename = "before")]
+    #[serde(rename = "before")]
     Before,
     #[sqlx(rename = "during")]
+    #[serde(rename = "during")]
     During,
     #[sqlx(rename = "after")]
+    #[serde(rename = "after")]
     After,
     #[sqlx(rename = "other")]
+    #[serde(rename = "other")]
     Other,
 }
 

@@ -1,7 +1,10 @@
 use crate::db::models::enums::Role;
+use crate::utils::sql_utils::build_update_sql;
+use chrono::Utc;
+use serde::Serialize;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
-#[derive(FromRow, Debug)]
+#[derive(FromRow, Debug, Serialize)]
 pub struct Person {
     pub id: i64,
     pub first_name: String,
@@ -23,7 +26,8 @@ pub async fn create_person(
     role: Option<&Role>,
     linkedin_url: Option<&str>,
 ) -> Result<Person, Error> {
-    let role = role.map(|r| r.as_str());
+    let role_str = role.map(|r| r.as_str());
+    let now = Utc::now().to_rfc3339();
 
     let person = query_as!(
         Person,
@@ -34,9 +38,11 @@ pub async fn create_person(
             email,
             phone_number,
             role,
-            linkedin_url
+            linkedin_url,
+            created_at,
+            updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         RETURNING
             id AS "id!: i64",
             first_name,
@@ -52,8 +58,10 @@ pub async fn create_person(
         last_name,
         email,
         phone_number,
-        role,
-        linkedin_url
+        role_str,
+        linkedin_url,
+        now,
+        now
     )
     .fetch_one(pool)
     .await?;
@@ -112,49 +120,38 @@ pub async fn get_all_persons(pool: &SqlitePool) -> Result<Vec<Person>, Error> {
 pub async fn update_person(
     pool: &SqlitePool,
     id: i64,
-    first_name: &str,
-    last_name: &str,
+    first_name: Option<&str>,
+    last_name: Option<&str>,
     email: Option<&str>,
     phone_number: Option<&str>,
     role: Option<&Role>,
     linkedin_url: Option<&str>,
 ) -> Result<Person, Error> {
-    let role = role.map(|r| r.as_str());
+    // Map role enum to &str if provided
+    let role_str = role.map(|r| r.as_str());
 
-    let person = query_as!(
-        Person,
-        r#"
-        UPDATE person
-        SET
-            first_name = ?,
-            last_name = ?,
-            email = ?,
-            phone_number = ?,
-            role = ?,
-            linkedin_url = ?
-        WHERE id = ?
-        RETURNING
-            id AS "id!: i64",
-            first_name,
-            last_name,
-            email,
-            phone_number,
-            role AS "role: Role",
-            linkedin_url,
-            created_at,
-            updated_at
-        "#,
-        first_name,
-        last_name,
-        email,
-        phone_number,
-        role,
-        linkedin_url,
-        id
-    )
-    .fetch_one(pool)
-    .await?;
+    // 1. Build SQL dynamically
+    let fields = vec![
+        ("first_name", first_name),
+        ("last_name", last_name),
+        ("email", email),
+        ("phone_number", phone_number),
+        ("role", role_str),
+        ("linkedin_url", linkedin_url),
+    ];
 
+    let (sql, binds) = build_update_sql("person", "id", id, fields);
+
+    // 2. Bind parameters in the right order
+    let mut query = sqlx::query_as::<_, Person>(&sql);
+    for val in binds.iter().take(binds.len() - 1) {
+        query = query.bind(val);
+    }
+    // Last param is the id
+    query = query.bind(binds.last().unwrap());
+
+    // 3. Execute and return updated record
+    let person = query.fetch_one(pool).await?;
     Ok(person)
 }
 

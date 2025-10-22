@@ -31,8 +31,8 @@ async fn test_person_crud_flow() -> Result<(), sqlx::Error> {
     let updated = update_person(
         &pool,
         created.id,
-        "Jane",
-        "Doe",
+        Some("Jane"),
+        Some("Doe"),
         Some("jane@example.com"),
         Some("+49 321 654"),
         Some(&Role::Manager),
@@ -45,6 +45,9 @@ async fn test_person_crud_flow() -> Result<(), sqlx::Error> {
 
     let deleted_id = delete_person(&pool, created.id).await?;
     assert_eq!(deleted_id, created.id);
+
+    let remaining = get_all_persons(&pool).await?;
+    assert!(!remaining.iter().any(|p| p.id == created.id));
 
     Ok(())
 }
