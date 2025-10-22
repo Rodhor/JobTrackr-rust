@@ -32,7 +32,7 @@ pub async fn init_db() -> SqlitePool {
 
     // 3. Connect to SQLite
     let pool = SqlitePoolOptions::new()
-        .max_connections(5)
+        .max_connections(1)
         .connect(&db_url)
         .await
         .unwrap_or_else(|e| {

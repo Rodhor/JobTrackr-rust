@@ -1,8 +1,8 @@
-use crate::db::application::{
+use crate::db::models::enums::Status;
+use crate::db::queries::application::{
     create_application, delete_application, get_all_applications, get_application_by_id,
     get_applications_by_job_listing_id, get_applications_by_user_id, update_application,
 };
-use crate::db::enums::Status;
 use crate::db::tests::test_utils::setup_test_db;
 
 #[tokio::test]

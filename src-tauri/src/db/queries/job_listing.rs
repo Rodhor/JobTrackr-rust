@@ -1,4 +1,4 @@
-use crate::db::enums::{Currency, SeniorityLevel, WorkType};
+use crate::db::models::enums::{Currency, SeniorityLevel, WorkType};
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
 #[derive(FromRow, Debug)]

@@ -1,5 +1,7 @@
+use crate::db::queries::user::{
+    create_user, delete_user, get_all_users, get_user_by_id, update_user,
+};
 use crate::db::tests::test_utils::setup_test_db;
-use crate::db::user::{create_user, delete_user, get_all_users, get_user_by_id, update_user};
 
 #[tokio::test]
 async fn test_user_crud_flow() -> Result<(), sqlx::Error> {

@@ -1,4 +1,4 @@
-use crate::db::enums::ContactType;
+use crate::db::models::enums::ContactType;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
 #[derive(FromRow, Debug)]

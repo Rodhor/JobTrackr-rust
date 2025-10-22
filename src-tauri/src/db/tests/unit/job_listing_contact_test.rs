@@ -1,5 +1,5 @@
-use crate::db::enums::Role;
-use crate::db::job_listing_contact::{
+use crate::db::models::enums::Role;
+use crate::db::queries::job_listing_contact::{
     create_job_listing_contact, delete_job_listing_contact, get_all_job_listing_contacts,
     get_job_listing_contact_by_id, get_job_listing_contacts_by_listing_id,
     get_job_listing_contacts_by_person_id, update_job_listing_contact,

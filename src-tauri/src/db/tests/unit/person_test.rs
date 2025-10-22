@@ -1,5 +1,5 @@
-use crate::db::enums::Role;
-use crate::db::person::{
+use crate::db::models::enums::Role;
+use crate::db::queries::person::{
     create_person, delete_person, get_all_persons, get_person_by_id, update_person,
 };
 use crate::db::tests::test_utils::setup_test_db;

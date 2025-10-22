@@ -1,8 +1,8 @@
-use crate::db::contact_note::{
+use crate::db::models::enums::NoteType;
+use crate::db::queries::contact_note::{
     create_contact_note, delete_contact_note, get_all_contact_notes, get_contact_note_by_id,
     get_contact_notes_by_contact_id, update_contact_note,
 };
-use crate::db::enums::NoteType;
 use crate::db::tests::test_utils::setup_test_db;
 
 #[tokio::test]

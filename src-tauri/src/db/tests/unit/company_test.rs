@@ -1,7 +1,7 @@
-use crate::db::company::{
+use crate::db::models::enums::WorkType;
+use crate::db::queries::company::{
     create_company, delete_company, get_all_companies, get_company_by_id, update_company,
 };
-use crate::db::enums::WorkType;
 use crate::db::tests::test_utils::setup_test_db;
 
 #[tokio::test]

@@ -1,8 +1,8 @@
-use crate::db::contact::{
+use crate::db::models::enums::ContactType;
+use crate::db::queries::contact::{
     create_contact, delete_contact, get_all_contacts, get_contact_by_id, get_contacts_by_person_id,
     get_contacts_by_user_id, update_contact,
 };
-use crate::db::enums::ContactType;
 use crate::db::tests::test_utils::setup_test_db;
 
 #[tokio::test]

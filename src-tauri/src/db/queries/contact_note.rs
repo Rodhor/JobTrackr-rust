@@ -1,4 +1,4 @@
-use crate::db::enums::NoteType;
+use crate::db::models::enums::NoteType;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
 #[derive(FromRow, Debug)]

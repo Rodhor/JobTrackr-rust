@@ -1,4 +1,4 @@
-use crate::db::enums::WorkType;
+use crate::db::models::enums::WorkType;
 use chrono::Utc;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 

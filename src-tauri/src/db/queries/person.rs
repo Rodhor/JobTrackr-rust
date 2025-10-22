@@ -1,4 +1,4 @@
-use crate::db::enums::Role;
+use crate::db::models::enums::Role;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
 #[derive(FromRow, Debug)]
