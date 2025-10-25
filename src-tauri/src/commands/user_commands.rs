@@ -5,9 +5,9 @@ use sqlx::SqlitePool;
 #[tauri::command]
 pub async fn create_user_command(
     pool: tauri::State<'_, SqlitePool>,
-    first_name: String,
-    last_name: String,
-    email: String,
+    first_name: Option<String>,
+    last_name: Option<String>,
+    email: Option<String>,
     phone_number: Option<String>,
     street_address: Option<String>,
     zip_code: Option<String>,
@@ -16,9 +16,9 @@ pub async fn create_user_command(
 ) -> JsonResult {
     user_service::create_user_service(
         &pool,
-        &first_name,
-        &last_name,
-        &email,
+        first_name.as_deref(),
+        last_name.as_deref(),
+        email.as_deref(),
         phone_number.as_deref(),
         street_address.as_deref(),
         zip_code.as_deref(),

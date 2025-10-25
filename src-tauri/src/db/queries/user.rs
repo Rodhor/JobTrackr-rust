@@ -6,9 +6,10 @@ use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 #[derive(FromRow, Debug, Serialize)]
 pub struct User {
     pub id: i64,
-    pub first_name: String,
-    pub last_name: String,
-    pub email: String,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email: Option<String>,
+
     pub phone_number: Option<String>,
     pub street_address: Option<String>,
     pub zip_code: Option<String>,
@@ -20,9 +21,9 @@ pub struct User {
 
 pub async fn create_user(
     pool: &SqlitePool,
-    first_name: &str,
-    last_name: &str,
-    email: &str,
+    first_name: Option<&str>,
+    last_name: Option<&str>,
+    email: Option<&str>,
     phone_number: Option<&str>,
     street_address: Option<&str>,
     zip_code: Option<&str>,

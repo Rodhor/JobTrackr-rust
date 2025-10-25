@@ -5,16 +5,16 @@ use sqlx::SqlitePool;
 
 pub async fn create_user_service(
     pool: &SqlitePool,
-    first_name: &str,
-    last_name: &str,
-    email: &str,
+    first_name: Option<&str>,
+    last_name: Option<&str>,
+    email: Option<&str>,
     phone_number: Option<&str>,
     street_address: Option<&str>,
     zip_code: Option<&str>,
     city: Option<&str>,
     country: Option<&str>,
 ) -> JsonResult {
-    info!("Creating user: {} {}", first_name, last_name);
+    info!("Creating user: {:?} {:?}", first_name, last_name);
 
     let result = user::create_user(
         pool,
@@ -34,7 +34,7 @@ pub async fn create_user_service(
             info!("User created successfully. ID: {}", record.id);
             let json = serde_json::json!({
                 "status": "success",
-                "message": format!("User '{}' '{}' created successfully.", first_name, last_name),
+                "message": format!("User '{:?}' '{:?}' created successfully.", first_name, last_name),
                 "data": record
             });
             Ok(json.to_string())
@@ -43,7 +43,7 @@ pub async fn create_user_service(
             error!("Database error creating user: {}", e);
             let json = serde_json::json!({
                 "status": "error",
-                "message": format!("Failed to create user '{}' '{}': {}", first_name, last_name, e)
+                "message": format!("Failed to create user '{:?}' '{:?}': {}", first_name, last_name, e)
             });
             Err(json.to_string())
         }

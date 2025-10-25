@@ -10,9 +10,9 @@ PRAGMA foreign_keys = ON;
 -- ======================================================
 CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
+    first_name TEXT ,
+    last_name TEXT ,
+    email TEXT UNIQUE ,
     phone_number TEXT,
     street_address TEXT,
     zip_code TEXT,
