@@ -15,7 +15,7 @@
     import NavWorkspace from "./nav-workspace.svelte";
     import NavHome from "./nav-home.svelte";
     import NavExports from "./nav-exports.svelte";
-    import Separator from "./ui/separator/separator.svelte";
+    import Separator from "../ui/separator/separator.svelte";
 
     let {
         ref = $bindable(null),

@@ -2,9 +2,9 @@
     import "../app.css";
     import { ModeWatcher } from "mode-watcher";
 
-    import AppSidebar from "$lib/components/app-sidebar.svelte";
+    import AppSidebar from "$lib/components/navigation/app-sidebar.svelte";
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-    import TopBar from "$lib/components/topbar.svelte";
+    import TopBar from "$lib/components/navigation/topbar.svelte";
 </script>
 
 <ModeWatcher />

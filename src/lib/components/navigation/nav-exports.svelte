@@ -1,11 +1,16 @@
 <script lang="ts">
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+    import * as Tooltip from "$lib/components/ui/tooltip/index.js";
+    import { useSidebar } from "$lib/components/ui/sidebar";
 
     import FileDownIcon from "@lucide/svelte/icons/file-down";
     import FileJsonIcon from "@lucide/svelte/icons/file-json";
     import FileSpreadsheetIcon from "@lucide/svelte/icons/file-spreadsheet";
     import DatabaseIcon from "@lucide/svelte/icons/database";
-    import * as Tooltip from "$lib/components/ui/tooltip/index.js";
+
+    import { base } from "$app/paths";
+
+    const sidebar = useSidebar();
 </script>
 
 <Sidebar.Group>
@@ -18,8 +23,15 @@
                 <Tooltip.Root>
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
-                            <FileSpreadsheetIcon class="h-4 w-4 mr-2" />
-                            Export CSV
+                            <a
+                                href={`${base}/export/csv`}
+                                class="flex items-center gap-4"
+                            >
+                                <FileSpreadsheetIcon class="h-4 w-4" />
+                                {#if sidebar.state === "expanded"}
+                                    <span class="truncate">Export CSV</span>
+                                {/if}
+                            </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
                     <Tooltip.Content
@@ -35,8 +47,15 @@
                 <Tooltip.Root>
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
-                            <FileDownIcon class="h-4 w-4 mr-2" />
-                            Export Excel
+                            <a
+                                href={`${base}/export/excel`}
+                                class="flex items-center gap-4"
+                            >
+                                <FileDownIcon class="h-4 w-4" />
+                                {#if sidebar.state === "expanded"}
+                                    <span class="truncate">Export Excel</span>
+                                {/if}
+                            </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
                     <Tooltip.Content
@@ -52,8 +71,15 @@
                 <Tooltip.Root>
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
-                            <FileJsonIcon class="h-4 w-4 mr-2" />
-                            Export JSON
+                            <a
+                                href={`${base}/export/json`}
+                                class="flex items-center gap-4"
+                            >
+                                <FileJsonIcon class="h-4 w-4" />
+                                {#if sidebar.state === "expanded"}
+                                    <span class="truncate">Export JSON</span>
+                                {/if}
+                            </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
                     <Tooltip.Content
@@ -69,8 +95,17 @@
                 <Tooltip.Root>
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
-                            <DatabaseIcon class="h-4 w-4 mr-2" />
-                            Export DB Backup
+                            <a
+                                href={`${base}/export/backup`}
+                                class="flex items-center gap-4"
+                            >
+                                <DatabaseIcon class="h-4 w-4" />
+                                {#if sidebar.state === "expanded"}
+                                    <span class="truncate"
+                                        >Export DB Backup</span
+                                    >
+                                {/if}
+                            </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
                     <Tooltip.Content
