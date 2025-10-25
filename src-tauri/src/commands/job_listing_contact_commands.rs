@@ -20,7 +20,7 @@ pub async fn create_job_listing_contact_command(
 }
 
 #[tauri::command]
-pub async fn get_job_listing_contact_command(
+pub async fn get_job_listing_contact_by_id_command(
     pool: tauri::State<'_, SqlitePool>,
     id: i64,
 ) -> JsonResult {

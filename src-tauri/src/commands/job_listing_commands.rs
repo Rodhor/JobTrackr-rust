@@ -34,7 +34,10 @@ pub async fn create_job_listing_command(
 }
 
 #[tauri::command]
-pub async fn get_job_listing_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
+pub async fn get_job_listing_by_id_command(
+    pool: tauri::State<'_, SqlitePool>,
+    id: i64,
+) -> JsonResult {
     job_listing_service::get_job_listing_by_id_service(&pool, &id).await
 }
 

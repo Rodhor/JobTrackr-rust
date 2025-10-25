@@ -28,7 +28,10 @@ pub async fn create_application_command(
 }
 
 #[tauri::command]
-pub async fn get_application_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
+pub async fn get_application_by_id_command(
+    pool: tauri::State<'_, SqlitePool>,
+    id: i64,
+) -> JsonResult {
     application_service::get_application_by_id_service(&pool, &id).await
 }
 

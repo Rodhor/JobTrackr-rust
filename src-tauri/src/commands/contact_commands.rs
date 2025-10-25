@@ -24,7 +24,7 @@ pub async fn create_contact_command(
 }
 
 #[tauri::command]
-pub async fn get_contact_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
+pub async fn get_contact_by_id_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
     contact_service::get_contact_by_id_service(&pool, &id).await
 }
 

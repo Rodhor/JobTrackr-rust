@@ -20,7 +20,10 @@ pub async fn create_contact_note_command(
 }
 
 #[tauri::command]
-pub async fn get_contact_note_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
+pub async fn get_contact_note_by_id_command(
+    pool: tauri::State<'_, SqlitePool>,
+    id: i64,
+) -> JsonResult {
     contact_note_service::get_contact_note_by_id_service(&pool, &id).await
 }
 

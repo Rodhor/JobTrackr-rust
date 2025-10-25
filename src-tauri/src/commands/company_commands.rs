@@ -32,7 +32,7 @@ pub async fn create_company_command(
 }
 
 #[tauri::command]
-pub async fn get_company_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
+pub async fn get_company_by_id_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
     company_service::get_company_by_id_service(&pool, &id).await
 }
 
