@@ -4,6 +4,9 @@ export type DefaultWorkType =
   | "internship"
   | "contract"
   | "freelance"
+  | "remote"
+  | "in_office"
+  | "hybrid"
   | "other";
 
 export type SeniorityLevel =
@@ -18,8 +21,9 @@ export type Currency = "USD" | "EUR" | "GBP" | "DKK" | "other";
 
 export type Role = "recruiter" | "hr" | "manager" | "other";
 
-export type Status =
+export type Stage =
   | "applied"
+  | "screening"
   | "interviewing"
   | "offered"
   | "rejected"
@@ -28,4 +32,4 @@ export type Status =
 
 export type ContactType = "phone" | "email" | "in_person" | "other";
 
-export type NoteType = "before" | "during" | "after" | "other";
+export type NoteType = "general" | "feedback" | "reminder" | "other";

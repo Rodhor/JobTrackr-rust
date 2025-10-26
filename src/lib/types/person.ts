@@ -8,6 +8,7 @@ export interface Person {
   phoneNumber?: string;
   role?: Role;
   linkedinUrl?: string;
+  companyId?: number;
   createdAt: string;
   updatedAt: string;
 }

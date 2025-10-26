@@ -5,8 +5,8 @@ export interface Contact {
   contactType: ContactType;
   contactDate: string;
   location?: string;
-  userId: number;
   personId?: number;
+  applicationId?: number;
   createdAt: string;
   updatedAt: string;
 }

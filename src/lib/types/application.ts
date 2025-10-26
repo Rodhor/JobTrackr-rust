@@ -1,10 +1,9 @@
-import type { Status } from "./enums";
+import type { Stage } from "./enums";
 
 export interface Application {
   id: number;
-  userId: number;
-  jobListingId: number;
-  status: Status;
+  jobListingId?: number;
+  stage: Stage;
   appliedDate: string;
   cvFilePath?: string;
   coverLetterFilePath?: string;
