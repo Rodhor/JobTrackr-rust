@@ -10,6 +10,8 @@
     import PhoneCallIcon from "@lucide/svelte/icons/phone-call";
     import StickyNoteIcon from "@lucide/svelte/icons/sticky-note";
     import ListIcon from "@lucide/svelte/icons/list";
+    import BellIcon from "@lucide/svelte/icons/bell";
+    import SettingsIcon from "@lucide/svelte/icons/settings";
 
     import { base } from "$app/paths";
 
@@ -31,9 +33,9 @@
                                 class="flex items-center gap-4"
                             >
                                 <LayoutDashboardIcon class="h-4 w-4" />
-                                {#if sidebar.state === "expanded"}
-                                    <span class="truncate">Dashboard</span>
-                                {/if}
+                                {#if sidebar.state === "expanded"}<span
+                                        class="truncate">Dashboard</span
+                                    >{/if}
                             </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
@@ -55,9 +57,9 @@
                                 class="flex items-center gap-4"
                             >
                                 <ListIcon class="h-4 w-4" />
-                                {#if sidebar.state === "expanded"}
-                                    <span class="truncate">Job Listings</span>
-                                {/if}
+                                {#if sidebar.state === "expanded"}<span
+                                        class="truncate">Job Listings</span
+                                    >{/if}
                             </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
@@ -79,9 +81,9 @@
                                 class="flex items-center gap-4"
                             >
                                 <BriefcaseIcon class="h-4 w-4" />
-                                {#if sidebar.state === "expanded"}
-                                    <span class="truncate">Applications</span>
-                                {/if}
+                                {#if sidebar.state === "expanded"}<span
+                                        class="truncate">Applications</span
+                                    >{/if}
                             </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
@@ -103,9 +105,9 @@
                                 class="flex items-center gap-4"
                             >
                                 <Building2Icon class="h-4 w-4" />
-                                {#if sidebar.state === "expanded"}
-                                    <span class="truncate">Companies</span>
-                                {/if}
+                                {#if sidebar.state === "expanded"}<span
+                                        class="truncate">Companies</span
+                                    >{/if}
                             </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
@@ -127,9 +129,9 @@
                                 class="flex items-center gap-4"
                             >
                                 <UsersIcon class="h-4 w-4" />
-                                {#if sidebar.state === "expanded"}
-                                    <span class="truncate">People</span>
-                                {/if}
+                                {#if sidebar.state === "expanded"}<span
+                                        class="truncate">People</span
+                                    >{/if}
                             </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
@@ -151,9 +153,9 @@
                                 class="flex items-center gap-4"
                             >
                                 <PhoneCallIcon class="h-4 w-4" />
-                                {#if sidebar.state === "expanded"}
-                                    <span class="truncate">Interactions</span>
-                                {/if}
+                                {#if sidebar.state === "expanded"}<span
+                                        class="truncate">Interactions</span
+                                    >{/if}
                             </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
@@ -171,17 +173,41 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/contactNotes`}
+                                href={`${base}/notes`}
                                 class="flex items-center gap-4"
                             >
                                 <StickyNoteIcon class="h-4 w-4" />
-                                {#if sidebar.state === "expanded"}
-                                    <span class="truncate">Notes</span>
-                                {/if}
+                                {#if sidebar.state === "expanded"}<span
+                                        class="truncate">Notes</span
+                                    >{/if}
                             </a>
                         </Sidebar.MenuButton>
                     </Tooltip.Trigger>
                     <Tooltip.Content>Manage notes and reminders</Tooltip.Content
+                    >
+                </Tooltip.Root>
+            </Tooltip.Provider>
+        </Sidebar.MenuItem>
+
+        <!-- Reminders -->
+        <Sidebar.MenuItem>
+            <Tooltip.Provider>
+                <Tooltip.Root>
+                    <Tooltip.Trigger>
+                        <Sidebar.MenuButton>
+                            <a
+                                href={`${base}/reminders`}
+                                class="flex items-center gap-4"
+                            >
+                                <BellIcon class="h-4 w-4" />
+                                {#if sidebar.state === "expanded"}<span
+                                        class="truncate">Reminders</span
+                                    >{/if}
+                            </a>
+                        </Sidebar.MenuButton>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content
+                        >Upcoming follow-ups and due dates</Tooltip.Content
                     >
                 </Tooltip.Root>
             </Tooltip.Provider>
