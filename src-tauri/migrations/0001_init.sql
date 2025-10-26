@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS company (
     CHECK (
         default_work_type IN (
             'full_time', 'part_time', 'internship', 'contract',
-            'freelance', 'remote', 'in_office', 'other'
+            'freelance', 'remote', 'in_office', 'hybrid', 'other'
         )
     )
 );
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS job_listing (
     CHECK (
         work_type IN (
             'full_time', 'part_time', 'internship', 'contract',
-            'freelance', 'remote', 'in_office','hybrid', 'other'
+            'freelance', 'remote', 'in_office', 'hybrid', 'other'
         )
     ),
     CHECK (
@@ -56,7 +56,8 @@ CREATE TABLE IF NOT EXISTS job_listing (
             'junior', 'mid', 'senior', 'lead', 'manager', 'other'
         )
     ),
-    CHECK (currency IN ('USD', 'EUR', 'GBP', 'DKK', 'other'))
+    CHECK (currency IN ('USD', 'EUR', 'GBP', 'DKK', 'other')),
+    CHECK (salary_min IS NULL OR salary_max IS NULL OR salary_min <= salary_max)
 );
 
 -- ======================================================
@@ -83,7 +84,7 @@ CREATE TABLE IF NOT EXISTS application (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     job_listing_id INTEGER REFERENCES job_listing(id) ON DELETE SET NULL,
     stage TEXT,
-    applied_date DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    applied_date TEXT NOT NULL DEFAULT (date('now')),
     cv_file_path TEXT,
     cover_letter_file_path TEXT,
     application_notes TEXT,
@@ -103,15 +104,13 @@ CREATE TABLE IF NOT EXISTS application (
 CREATE TABLE IF NOT EXISTS contact (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     contact_type TEXT NOT NULL,
-    contact_date DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    contact_date TEXT NOT NULL DEFAULT (date('now')),
     location TEXT,
     person_id INTEGER REFERENCES person(id) ON DELETE SET NULL,
     application_id INTEGER REFERENCES application(id) ON DELETE SET NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CHECK (
-        contact_type IN ('phone', 'email', 'in_person', 'other')
-    )
+    CHECK (contact_type IN ('phone', 'email', 'in_person', 'other'))
 );
 
 -- ======================================================
@@ -128,9 +127,7 @@ CREATE TABLE IF NOT EXISTS note (
     content TEXT,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CHECK (
-        note_type IN ('general', 'feedback', 'reminder', 'other')
-    )
+    CHECK (note_type IN ('general', 'feedback', 'reminder', 'other'))
 );
 
 -- ======================================================
@@ -138,102 +135,46 @@ CREATE TABLE IF NOT EXISTS note (
 -- ======================================================
 CREATE TABLE IF NOT EXISTS reminder (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    -- Optional links so a reminder can attach to any context
     application_id INTEGER REFERENCES application(id) ON DELETE SET NULL,
     contact_id INTEGER REFERENCES contact(id) ON DELETE SET NULL,
     note_id INTEGER REFERENCES note(id) ON DELETE SET NULL,
     job_listing_id INTEGER REFERENCES job_listing(id) ON DELETE SET NULL,
     company_id INTEGER REFERENCES company(id) ON DELETE SET NULL,
     person_id INTEGER REFERENCES person(id) ON DELETE SET NULL,
-    reminder_date DATE NOT NULL,
+    reminder_date TEXT NOT NULL,
     title TEXT,
     message TEXT,
-    is_completed INTEGER NOT NULL DEFAULT 0, -- 0=false, 1=true
+    is_completed INTEGER NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK (is_completed IN (0,1))
 );
 
 -- ======================================================
 -- Indexes
 -- ======================================================
+CREATE INDEX IF NOT EXISTS idx_company_name ON company(name);
+CREATE INDEX IF NOT EXISTS idx_person_company_id ON person(company_id);
+
 CREATE INDEX IF NOT EXISTS idx_job_listing_company_id ON job_listing(company_id);
+
 CREATE INDEX IF NOT EXISTS idx_application_job_listing_id ON application(job_listing_id);
+
 CREATE INDEX IF NOT EXISTS idx_contact_person_id ON contact(person_id);
+CREATE INDEX IF NOT EXISTS idx_contact_application_id ON contact(application_id);
+CREATE INDEX IF NOT EXISTS idx_contact_date ON contact(contact_date);
+
+CREATE INDEX IF NOT EXISTS idx_note_contact_id ON note(contact_id);
+CREATE INDEX IF NOT EXISTS idx_note_job_listing_id ON note(job_listing_id);
+CREATE INDEX IF NOT EXISTS idx_note_person_id ON note(person_id);
+CREATE INDEX IF NOT EXISTS idx_note_company_id ON note(company_id);
 CREATE INDEX IF NOT EXISTS idx_note_application_id ON note(application_id);
+
 CREATE INDEX IF NOT EXISTS idx_reminder_date ON reminder(reminder_date);
 CREATE INDEX IF NOT EXISTS idx_reminder_completed ON reminder(is_completed);
-
-
--- ======================================================
--- Triggers to auto-update updated_at
--- ======================================================
-
--- Company
-CREATE TRIGGER IF NOT EXISTS trg_company_updated_at
-AFTER UPDATE ON company
-FOR EACH ROW
-BEGIN
-    UPDATE company
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE id = OLD.id;
-END;
-
--- Person
-CREATE TRIGGER IF NOT EXISTS trg_person_updated_at
-AFTER UPDATE ON person
-FOR EACH ROW
-BEGIN
-    UPDATE person
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE id = OLD.id;
-END;
-
--- Job Listing
-CREATE TRIGGER IF NOT EXISTS trg_job_listing_updated_at
-AFTER UPDATE ON job_listing
-FOR EACH ROW
-BEGIN
-    UPDATE job_listing
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE id = OLD.id;
-END;
-
--- Application
-CREATE TRIGGER IF NOT EXISTS trg_application_updated_at
-AFTER UPDATE ON application
-FOR EACH ROW
-BEGIN
-    UPDATE application
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE id = OLD.id;
-END;
-
--- Contact
-CREATE TRIGGER IF NOT EXISTS trg_contact_updated_at
-AFTER UPDATE ON contact
-FOR EACH ROW
-BEGIN
-    UPDATE contact
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE id = OLD.id;
-END;
-
--- Note
-CREATE TRIGGER IF NOT EXISTS trg_note_updated_at
-AFTER UPDATE ON note
-FOR EACH ROW
-BEGIN
-    UPDATE note
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE id = OLD.id;
-END;
-
--- Reminder
-CREATE TRIGGER IF NOT EXISTS trg_reminder_updated_at
-AFTER UPDATE ON reminder
-FOR EACH ROW
-BEGIN
-    UPDATE reminder
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE id = OLD.id;
-END;
+CREATE INDEX IF NOT EXISTS idx_reminder_app_id ON reminder(application_id);
+CREATE INDEX IF NOT EXISTS idx_reminder_contact_id ON reminder(contact_id);
+CREATE INDEX IF NOT EXISTS idx_reminder_note_id ON reminder(note_id);
+CREATE INDEX IF NOT EXISTS idx_reminder_job_listing_id ON reminder(job_listing_id);
+CREATE INDEX IF NOT EXISTS idx_reminder_company_id ON reminder(company_id);
+CREATE INDEX IF NOT EXISTS idx_reminder_person_id ON reminder(person_id);
