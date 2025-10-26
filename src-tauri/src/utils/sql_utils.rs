@@ -31,7 +31,7 @@ pub fn build_update_sql(
 
     // Always update timestamp
     set_clauses.push("updated_at = ?".to_string());
-    let now = Utc::now().to_rfc3339();
+    let now = Utc::now().naive_utc().to_string();
     binds.push(now);
 
     // Final SQL

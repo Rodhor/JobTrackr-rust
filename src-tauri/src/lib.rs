@@ -4,6 +4,7 @@ pub mod logger;
 pub mod services;
 pub mod utils;
 
+use crate::commands::*;
 use crate::db::connection::init_db;
 use crate::logger::*;
 use sqlx::SqlitePool;
@@ -38,7 +39,58 @@ pub async fn run() {
         // --------------------------------------------------------
         // Command registration
         // --------------------------------------------------------
-        .invoke_handler(tauri::generate_handler![])
+        .invoke_handler(tauri::generate_handler![
+            // ===============================
+            // Applications
+            // ===============================
+            create_application_command,
+            update_application_command,
+            // ===============================
+            // Companies
+            // ===============================
+            create_company_command,
+            get_company_by_id_command,
+            get_all_companies_command,
+            update_company_command,
+            delete_company_command,
+            // ===============================
+            // Contacts
+            // ===============================
+            create_contact_command,
+            update_contact_command,
+            // ===============================
+            // Job Listings
+            // ===============================
+            create_job_listing_command,
+            get_job_listing_by_id_command,
+            get_all_job_listings_command,
+            update_job_listing_command,
+            delete_job_listing_command,
+            // ===============================
+            // Notes
+            // ===============================
+            create_note_command,
+            get_note_by_id_command,
+            get_all_notes_command,
+            update_note_command,
+            delete_note_command,
+            // ===============================
+            // Persons
+            // ===============================
+            create_person_command,
+            get_person_by_id_command,
+            get_all_persons_command,
+            update_person_command,
+            delete_person_command,
+            // ===============================
+            // Reminders
+            // ===============================
+            create_reminder_command,
+            get_reminder_by_id_command,
+            get_all_reminders_command,
+            update_reminder_command,
+            delete_reminder_command
+        ])
         // ============================================================
         // 4. Launch application
         // ============================================================
