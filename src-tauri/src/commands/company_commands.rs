@@ -3,6 +3,9 @@ use crate::services::company_service;
 use crate::services::service_types::JsonResult;
 use sqlx::SqlitePool;
 
+// ======================================================
+// Create Company Command
+// ======================================================
 #[tauri::command]
 pub async fn create_company_command(
     pool: tauri::State<'_, SqlitePool>,
@@ -31,16 +34,25 @@ pub async fn create_company_command(
     .await
 }
 
+// ======================================================
+// Get Company by ID Command
+// ======================================================
 #[tauri::command]
 pub async fn get_company_by_id_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
     company_service::get_company_by_id_service(&pool, &id).await
 }
 
+// ======================================================
+// Get All Companies Command
+// ======================================================
 #[tauri::command]
 pub async fn get_all_companies_command(pool: tauri::State<'_, SqlitePool>) -> JsonResult {
     company_service::get_all_companies_service(&pool).await
 }
 
+// ======================================================
+// Update Company Command
+// ======================================================
 #[tauri::command]
 pub async fn update_company_command(
     pool: tauri::State<'_, SqlitePool>,
@@ -71,6 +83,9 @@ pub async fn update_company_command(
     .await
 }
 
+// ======================================================
+// Delete Company Command
+// ======================================================
 #[tauri::command]
 pub async fn delete_company_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
     company_service::delete_company_service(&pool, &id).await

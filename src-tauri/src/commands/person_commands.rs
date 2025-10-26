@@ -3,6 +3,9 @@ use crate::services::person_service;
 use crate::services::service_types::JsonResult;
 use sqlx::SqlitePool;
 
+// ======================================================
+// Create Person Command
+// ======================================================
 #[tauri::command]
 pub async fn create_person_command(
     pool: tauri::State<'_, SqlitePool>,
@@ -12,6 +15,7 @@ pub async fn create_person_command(
     phone_number: Option<String>,
     role: Option<Role>,
     linkedin_url: Option<String>,
+    company_id: Option<i64>,
 ) -> JsonResult {
     person_service::create_person_service(
         &pool,
@@ -21,20 +25,30 @@ pub async fn create_person_command(
         phone_number.as_deref(),
         role.as_ref(),
         linkedin_url.as_deref(),
+        company_id,
     )
     .await
 }
 
+// ======================================================
+// Get Person by ID Command
+// ======================================================
 #[tauri::command]
 pub async fn get_person_by_id_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
     person_service::get_person_by_id_service(&pool, &id).await
 }
 
+// ======================================================
+// Get All Persons Command
+// ======================================================
 #[tauri::command]
 pub async fn get_all_persons_command(pool: tauri::State<'_, SqlitePool>) -> JsonResult {
     person_service::get_all_persons_service(&pool).await
 }
 
+// ======================================================
+// Update Person Command
+// ======================================================
 #[tauri::command]
 pub async fn update_person_command(
     pool: tauri::State<'_, SqlitePool>,
@@ -45,6 +59,7 @@ pub async fn update_person_command(
     phone_number: Option<String>,
     role: Option<Role>,
     linkedin_url: Option<String>,
+    company_id: Option<i64>,
 ) -> JsonResult {
     person_service::update_person_service(
         &pool,
@@ -55,10 +70,14 @@ pub async fn update_person_command(
         phone_number.as_deref(),
         role.as_ref(),
         linkedin_url.as_deref(),
+        company_id,
     )
     .await
 }
 
+// ======================================================
+// Delete Person Command
+// ======================================================
 #[tauri::command]
 pub async fn delete_person_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
     person_service::delete_person_service(&pool, &id).await

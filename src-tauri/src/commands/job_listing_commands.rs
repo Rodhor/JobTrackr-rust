@@ -3,6 +3,9 @@ use crate::services::job_listing_service;
 use crate::services::service_types::JsonResult;
 use sqlx::SqlitePool;
 
+// ======================================================
+// Create Job Listing Command
+// ======================================================
 #[tauri::command]
 pub async fn create_job_listing_command(
     pool: tauri::State<'_, SqlitePool>,
@@ -33,6 +36,9 @@ pub async fn create_job_listing_command(
     .await
 }
 
+// ======================================================
+// Get Job Listing by ID Command
+// ======================================================
 #[tauri::command]
 pub async fn get_job_listing_by_id_command(
     pool: tauri::State<'_, SqlitePool>,
@@ -41,11 +47,17 @@ pub async fn get_job_listing_by_id_command(
     job_listing_service::get_job_listing_by_id_service(&pool, &id).await
 }
 
+// ======================================================
+// Get All Job Listings Command
+// ======================================================
 #[tauri::command]
 pub async fn get_all_job_listings_command(pool: tauri::State<'_, SqlitePool>) -> JsonResult {
     job_listing_service::get_all_job_listings_service(&pool).await
 }
 
+// ======================================================
+// Update Job Listing Command
+// ======================================================
 #[tauri::command]
 pub async fn update_job_listing_command(
     pool: tauri::State<'_, SqlitePool>,
@@ -63,7 +75,7 @@ pub async fn update_job_listing_command(
 ) -> JsonResult {
     job_listing_service::update_job_listing_service(
         &pool,
-        id,
+        &id,
         company_id,
         title.as_deref(),
         work_type.as_ref(),
@@ -78,6 +90,9 @@ pub async fn update_job_listing_command(
     .await
 }
 
+// ======================================================
+// Delete Job Listing Command
+// ======================================================
 #[tauri::command]
 pub async fn delete_job_listing_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
     job_listing_service::delete_job_listing_service(&pool, &id).await

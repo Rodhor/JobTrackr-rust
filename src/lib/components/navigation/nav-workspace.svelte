@@ -51,7 +51,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/joblistings`}
+                                href={`${base}/jobListings`}
                                 class="flex items-center gap-4"
                             >
                                 <ListIcon class="h-4 w-4" />
@@ -147,7 +147,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/interactions`}
+                                href={`${base}/contacts`}
                                 class="flex items-center gap-4"
                             >
                                 <PhoneCallIcon class="h-4 w-4" />
@@ -171,7 +171,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/notes`}
+                                href={`${base}/contactNotes`}
                                 class="flex items-center gap-4"
                             >
                                 <StickyNoteIcon class="h-4 w-4" />

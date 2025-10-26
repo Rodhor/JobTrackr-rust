@@ -4,6 +4,9 @@ use crate::logger::*;
 use crate::services::service_types::JsonResult;
 use sqlx::SqlitePool;
 
+// ======================================================
+// Create Person
+// ======================================================
 pub async fn create_person_service(
     pool: &SqlitePool,
     first_name: &str,
@@ -12,6 +15,7 @@ pub async fn create_person_service(
     phone_number: Option<&str>,
     role: Option<&Role>,
     linkedin_url: Option<&str>,
+    company_id: Option<i64>,
 ) -> JsonResult {
     info!("Creating person: {} {}", first_name, last_name);
 
@@ -23,21 +27,25 @@ pub async fn create_person_service(
         phone_number,
         role,
         linkedin_url,
+        company_id,
     )
     .await;
 
     match result {
         Ok(record) => {
-            info!("Person created. ID: {}", record.id);
+            info!("Person created successfully. ID: {}", record.id);
             let json = serde_json::json!({
                 "status": "success",
-                "message": "Person created successfully.",
+                "message": format!("Person '{} {}' created successfully.", first_name, last_name),
                 "data": record
             });
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Error creating person: {}", e);
+            error!(
+                "Error creating person '{} {}': {}",
+                first_name, last_name, e
+            );
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to create person '{} {}': {}", first_name, last_name, e)
@@ -47,13 +55,17 @@ pub async fn create_person_service(
     }
 }
 
+// ======================================================
+// Get Person by ID
+// ======================================================
 pub async fn get_person_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResult {
-    info!("Retrieving person by ID: {}", id);
+    info!("Retrieving person ID: {}", id);
 
     let result = person::get_person_by_id(pool, *id).await;
 
     match result {
         Ok(record) => {
+            info!("Person retrieved successfully. ID: {}", id);
             let json = serde_json::json!({
                 "status": "success",
                 "message": format!("Person {} retrieved successfully.", id),
@@ -62,7 +74,7 @@ pub async fn get_person_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResult
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Error retrieving person: {}", e);
+            error!("Error retrieving person {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to retrieve person {}: {}", id, e)
@@ -72,6 +84,9 @@ pub async fn get_person_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResult
     }
 }
 
+// ======================================================
+// Get All Persons
+// ======================================================
 pub async fn get_all_persons_service(pool: &SqlitePool) -> JsonResult {
     info!("Retrieving all persons");
 
@@ -79,7 +94,7 @@ pub async fn get_all_persons_service(pool: &SqlitePool) -> JsonResult {
 
     match result {
         Ok(records) => {
-            info!("All persons retrieved.");
+            info!("Persons retrieved successfully ({} total).", records.len());
             let json = serde_json::json!({
                 "status": "success",
                 "message": "All persons retrieved successfully.",
@@ -98,6 +113,9 @@ pub async fn get_all_persons_service(pool: &SqlitePool) -> JsonResult {
     }
 }
 
+// ======================================================
+// Update Person
+// ======================================================
 pub async fn update_person_service(
     pool: &SqlitePool,
     id: &i64,
@@ -107,6 +125,7 @@ pub async fn update_person_service(
     phone_number: Option<&str>,
     role: Option<&Role>,
     linkedin_url: Option<&str>,
+    company_id: Option<i64>,
 ) -> JsonResult {
     info!("Updating person ID: {}", id);
 
@@ -119,12 +138,13 @@ pub async fn update_person_service(
         phone_number,
         role,
         linkedin_url,
+        company_id,
     )
     .await;
 
     match result {
         Ok(record) => {
-            info!("Person updated. ID: {}", id);
+            info!("Person updated successfully. ID: {}", id);
             let json = serde_json::json!({
                 "status": "success",
                 "message": format!("Person {} updated successfully.", id),
@@ -133,7 +153,7 @@ pub async fn update_person_service(
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Error updating person: {}", e);
+            error!("Error updating person {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to update person {}: {}", id, e)
@@ -143,6 +163,9 @@ pub async fn update_person_service(
     }
 }
 
+// ======================================================
+// Delete Person
+// ======================================================
 pub async fn delete_person_service(pool: &SqlitePool, id: &i64) -> JsonResult {
     info!("Deleting person ID: {}", id);
 
@@ -150,7 +173,7 @@ pub async fn delete_person_service(pool: &SqlitePool, id: &i64) -> JsonResult {
 
     match result {
         Ok(_) => {
-            info!("Person deleted. ID: {}", id);
+            info!("Person deleted successfully. ID: {}", id);
             let json = serde_json::json!({
                 "status": "success",
                 "message": format!("Person {} deleted successfully.", id)
@@ -158,7 +181,7 @@ pub async fn delete_person_service(pool: &SqlitePool, id: &i64) -> JsonResult {
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Error deleting person: {}", e);
+            error!("Error deleting person {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to delete person {}: {}", id, e)

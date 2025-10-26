@@ -1,5 +1,6 @@
 use crate::db::models::enums::ContactType;
 use crate::utils::sql_utils::build_update_sql;
+use chrono::{NaiveDate, NaiveDateTime};
 use serde::Serialize;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
@@ -7,21 +8,24 @@ use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 pub struct Contact {
     pub id: i64,
     pub contact_type: ContactType,
-    pub contact_date: String,
+    pub contact_date: NaiveDate,
     pub location: Option<String>,
-    pub user_id: i64,
     pub person_id: Option<i64>,
-    pub created_at: String,
-    pub updated_at: String,
+    pub application_id: Option<i64>,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
 }
 
+// ======================================================
+// Create
+// ======================================================
 pub async fn create_contact(
     pool: &SqlitePool,
     contact_type: &ContactType,
-    contact_date: &str,
+    contact_date: &NaiveDate,
     location: Option<&str>,
-    user_id: i64,
     person_id: Option<i64>,
+    application_id: Option<i64>,
 ) -> Result<Contact, Error> {
     let contact_type_str = contact_type.as_str();
 
@@ -32,8 +36,8 @@ pub async fn create_contact(
             contact_type,
             contact_date,
             location,
-            user_id,
-            person_id
+            person_id,
+            application_id
         )
         VALUES (?, ?, ?, ?, ?)
         RETURNING
@@ -41,16 +45,16 @@ pub async fn create_contact(
             contact_type AS "contact_type: ContactType",
             contact_date,
             location,
-            user_id,
             person_id,
+            application_id,
             created_at,
             updated_at
         "#,
         contact_type_str,
-        contact_date,
+        contact_date, // <-- directly pass NaiveDate
         location,
-        user_id,
-        person_id
+        person_id,
+        application_id
     )
     .fetch_one(pool)
     .await?;
@@ -58,6 +62,9 @@ pub async fn create_contact(
     Ok(contact)
 }
 
+// ======================================================
+// Get by ID
+// ======================================================
 pub async fn get_contact_by_id(pool: &SqlitePool, id: i64) -> Result<Contact, Error> {
     let contact = query_as!(
         Contact,
@@ -67,8 +74,8 @@ pub async fn get_contact_by_id(pool: &SqlitePool, id: i64) -> Result<Contact, Er
             contact_type AS "contact_type: ContactType",
             contact_date,
             location,
-            user_id,
             person_id,
+            application_id,
             created_at,
             updated_at
         FROM contact
@@ -82,6 +89,9 @@ pub async fn get_contact_by_id(pool: &SqlitePool, id: i64) -> Result<Contact, Er
     Ok(contact)
 }
 
+// ======================================================
+// Get all
+// ======================================================
 pub async fn get_all_contacts(pool: &SqlitePool) -> Result<Vec<Contact>, Error> {
     let contacts = query_as!(
         Contact,
@@ -91,11 +101,12 @@ pub async fn get_all_contacts(pool: &SqlitePool) -> Result<Vec<Contact>, Error> 
             contact_type AS "contact_type: ContactType",
             contact_date,
             location,
-            user_id,
             person_id,
+            application_id,
             created_at,
             updated_at
         FROM contact
+        ORDER BY contact_date DESC
         "#
     )
     .fetch_all(pool)
@@ -104,33 +115,9 @@ pub async fn get_all_contacts(pool: &SqlitePool) -> Result<Vec<Contact>, Error> 
     Ok(contacts)
 }
 
-pub async fn get_contacts_by_user_id(
-    pool: &SqlitePool,
-    user_id: i64,
-) -> Result<Vec<Contact>, Error> {
-    let contacts = query_as!(
-        Contact,
-        r#"
-        SELECT
-            id AS "id!: i64",
-            contact_type AS "contact_type: ContactType",
-            contact_date,
-            location,
-            user_id,
-            person_id,
-            created_at,
-            updated_at
-        FROM contact
-        WHERE user_id = ?
-        "#,
-        user_id
-    )
-    .fetch_all(pool)
-    .await?;
-
-    Ok(contacts)
-}
-
+// ======================================================
+// Get by Person ID
+// ======================================================
 pub async fn get_contacts_by_person_id(
     pool: &SqlitePool,
     person_id: i64,
@@ -143,12 +130,13 @@ pub async fn get_contacts_by_person_id(
             contact_type AS "contact_type: ContactType",
             contact_date,
             location,
-            user_id,
             person_id,
+            application_id,
             created_at,
             updated_at
         FROM contact
         WHERE person_id = ?
+        ORDER BY contact_date DESC
         "#,
         person_id
     )
@@ -158,42 +146,79 @@ pub async fn get_contacts_by_person_id(
     Ok(contacts)
 }
 
+// ======================================================
+// Get by Application ID
+// ======================================================
+pub async fn get_contacts_by_application_id(
+    pool: &SqlitePool,
+    application_id: i64,
+) -> Result<Vec<Contact>, Error> {
+    let contacts = query_as!(
+        Contact,
+        r#"
+        SELECT
+            id AS "id!: i64",
+            contact_type AS "contact_type: ContactType",
+            contact_date,
+            location,
+            person_id,
+            application_id,
+            created_at,
+            updated_at
+        FROM contact
+        WHERE application_id = ?
+        ORDER BY contact_date DESC
+        "#,
+        application_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(contacts)
+}
+
+// ======================================================
+// Update
+// ======================================================
 pub async fn update_contact(
     pool: &SqlitePool,
     id: i64,
     contact_type: Option<&ContactType>,
-    contact_date: Option<&str>,
+    contact_date: Option<&NaiveDate>,
     location: Option<&str>,
-    user_id: Option<i64>,
     person_id: Option<i64>,
+    application_id: Option<i64>,
 ) -> Result<Contact, Error> {
     let contact_type_str = contact_type.map(|c| c.as_str());
-    let user_id_s = user_id.map(|v| v.to_string());
     let person_id_s = person_id.map(|v| v.to_string());
+    let application_id_s = application_id.map(|v| v.to_string());
 
-    // Build SQL dynamically
-    let fields = vec![
+    // convert NaiveDate to formatted ISO string (for SQL text binding)
+    let contact_date_s = contact_date.map(|d| d.format("%Y-%m-%d").to_string());
+    let contact_date_ref = contact_date_s.as_deref();
+
+    let fields: Vec<(&str, Option<&str>)> = vec![
         ("contact_type", contact_type_str),
-        ("contact_date", contact_date),
+        ("contact_date", contact_date_ref),
         ("location", location),
-        ("user_id", user_id_s.as_deref()),
         ("person_id", person_id_s.as_deref()),
+        ("application_id", application_id_s.as_deref()),
     ];
 
     let (sql, binds) = build_update_sql("contact", "id", id, fields);
 
-    // Bind parameters
     let mut query = sqlx::query_as::<_, Contact>(&sql);
-    for val in binds.iter().take(binds.len() - 1) {
+    for val in &binds {
         query = query.bind(val);
     }
-    query = query.bind(binds.last().unwrap());
 
-    // Execute and return updated record
     let contact = query.fetch_one(pool).await?;
     Ok(contact)
 }
 
+// ======================================================
+// Delete
+// ======================================================
 pub async fn delete_contact(pool: &SqlitePool, id: i64) -> Result<i64, Error> {
     let row = query!(
         r#"

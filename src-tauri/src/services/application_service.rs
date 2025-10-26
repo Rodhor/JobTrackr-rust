@@ -1,26 +1,31 @@
-use crate::db::models::enums::Status;
+use crate::db::models::enums::Stage;
 use crate::db::queries::application;
 use crate::logger::*;
 use crate::services::service_types::JsonResult;
+use chrono::NaiveDate;
 use sqlx::SqlitePool;
 
+// ======================================================
+// Create Application
+// ======================================================
 pub async fn create_application_service(
     pool: &SqlitePool,
-    user_id: i64,
-    job_listing_id: i64,
-    status: Option<&Status>,
-    applied_date: &str,
+    job_listing_id: Option<i64>,
+    stage: Option<&Stage>,
+    applied_date: &NaiveDate,
     cv_file_path: Option<&str>,
     cover_letter_file_path: Option<&str>,
     application_notes: Option<&str>,
 ) -> JsonResult {
-    info!("Creating application for user_id: {}", user_id);
+    info!(
+        "Creating application for job_listing_id: {:?}",
+        job_listing_id
+    );
 
     let result = application::create_application(
         pool,
-        user_id,
         job_listing_id,
-        status,
+        stage,
         applied_date,
         cv_file_path,
         cover_letter_file_path,
@@ -33,7 +38,7 @@ pub async fn create_application_service(
             info!("Application created successfully. ID: {}", record.id);
             let json = serde_json::json!({
                 "status": "success",
-                "message": format!("Application created successfully for user {}.", user_id),
+                "message": format!("Application created successfully (job_listing_id: {:?}).", job_listing_id),
                 "data": record
             });
             Ok(json.to_string())
@@ -42,13 +47,16 @@ pub async fn create_application_service(
             error!("Database error creating application: {}", e);
             let json = serde_json::json!({
                 "status": "error",
-                "message": format!("Failed to create application for user {}: {}", user_id, e)
+                "message": format!("Failed to create application (job_listing_id: {:?}): {}", job_listing_id, e)
             });
             Err(json.to_string())
         }
     }
 }
 
+// ======================================================
+// Get Application by ID
+// ======================================================
 pub async fn get_application_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResult {
     info!("Retrieving application by ID: {}", id);
 
@@ -74,6 +82,9 @@ pub async fn get_application_by_id_service(pool: &SqlitePool, id: &i64) -> JsonR
     }
 }
 
+// ======================================================
+// Get All Applications
+// ======================================================
 pub async fn get_all_applications_service(pool: &SqlitePool) -> JsonResult {
     info!("Retrieving all applications");
 
@@ -100,13 +111,15 @@ pub async fn get_all_applications_service(pool: &SqlitePool) -> JsonResult {
     }
 }
 
+// ======================================================
+// Update Application
+// ======================================================
 pub async fn update_application_service(
     pool: &SqlitePool,
     id: &i64,
-    user_id: Option<i64>,
     job_listing_id: Option<i64>,
-    status: Option<&Status>,
-    applied_date: Option<&str>,
+    stage: Option<&Stage>,
+    applied_date: Option<&NaiveDate>,
     cv_file_path: Option<&str>,
     cover_letter_file_path: Option<&str>,
     application_notes: Option<&str>,
@@ -116,9 +129,8 @@ pub async fn update_application_service(
     let result = application::update_application(
         pool,
         *id,
-        user_id,
         job_listing_id,
-        status,
+        stage,
         applied_date,
         cv_file_path,
         cover_letter_file_path,
@@ -147,6 +159,9 @@ pub async fn update_application_service(
     }
 }
 
+// ======================================================
+// Delete Application
+// ======================================================
 pub async fn delete_application_service(pool: &SqlitePool, id: &i64) -> JsonResult {
     info!("Deleting application with ID: {}", id);
 

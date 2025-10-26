@@ -1,6 +1,6 @@
 use crate::db::models::enums::WorkType;
 use crate::utils::sql_utils::build_update_sql;
-use chrono::Utc;
+use chrono::NaiveDateTime;
 use serde::Serialize;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
@@ -16,10 +16,13 @@ pub struct Company {
     pub industry: Option<String>,
     pub website: Option<String>,
     pub phone_number: Option<String>,
-    pub created_at: String,
-    pub updated_at: String,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
 }
 
+// ======================================================
+// Create
+// ======================================================
 pub async fn create_company(
     pool: &SqlitePool,
     name: &str,
@@ -32,7 +35,6 @@ pub async fn create_company(
     website: Option<&str>,
     phone_number: Option<&str>,
 ) -> Result<Company, Error> {
-    let now = Utc::now().to_rfc3339();
     let worktype = default_work_type.map(|t| t.as_str());
 
     let company = query_as!(
@@ -47,11 +49,9 @@ pub async fn create_company(
             default_work_type,
             industry,
             website,
-            phone_number,
-            created_at,
-            updated_at
+            phone_number
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         RETURNING
             id AS "id!: i64",
             name,
@@ -74,9 +74,7 @@ pub async fn create_company(
         worktype,
         industry,
         website,
-        phone_number,
-        now,
-        now
+        phone_number
     )
     .fetch_one(pool)
     .await?;
@@ -84,6 +82,9 @@ pub async fn create_company(
     Ok(company)
 }
 
+// ======================================================
+// Get by ID
+// ======================================================
 pub async fn get_company_by_id(pool: &SqlitePool, id: i64) -> Result<Company, Error> {
     let company = query_as!(
         Company,
@@ -112,6 +113,9 @@ pub async fn get_company_by_id(pool: &SqlitePool, id: i64) -> Result<Company, Er
     Ok(company)
 }
 
+// ======================================================
+// Get all
+// ======================================================
 pub async fn get_all_companies(pool: &SqlitePool) -> Result<Vec<Company>, Error> {
     let companies = query_as!(
         Company,
@@ -138,6 +142,9 @@ pub async fn get_all_companies(pool: &SqlitePool) -> Result<Vec<Company>, Error>
     Ok(companies)
 }
 
+// ======================================================
+// Update
+// ======================================================
 pub async fn update_company(
     pool: &SqlitePool,
     id: i64,
@@ -153,7 +160,6 @@ pub async fn update_company(
 ) -> Result<Company, Error> {
     let worktype_str = default_work_type.map(|t| t.as_str());
 
-    // 1. Build dynamic SQL
     let fields = vec![
         ("name", name),
         ("street_address", street_address),
@@ -168,18 +174,19 @@ pub async fn update_company(
 
     let (sql, binds) = build_update_sql("company", "id", id, fields);
 
-    // 2. Bind parameters in order
     let mut query = sqlx::query_as::<_, Company>(&sql);
     for val in binds.iter().take(binds.len() - 1) {
         query = query.bind(val);
     }
     query = query.bind(binds.last().unwrap());
 
-    // 3. Execute and return updated record
     let company = query.fetch_one(pool).await?;
     Ok(company)
 }
 
+// ======================================================
+// Delete
+// ======================================================
 pub async fn delete_company(pool: &SqlitePool, id: i64) -> Result<i64, Error> {
     let row = query!(
         r#"

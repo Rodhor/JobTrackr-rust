@@ -56,12 +56,12 @@
       {
         "name": "created_at",
         "ordinal": 10,
-        "type_info": "Text"
+        "type_info": "Datetime"
       },
       {
         "name": "updated_at",
         "ordinal": 11,
-        "type_info": "Text"
+        "type_info": "Datetime"
       }
     ],
     "parameters": {

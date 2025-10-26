@@ -4,6 +4,9 @@ use crate::logger::*;
 use crate::services::service_types::JsonResult;
 use sqlx::SqlitePool;
 
+// ======================================================
+// Create Company
+// ======================================================
 pub async fn create_company_service(
     pool: &SqlitePool,
     name: &str,
@@ -43,7 +46,7 @@ pub async fn create_company_service(
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error creating company: {}", e);
+            error!("Error creating company '{}': {}", name, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to create company '{}': {}", name, e)
@@ -53,6 +56,9 @@ pub async fn create_company_service(
     }
 }
 
+// ======================================================
+// Get Company by ID
+// ======================================================
 pub async fn get_company_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResult {
     info!("Retrieving company by ID: {}", id);
 
@@ -60,6 +66,7 @@ pub async fn get_company_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResul
 
     match result {
         Ok(record) => {
+            info!("Company retrieved successfully. ID: {}", id);
             let json = serde_json::json!({
                 "status": "success",
                 "message": format!("Company {} retrieved successfully.", id),
@@ -68,7 +75,7 @@ pub async fn get_company_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResul
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error retrieving company: {}", e);
+            error!("Error retrieving company {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to retrieve company {}: {}", id, e)
@@ -78,6 +85,9 @@ pub async fn get_company_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResul
     }
 }
 
+// ======================================================
+// Get All Companies
+// ======================================================
 pub async fn get_all_companies_service(pool: &SqlitePool) -> JsonResult {
     info!("Retrieving all companies");
 
@@ -85,7 +95,10 @@ pub async fn get_all_companies_service(pool: &SqlitePool) -> JsonResult {
 
     match result {
         Ok(records) => {
-            info!("Companies retrieved successfully.");
+            info!(
+                "Companies retrieved successfully ({} total).",
+                records.len()
+            );
             let json = serde_json::json!({
                 "status": "success",
                 "message": "All companies retrieved successfully.",
@@ -94,16 +107,19 @@ pub async fn get_all_companies_service(pool: &SqlitePool) -> JsonResult {
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error retrieving companies: {}", e);
+            error!("Error retrieving companies: {}", e);
             let json = serde_json::json!({
                 "status": "error",
-                "message": format!("Error retrieving companies: {}", e)
+                "message": format!("Failed to retrieve companies: {}", e)
             });
             Err(json.to_string())
         }
     }
 }
 
+// ======================================================
+// Update Company
+// ======================================================
 pub async fn update_company_service(
     pool: &SqlitePool,
     id: &i64,
@@ -145,7 +161,7 @@ pub async fn update_company_service(
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error updating company: {}", e);
+            error!("Error updating company {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to update company {}: {}", id, e)
@@ -155,6 +171,9 @@ pub async fn update_company_service(
     }
 }
 
+// ======================================================
+// Delete Company
+// ======================================================
 pub async fn delete_company_service(pool: &SqlitePool, id: &i64) -> JsonResult {
     info!("Deleting company with ID: {}", id);
 
@@ -170,7 +189,7 @@ pub async fn delete_company_service(pool: &SqlitePool, id: &i64) -> JsonResult {
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error deleting company: {}", e);
+            error!("Error deleting company {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to delete company {}: {}", id, e)

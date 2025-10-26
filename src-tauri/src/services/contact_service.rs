@@ -2,25 +2,32 @@ use crate::db::models::enums::ContactType;
 use crate::db::queries::contact;
 use crate::logger::*;
 use crate::services::service_types::JsonResult;
+use chrono::NaiveDate;
 use sqlx::SqlitePool;
 
+// ======================================================
+// Create Contact
+// ======================================================
 pub async fn create_contact_service(
     pool: &SqlitePool,
     contact_type: &ContactType,
-    contact_date: &str,
+    contact_date: &NaiveDate,
     location: Option<&str>,
-    user_id: i64,
     person_id: Option<i64>,
+    application_id: Option<i64>,
 ) -> JsonResult {
-    info!("Creating contact for user_id: {}", user_id);
+    info!(
+        "Creating contact (person_id={:?}, application_id={:?})",
+        person_id, application_id
+    );
 
     let result = contact::create_contact(
         pool,
         contact_type,
         contact_date,
         location,
-        user_id,
         person_id,
+        application_id,
     )
     .await;
 
@@ -35,7 +42,7 @@ pub async fn create_contact_service(
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error creating contact: {}", e);
+            error!("Error creating contact: {}", e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to create contact: {}", e)
@@ -45,6 +52,9 @@ pub async fn create_contact_service(
     }
 }
 
+// ======================================================
+// Get Contact by ID
+// ======================================================
 pub async fn get_contact_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResult {
     info!("Retrieving contact by ID: {}", id);
 
@@ -52,6 +62,7 @@ pub async fn get_contact_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResul
 
     match result {
         Ok(record) => {
+            info!("Contact retrieved successfully. ID: {}", id);
             let json = serde_json::json!({
                 "status": "success",
                 "message": format!("Contact {} retrieved successfully.", id),
@@ -60,7 +71,7 @@ pub async fn get_contact_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResul
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error retrieving contact: {}", e);
+            error!("Error retrieving contact {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to retrieve contact {}: {}", id, e)
@@ -70,6 +81,9 @@ pub async fn get_contact_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResul
     }
 }
 
+// ======================================================
+// Get All Contacts
+// ======================================================
 pub async fn get_all_contacts_service(pool: &SqlitePool) -> JsonResult {
     info!("Retrieving all contacts");
 
@@ -77,7 +91,7 @@ pub async fn get_all_contacts_service(pool: &SqlitePool) -> JsonResult {
 
     match result {
         Ok(records) => {
-            info!("Contacts retrieved successfully.");
+            info!("Contacts retrieved successfully ({} total).", records.len());
             let json = serde_json::json!({
                 "status": "success",
                 "message": "All contacts retrieved successfully.",
@@ -86,26 +100,29 @@ pub async fn get_all_contacts_service(pool: &SqlitePool) -> JsonResult {
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error retrieving contacts: {}", e);
+            error!("Error retrieving contacts: {}", e);
             let json = serde_json::json!({
                 "status": "error",
-                "message": format!("Error retrieving contacts: {}", e)
+                "message": format!("Failed to retrieve contacts: {}", e)
             });
             Err(json.to_string())
         }
     }
 }
 
+// ======================================================
+// Update Contact
+// ======================================================
 pub async fn update_contact_service(
     pool: &SqlitePool,
     id: &i64,
     contact_type: Option<&ContactType>,
-    contact_date: Option<&str>,
+    contact_date: Option<&NaiveDate>,
     location: Option<&str>,
-    user_id: Option<i64>,
     person_id: Option<i64>,
+    application_id: Option<i64>,
 ) -> JsonResult {
-    info!("Updating contact with ID: {}", id);
+    info!("Updating contact ID: {}", id);
 
     let result = contact::update_contact(
         pool,
@@ -113,8 +130,8 @@ pub async fn update_contact_service(
         contact_type,
         contact_date,
         location,
-        user_id,
         person_id,
+        application_id,
     )
     .await;
 
@@ -129,7 +146,7 @@ pub async fn update_contact_service(
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error updating contact: {}", e);
+            error!("Error updating contact {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to update contact {}: {}", id, e)
@@ -139,8 +156,11 @@ pub async fn update_contact_service(
     }
 }
 
+// ======================================================
+// Delete Contact
+// ======================================================
 pub async fn delete_contact_service(pool: &SqlitePool, id: &i64) -> JsonResult {
-    info!("Deleting contact with ID: {}", id);
+    info!("Deleting contact ID: {}", id);
 
     let result = contact::delete_contact(pool, *id).await;
 
@@ -154,7 +174,7 @@ pub async fn delete_contact_service(pool: &SqlitePool, id: &i64) -> JsonResult {
             Ok(json.to_string())
         }
         Err(e) => {
-            error!("Database error deleting contact: {}", e);
+            error!("Error deleting contact {}: {}", id, e);
             let json = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to delete contact {}: {}", id, e)

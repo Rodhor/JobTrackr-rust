@@ -1,5 +1,6 @@
 use crate::db::models::enums::{Currency, SeniorityLevel, WorkType};
 use crate::utils::sql_utils::build_update_sql;
+use chrono::NaiveDateTime;
 use serde::Serialize;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
@@ -16,10 +17,13 @@ pub struct JobListing {
     pub currency: Option<Currency>,
     pub description: Option<String>,
     pub url: Option<String>,
-    pub created_at: String,
-    pub updated_at: String,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
 }
 
+// ======================================================
+// Create
+// ======================================================
 pub async fn create_job_listing(
     pool: &SqlitePool,
     company_id: i64,
@@ -85,6 +89,9 @@ pub async fn create_job_listing(
     Ok(job_listing)
 }
 
+// ======================================================
+// Get by ID
+// ======================================================
 pub async fn get_job_listing_by_id(pool: &SqlitePool, id: i64) -> Result<JobListing, Error> {
     let job_listing = query_as!(
         JobListing,
@@ -114,6 +121,9 @@ pub async fn get_job_listing_by_id(pool: &SqlitePool, id: i64) -> Result<JobList
     Ok(job_listing)
 }
 
+// ======================================================
+// Get all
+// ======================================================
 pub async fn get_all_job_listings(pool: &SqlitePool) -> Result<Vec<JobListing>, Error> {
     let listings = query_as!(
         JobListing,
@@ -133,6 +143,7 @@ pub async fn get_all_job_listings(pool: &SqlitePool) -> Result<Vec<JobListing>, 
             created_at,
             updated_at
         FROM job_listing
+        ORDER BY created_at DESC
         "#
     )
     .fetch_all(pool)
@@ -141,6 +152,9 @@ pub async fn get_all_job_listings(pool: &SqlitePool) -> Result<Vec<JobListing>, 
     Ok(listings)
 }
 
+// ======================================================
+// Get by Company ID
+// ======================================================
 pub async fn get_job_listings_by_company_id(
     pool: &SqlitePool,
     company_id: i64,
@@ -164,6 +178,7 @@ pub async fn get_job_listings_by_company_id(
             updated_at
         FROM job_listing
         WHERE company_id = ?
+        ORDER BY created_at DESC
         "#,
         company_id
     )
@@ -173,6 +188,9 @@ pub async fn get_job_listings_by_company_id(
     Ok(listings)
 }
 
+// ======================================================
+// Update
+// ======================================================
 pub async fn update_job_listing(
     pool: &SqlitePool,
     id: i64,
@@ -191,13 +209,11 @@ pub async fn update_job_listing(
     let seniority_level_str = seniority_level.map(|l| l.as_str());
     let currency_str = currency.map(|c| c.as_str());
 
-    // Keep owned String conversions alive for integer and enum fields
     let company_id_s = company_id.map(|v| v.to_string());
     let salary_min_s = salary_min.map(|v| v.to_string());
     let salary_max_s = salary_max.map(|v| v.to_string());
 
-    // 1. Build SQL dynamically
-    let fields = vec![
+    let fields: Vec<(&str, Option<&str>)> = vec![
         ("company_id", company_id_s.as_deref()),
         ("title", title),
         ("work_type", work_type_str),
@@ -212,18 +228,18 @@ pub async fn update_job_listing(
 
     let (sql, binds) = build_update_sql("job_listing", "id", id, fields);
 
-    // 2. Bind parameters
     let mut query = sqlx::query_as::<_, JobListing>(&sql);
-    for val in binds.iter().take(binds.len() - 1) {
+    for val in &binds {
         query = query.bind(val);
     }
-    query = query.bind(binds.last().unwrap());
 
-    // 3. Execute and return updated record
     let job_listing = query.fetch_one(pool).await?;
     Ok(job_listing)
 }
 
+// ======================================================
+// Delete
+// ======================================================
 pub async fn delete_job_listing(pool: &SqlitePool, id: i64) -> Result<i64, Error> {
     let row = query!(
         r#"

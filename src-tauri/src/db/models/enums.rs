@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 use sqlx::Type;
 
+// ======================================================
+// Work Type
+// ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum WorkType {
@@ -19,6 +22,15 @@ pub enum WorkType {
     #[sqlx(rename = "freelance")]
     #[serde(rename = "freelance")]
     Freelance,
+    #[sqlx(rename = "remote")]
+    #[serde(rename = "remote")]
+    Remote,
+    #[sqlx(rename = "in_office")]
+    #[serde(rename = "in_office")]
+    InOffice,
+    #[sqlx(rename = "hybrid")]
+    #[serde(rename = "hybrid")]
+    Hybrid,
     #[sqlx(rename = "other")]
     #[serde(rename = "other")]
     Other,
@@ -32,11 +44,17 @@ impl WorkType {
             WorkType::Internship => "internship",
             WorkType::Contract => "contract",
             WorkType::Freelance => "freelance",
+            WorkType::Remote => "remote",
+            WorkType::InOffice => "in_office",
+            WorkType::Hybrid => "hybrid",
             WorkType::Other => "other",
         }
     }
 }
 
+// ======================================================
+// Seniority Level
+// ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum SeniorityLevel {
@@ -73,6 +91,9 @@ impl SeniorityLevel {
     }
 }
 
+// ======================================================
+// Currency
+// ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum Currency {
@@ -105,6 +126,9 @@ impl Currency {
     }
 }
 
+// ======================================================
+// Role (Person)
+// ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum Role {
@@ -133,12 +157,18 @@ impl Role {
     }
 }
 
+// ======================================================
+// Application Stage (formerly Status)
+// ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
-pub enum Status {
+pub enum Stage {
     #[sqlx(rename = "applied")]
     #[serde(rename = "applied")]
     Applied,
+    #[sqlx(rename = "screening")]
+    #[serde(rename = "screening")]
+    Screening,
     #[sqlx(rename = "interviewing")]
     #[serde(rename = "interviewing")]
     Interviewing,
@@ -156,19 +186,23 @@ pub enum Status {
     Other,
 }
 
-impl Status {
+impl Stage {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Status::Applied => "applied",
-            Status::Interviewing => "interviewing",
-            Status::Offered => "offered",
-            Status::Rejected => "rejected",
-            Status::Withdrawn => "withdrawn",
-            Status::Other => "other",
+            Stage::Applied => "applied",
+            Stage::Screening => "screening",
+            Stage::Interviewing => "interviewing",
+            Stage::Offered => "offered",
+            Stage::Rejected => "rejected",
+            Stage::Withdrawn => "withdrawn",
+            Stage::Other => "other",
         }
     }
 }
 
+// ======================================================
+// Contact Type
+// ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum ContactType {
@@ -197,18 +231,21 @@ impl ContactType {
     }
 }
 
+// ======================================================
+// Note Type (aligned with schema: general, feedback, reminder, other)
+// ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
 pub enum NoteType {
-    #[sqlx(rename = "before")]
-    #[serde(rename = "before")]
-    Before,
-    #[sqlx(rename = "during")]
-    #[serde(rename = "during")]
-    During,
-    #[sqlx(rename = "after")]
-    #[serde(rename = "after")]
-    After,
+    #[sqlx(rename = "general")]
+    #[serde(rename = "general")]
+    General,
+    #[sqlx(rename = "feedback")]
+    #[serde(rename = "feedback")]
+    Feedback,
+    #[sqlx(rename = "reminder")]
+    #[serde(rename = "reminder")]
+    Reminder,
     #[sqlx(rename = "other")]
     #[serde(rename = "other")]
     Other,
@@ -217,10 +254,33 @@ pub enum NoteType {
 impl NoteType {
     pub fn as_str(&self) -> &'static str {
         match self {
-            NoteType::Before => "before",
-            NoteType::During => "during",
-            NoteType::After => "after",
+            NoteType::General => "general",
+            NoteType::Feedback => "feedback",
+            NoteType::Reminder => "reminder",
             NoteType::Other => "other",
+        }
+    }
+}
+
+// ======================================================
+// Reminder Completion Status
+// ======================================================
+#[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[sqlx(type_name = "INTEGER")]
+pub enum ReminderStatus {
+    #[sqlx(rename = "0")]
+    #[serde(rename = "0")]
+    Pending,
+    #[sqlx(rename = "1")]
+    #[serde(rename = "1")]
+    Completed,
+}
+
+impl ReminderStatus {
+    pub fn as_int(&self) -> i32 {
+        match self {
+            ReminderStatus::Pending => 0,
+            ReminderStatus::Completed => 1,
         }
     }
 }
