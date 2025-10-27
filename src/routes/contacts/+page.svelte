@@ -1,178 +1,120 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import {
-        contacts,
-        loadContacts,
-        createContact,
-        deleteContact,
-    } from "$lib/stores/contacts";
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import { contacts } from "$lib/stores/contacts";
     import { Button } from "$lib/components/ui/button/index.js";
+    import { Badge } from "$lib/components/ui/badge/index.js";
+    import type { Contact } from "$lib/types/contact";
     import type { ContactType } from "$lib/types/enums";
 
-    let open = false;
+    // ----------------------------------------------------------
+    // Mock data (showcase only)
+    // ----------------------------------------------------------
+    const mockContacts: Contact[] = [
+        {
+            id: 1,
+            contactType: "email",
+            contactDate: "2025-10-15",
+            location: "Remote",
+            personId: 12,
+            applicationId: 101,
+            createdAt: "2025-10-15 09:30:00",
+            updatedAt: "2025-10-15 09:30:00",
+        },
+        {
+            id: 2,
+            contactType: "phone",
+            contactDate: "2025-10-18",
+            location: "Office",
+            personId: 8,
+            applicationId: 104,
+            createdAt: "2025-10-18 11:00:00",
+            updatedAt: "2025-10-18 11:00:00",
+        },
+        {
+            id: 3,
+            contactType: "in_person",
+            contactDate: "2025-10-22",
+            location: "Berlin HQ",
+            personId: 5,
+            applicationId: 107,
+            createdAt: "2025-10-22 14:00:00",
+            updatedAt: "2025-10-22 14:00:00",
+        },
+    ];
 
-    // Form fields for creating new contact
-    let contactType: ContactType = "email";
-    let userId: number = 1;
-    let personId: number | null = null;
-    let location = "";
-    let contactDate = new Date().toISOString();
+    $contacts = mockContacts;
 
-    onMount(loadContacts);
-
-    async function handleCreate() {
-        const payload = {
-            contactType,
-            contactDate,
-            location: location || undefined,
-            userId,
-            personId: personId || undefined,
-        };
-
-        await createContact(payload as any);
-        open = false;
-        resetForm();
+    function formatDate(dateStr: string) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
     }
 
-    function resetForm() {
-        contactType = "email";
-        location = "";
-        personId = null;
-        contactDate = new Date().toISOString();
-    }
-
-    async function handleDelete(id: number) {
-        await deleteContact(id);
+    function typeColor(type: ContactType) {
+        switch (type) {
+            case "email":
+                return "bg-blue-100 text-blue-800";
+            case "phone":
+                return "bg-yellow-100 text-yellow-800";
+            case "in_person":
+                return "bg-green-100 text-green-800";
+            default:
+                return "bg-muted text-foreground";
+        }
     }
 </script>
 
-<!-- Header + Modal Trigger -->
-<div class="mb-4 flex justify-between items-center">
-    <h1 class="text-xl font-semibold">Interactions</h1>
-
-    <Dialog.Root bind:open>
-        <Dialog.Trigger asChild><Button>New Interaction</Button></Dialog.Trigger
-        >
-
-        <Dialog.Content class="max-w-xl">
-            <Dialog.Header>
-                <Dialog.Title>Create Interaction</Dialog.Title>
-                <Dialog.Description>
-                    Add a new contact record — interview, phone call, or
-                    meeting.
-                </Dialog.Description>
-            </Dialog.Header>
-
-            <form on:submit|preventDefault={handleCreate} class="space-y-4">
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm">Contact Type</span>
-                        <select
-                            bind:value={contactType}
-                            class="rounded-md border bg-background px-3 py-2"
-                            required
-                        >
-                            <option value="phone">Phone</option>
-                            <option value="email">Email</option>
-                            <option value="in_person">In Person</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm">Contact Date</span>
-                        <input
-                            type="text"
-                            class="rounded-md border bg-background px-3 py-2"
-                            bind:value={contactDate}
-                            required
-                        />
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm">User ID</span>
-                        <input
-                            type="number"
-                            class="rounded-md border bg-background px-3 py-2"
-                            bind:value={userId}
-                            min="1"
-                            required
-                        />
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm">Person ID</span>
-                        <input
-                            type="number"
-                            class="rounded-md border bg-background px-3 py-2"
-                            bind:value={personId}
-                            min="1"
-                            placeholder="Optional"
-                        />
-                    </label>
-                </div>
-
-                <label class="flex flex-col gap-1">
-                    <span class="text-sm">Location</span>
-                    <input
-                        type="text"
-                        class="rounded-md border bg-background px-3 py-2"
-                        bind:value={location}
-                        placeholder="e.g. Zoom, Office, Online"
-                    />
-                </label>
-
-                <Dialog.Footer class="flex justify-end gap-2">
-                    <Dialog.Close asChild>
-                        <Button type="button" variant="secondary">Cancel</Button
-                        >
-                    </Dialog.Close>
-                    <Button type="submit">Create</Button>
-                </Dialog.Footer>
-            </form>
-        </Dialog.Content>
-    </Dialog.Root>
+<!-- Header -->
+<div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold tracking-tight">Interactions</h1>
 </div>
 
 <!-- Table -->
-<div class="overflow-x-auto rounded-lg border">
+<div
+    class="overflow-hidden rounded-lg border border-border bg-background shadow-sm"
+>
     <table class="min-w-full text-sm">
-        <thead class="bg-muted/50 text-left">
+        <thead
+            class="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground"
+        >
             <tr>
-                <th class="px-4 py-2">ID</th>
-                <th class="px-4 py-2">Type</th>
-                <th class="px-4 py-2">Date</th>
-                <th class="px-4 py-2">Location</th>
-                <th class="px-4 py-2">User</th>
-                <th class="px-4 py-2">Person</th>
-                <th class="px-4 py-2">Actions</th>
+                <th class="px-4 py-3">Type</th>
+                <th class="px-4 py-3">Date</th>
+                <th class="px-4 py-3">Location</th>
+                <th class="px-4 py-3">Person</th>
+                <th class="px-4 py-3">Application</th>
+                <th class="px-4 py-3 text-right">Actions</th>
             </tr>
         </thead>
         <tbody>
             {#each $contacts as c (c.id)}
-                <tr class="border-t">
-                    <td class="px-4 py-2">{c.id}</td>
-                    <td class="px-4 py-2">{c.contactType}</td>
-                    <td class="px-4 py-2">{c.contactDate}</td>
-                    <td class="px-4 py-2">{c.location}</td>
-                    <td class="px-4 py-2">{c.userId}</td>
-                    <td class="px-4 py-2">{c.personId}</td>
-                    <td class="px-4 py-2">
-                        <button
-                            class="rounded-md border px-2 py-1 hover:bg-destructive hover:text-destructive-foreground"
-                            on:click={() => handleDelete(c.id)}
-                        >
-                            Delete
-                        </button>
+                <tr class="border-t hover:bg-muted/30 transition-colors">
+                    <td class="px-4 py-3">
+                        <Badge class={typeColor(c.contactType)}>
+                            {c.contactType}
+                        </Badge>
+                    </td>
+                    <td class="px-4 py-3">{formatDate(c.contactDate)}</td>
+                    <td
+                        class="px-4 py-3 truncate max-w-[180px] text-muted-foreground"
+                    >
+                        {c.location || "—"}
+                    </td>
+                    <td class="px-4 py-3">{c.personId || "—"}</td>
+                    <td class="px-4 py-3">{c.applicationId || "—"}</td>
+                    <td class="px-4 py-3 text-right">
+                        <Button size="sm" variant="destructive">Delete</Button>
                     </td>
                 </tr>
             {/each}
+
             {#if $contacts.length === 0}
-                <tr class="border-t">
+                <tr>
                     <td
-                        colspan="7"
-                        class="text-center py-8 text-muted-foreground"
+                        class="px-4 py-10 text-center text-sm text-muted-foreground"
+                        colspan="6"
                     >
                         No interactions yet.
                     </td>

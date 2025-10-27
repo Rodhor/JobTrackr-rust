@@ -1,26 +1,26 @@
 import { writable } from "svelte/store";
 import { invoke } from "@tauri-apps/api/core";
+import type { Reminder } from "$lib/types/reminder";
 import type { BackendResponse } from "$lib/types/backendResponse";
-import type { ContactNote } from "$lib/types/contactNote";
 
 /**
  * ---------------------------------------------------------------------
- * Reactive store for contact notes
+ * Reactive reminder store
  * ---------------------------------------------------------------------
  */
-export const contactNotes = writable<ContactNote[]>([]);
+export const reminders = writable<Reminder[]>([]);
 
 /**
  * ---------------------------------------------------------------------
- * Load all contact notes
+ * Load all reminders
  * ---------------------------------------------------------------------
  */
-export async function loadContactNotes() {
-  const raw = await invoke<string>("get_all_contact_notes_command");
-  const res = JSON.parse(raw) as BackendResponse<ContactNote[]>;
+export async function loadReminders() {
+  const raw = await invoke<string>("get_all_reminders_command");
+  const res = JSON.parse(raw) as BackendResponse<Reminder[]>;
 
   if (res.status === "success" && res.data) {
-    contactNotes.set(res.data);
+    reminders.set(res.data);
   } else {
     console.error(res.message);
   }
@@ -28,17 +28,17 @@ export async function loadContactNotes() {
 
 /**
  * ---------------------------------------------------------------------
- * Create a new contact note
+ * Create a new reminder
  * ---------------------------------------------------------------------
  */
-export async function createContactNote(
-  payload: Omit<ContactNote, "id" | "createdAt" | "updatedAt">,
+export async function createReminder(
+  payload: Omit<Reminder, "id" | "createdAt" | "updatedAt">,
 ) {
-  const raw = await invoke<string>("create_contact_note_command", payload);
-  const res = JSON.parse(raw) as BackendResponse<ContactNote>;
+  const raw = await invoke<string>("create_reminder_command", payload);
+  const res = JSON.parse(raw) as BackendResponse<Reminder>;
 
   if (res.status === "success" && res.data) {
-    contactNotes.update((list) => [...list, res.data!]);
+    reminders.update((list) => [...list, res.data!]);
   } else {
     console.error(res.message);
   }
@@ -46,23 +46,18 @@ export async function createContactNote(
 
 /**
  * ---------------------------------------------------------------------
- * Update an existing contact note
+ * Update an existing reminder
  * ---------------------------------------------------------------------
  */
-export async function updateContactNote(
-  id: number,
-  updates: Partial<ContactNote>,
-) {
-  const raw = await invoke<string>("update_contact_note_command", {
+export async function updateReminder(id: number, updates: Partial<Reminder>) {
+  const raw = await invoke<string>("update_note_command", {
     id,
     ...updates,
   });
-  const res = JSON.parse(raw) as BackendResponse<ContactNote>;
+  const res = JSON.parse(raw) as BackendResponse<Reminder>;
 
   if (res.status === "success" && res.data) {
-    contactNotes.update((list) =>
-      list.map((n) => (n.id === id ? res.data! : n)),
-    );
+    reminders.update((list) => list.map((l) => (l.id === id ? res.data! : l)));
   } else {
     console.error(res.message);
   }
@@ -70,15 +65,15 @@ export async function updateContactNote(
 
 /**
  * ---------------------------------------------------------------------
- * Delete contact note
+ * Delete a reminder
  * ---------------------------------------------------------------------
  */
-export async function deleteContactNote(id: number) {
-  const raw = await invoke<string>("delete_contact_note_command", { id });
+export async function deleteReminder(id: number) {
+  const raw = await invoke<string>("delete_reminder_command", { id });
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {
-    contactNotes.update((list) => list.filter((n) => n.id !== id));
+    reminders.update((list) => list.filter((l) => l.id !== id));
   } else {
     console.error(res.message);
   }

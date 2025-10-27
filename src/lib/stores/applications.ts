@@ -16,6 +16,12 @@ export async function loadApplications() {
   }
 }
 
+export async function loadApplicationById(id: number) {
+  const raw = await invoke<string>("get_application_by_id_command", { id });
+  const res = JSON.parse(raw) as BackendResponse<Application>;
+  return res.status === "success" ? (res.data ?? null) : null;
+}
+
 export async function createApplication(
   payload: Omit<Application, "id" | "createdAt" | "updatedAt">,
 ) {
