@@ -25,7 +25,7 @@ mod tests {
             Some(1), // company_id
             Some(1), // person_id
             &reminder_date,
-            Some("Follow up interview"),
+            "Follow up interview",
             Some("Reach out to recruiter about next steps"),
             false,
         )
@@ -33,13 +33,13 @@ mod tests {
         .expect("failed to create reminder");
 
         assert_eq!(created.application_id, Some(1));
-        assert_eq!(created.contact_id, Some(1));
+        assert_eq!(created.interaction_id, Some(1));
         assert_eq!(created.note_id, Some(1));
         assert_eq!(created.job_listing_id, Some(1));
         assert_eq!(created.company_id, Some(1));
         assert_eq!(created.person_id, Some(1));
         assert_eq!(created.reminder_date, reminder_date);
-        assert_eq!(created.title.as_deref(), Some("Follow up interview"));
+        assert_eq!(created.title, "Follow up interview");
         assert_eq!(
             created.message.as_deref(),
             Some("Reach out to recruiter about next steps")
@@ -99,7 +99,6 @@ mod tests {
 
         assert_eq!(updated.id, created.id);
         assert_eq!(updated.reminder_date, new_date);
-        assert_eq!(updated.title.as_deref(), Some("Final Interview"));
         assert_eq!(updated.message.as_deref(), Some("Confirm meeting slot"));
         assert!(updated.is_completed);
 

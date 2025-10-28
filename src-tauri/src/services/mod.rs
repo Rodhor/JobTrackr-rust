@@ -1,6 +1,6 @@
 pub mod application_service;
 pub mod company_service;
-pub mod contact_service;
+pub mod interaction_service;
 pub mod job_listing_service;
 pub mod note_service;
 pub mod person_service;

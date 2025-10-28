@@ -13,8 +13,6 @@ pub async fn create_application_service(
     job_listing_id: Option<i64>,
     stage: Option<&Stage>,
     applied_date: &NaiveDate,
-    cv_file_path: Option<&str>,
-    cover_letter_file_path: Option<&str>,
     application_notes: Option<&str>,
 ) -> JsonResult {
     info!(
@@ -27,8 +25,6 @@ pub async fn create_application_service(
         job_listing_id,
         stage,
         applied_date,
-        cv_file_path,
-        cover_letter_file_path,
         application_notes,
     )
     .await;
@@ -38,7 +34,10 @@ pub async fn create_application_service(
             info!("Application created successfully. ID: {}", record.id);
             let json = serde_json::json!({
                 "status": "success",
-                "message": format!("Application created successfully (job_listing_id: {:?}).", job_listing_id),
+                "message": format!(
+                    "Application created successfully (job_listing_id: {:?}).",
+                    job_listing_id
+                ),
                 "data": record
             });
             Ok(json.to_string())
@@ -47,7 +46,10 @@ pub async fn create_application_service(
             error!("Database error creating application: {}", e);
             let json = serde_json::json!({
                 "status": "error",
-                "message": format!("Failed to create application (job_listing_id: {:?}): {}", job_listing_id, e)
+                "message": format!(
+                    "Failed to create application (job_listing_id: {:?}): {}",
+                    job_listing_id, e
+                )
             });
             Err(json.to_string())
         }
@@ -120,8 +122,6 @@ pub async fn update_application_service(
     job_listing_id: Option<i64>,
     stage: Option<&Stage>,
     applied_date: Option<&NaiveDate>,
-    cv_file_path: Option<&str>,
-    cover_letter_file_path: Option<&str>,
     application_notes: Option<&str>,
 ) -> JsonResult {
     info!("Updating application with ID: {}", id);
@@ -132,8 +132,6 @@ pub async fn update_application_service(
         job_listing_id,
         stage,
         applied_date,
-        cv_file_path,
-        cover_letter_file_path,
         application_notes,
     )
     .await;

@@ -54,10 +54,10 @@ pub async fn run() {
             update_company_command,
             delete_company_command,
             // ===============================
-            // Contacts
+            // Interactions
             // ===============================
-            create_contact_command,
-            update_contact_command,
+            create_interaction_command,
+            update_interaction_command,
             // ===============================
             // Job Listings
             // ===============================

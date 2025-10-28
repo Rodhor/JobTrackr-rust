@@ -33,7 +33,7 @@ pub async fn create_person(
 ) -> Result<Person, Error> {
     let role_str = role.map(|r| r.as_str());
 
-    let person = query_as!(
+    query_as!(
         Person,
         r#"
         INSERT INTO person (
@@ -55,8 +55,8 @@ pub async fn create_person(
             role AS "role: Role",
             linkedin_url,
             company_id,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         "#,
         first_name,
         last_name,
@@ -67,16 +67,14 @@ pub async fn create_person(
         company_id
     )
     .fetch_one(pool)
-    .await?;
-
-    Ok(person)
+    .await
 }
 
 // ======================================================
 // Get by ID
 // ======================================================
 pub async fn get_person_by_id(pool: &SqlitePool, id: i64) -> Result<Person, Error> {
-    let person = query_as!(
+    query_as!(
         Person,
         r#"
         SELECT
@@ -88,24 +86,22 @@ pub async fn get_person_by_id(pool: &SqlitePool, id: i64) -> Result<Person, Erro
             role AS "role: Role",
             linkedin_url,
             company_id,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         FROM person
         WHERE id = ?
         "#,
         id
     )
     .fetch_one(pool)
-    .await?;
-
-    Ok(person)
+    .await
 }
 
 // ======================================================
 // Get all
 // ======================================================
 pub async fn get_all_persons(pool: &SqlitePool) -> Result<Vec<Person>, Error> {
-    let persons = query_as!(
+    query_as!(
         Person,
         r#"
         SELECT
@@ -117,16 +113,14 @@ pub async fn get_all_persons(pool: &SqlitePool) -> Result<Vec<Person>, Error> {
             role AS "role: Role",
             linkedin_url,
             company_id,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         FROM person
         ORDER BY created_at DESC
         "#
     )
     .fetch_all(pool)
-    .await?;
-
-    Ok(persons)
+    .await
 }
 
 // ======================================================
@@ -136,7 +130,7 @@ pub async fn get_persons_by_company_id(
     pool: &SqlitePool,
     company_id: i64,
 ) -> Result<Vec<Person>, Error> {
-    let persons = query_as!(
+    query_as!(
         Person,
         r#"
         SELECT
@@ -148,8 +142,8 @@ pub async fn get_persons_by_company_id(
             role AS "role: Role",
             linkedin_url,
             company_id,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         FROM person
         WHERE company_id = ?
         ORDER BY created_at DESC
@@ -157,9 +151,7 @@ pub async fn get_persons_by_company_id(
         company_id
     )
     .fetch_all(pool)
-    .await?;
-
-    Ok(persons)
+    .await
 }
 
 // ======================================================
@@ -196,8 +188,7 @@ pub async fn update_person(
         query = query.bind(val);
     }
 
-    let person = query.fetch_one(pool).await?;
-    Ok(person)
+    query.fetch_one(pool).await
 }
 
 // ======================================================

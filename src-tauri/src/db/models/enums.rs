@@ -135,12 +135,21 @@ pub enum Role {
     #[sqlx(rename = "recruiter")]
     #[serde(rename = "recruiter")]
     Recruiter,
+    #[sqlx(rename = "hiring_manager")]
+    #[serde(rename = "hiring_manager")]
+    HiringManager,
+    #[sqlx(rename = "team_lead")]
+    #[serde(rename = "team_lead")]
+    TeamLead,
     #[sqlx(rename = "hr")]
     #[serde(rename = "hr")]
     HR,
-    #[sqlx(rename = "manager")]
-    #[serde(rename = "manager")]
-    Manager,
+    #[sqlx(rename = "founder")]
+    #[serde(rename = "founder")]
+    Founder,
+    #[sqlx(rename = "developer")]
+    #[serde(rename = "developer")]
+    Developer,
     #[sqlx(rename = "other")]
     #[serde(rename = "other")]
     Other,
@@ -150,15 +159,18 @@ impl Role {
     pub fn as_str(&self) -> &'static str {
         match self {
             Role::Recruiter => "recruiter",
+            Role::HiringManager => "hiring_manager",
+            Role::TeamLead => "team_lead",
             Role::HR => "hr",
-            Role::Manager => "manager",
+            Role::Founder => "founder",
+            Role::Developer => "developer",
             Role::Other => "other",
         }
     }
 }
 
 // ======================================================
-// Application Stage (formerly Status)
+// Application Stage
 // ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
@@ -169,18 +181,30 @@ pub enum Stage {
     #[sqlx(rename = "screening")]
     #[serde(rename = "screening")]
     Screening,
+    #[sqlx(rename = "assessment")]
+    #[serde(rename = "assessment")]
+    Assessment,
     #[sqlx(rename = "interviewing")]
     #[serde(rename = "interviewing")]
     Interviewing,
     #[sqlx(rename = "offered")]
     #[serde(rename = "offered")]
     Offered,
+    #[sqlx(rename = "negotiation")]
+    #[serde(rename = "negotiation")]
+    Negotiation,
+    #[sqlx(rename = "accepted")]
+    #[serde(rename = "accepted")]
+    Accepted,
     #[sqlx(rename = "rejected")]
     #[serde(rename = "rejected")]
     Rejected,
     #[sqlx(rename = "withdrawn")]
     #[serde(rename = "withdrawn")]
     Withdrawn,
+    #[sqlx(rename = "on_hold")]
+    #[serde(rename = "on_hold")]
+    OnHold,
     #[sqlx(rename = "other")]
     #[serde(rename = "other")]
     Other,
@@ -191,48 +215,64 @@ impl Stage {
         match self {
             Stage::Applied => "applied",
             Stage::Screening => "screening",
+            Stage::Assessment => "assessment",
             Stage::Interviewing => "interviewing",
             Stage::Offered => "offered",
+            Stage::Negotiation => "negotiation",
+            Stage::Accepted => "accepted",
             Stage::Rejected => "rejected",
             Stage::Withdrawn => "withdrawn",
+            Stage::OnHold => "on_hold",
             Stage::Other => "other",
         }
     }
 }
 
 // ======================================================
-// Contact Type
+// Interaction Type
 // ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
-pub enum ContactType {
-    #[sqlx(rename = "phone")]
-    #[serde(rename = "phone")]
-    Phone,
+pub enum InteractionType {
     #[sqlx(rename = "email")]
     #[serde(rename = "email")]
     Email,
-    #[sqlx(rename = "in_person")]
-    #[serde(rename = "in_person")]
-    InPerson,
+    #[sqlx(rename = "phone")]
+    #[serde(rename = "phone")]
+    Phone,
+    #[sqlx(rename = "interview")]
+    #[serde(rename = "interview")]
+    Interview,
+    #[sqlx(rename = "meeting")]
+    #[serde(rename = "meeting")]
+    Meeting,
+    #[sqlx(rename = "follow_up")]
+    #[serde(rename = "follow_up")]
+    FollowUp,
+    #[sqlx(rename = "offer_discussion")]
+    #[serde(rename = "offer_discussion")]
+    OfferDiscussion,
     #[sqlx(rename = "other")]
     #[serde(rename = "other")]
     Other,
 }
 
-impl ContactType {
+impl InteractionType {
     pub fn as_str(&self) -> &'static str {
         match self {
-            ContactType::Phone => "phone",
-            ContactType::Email => "email",
-            ContactType::InPerson => "in_person",
-            ContactType::Other => "other",
+            InteractionType::Email => "email",
+            InteractionType::Phone => "phone",
+            InteractionType::Interview => "interview",
+            InteractionType::Meeting => "meeting",
+            InteractionType::FollowUp => "follow_up",
+            InteractionType::OfferDiscussion => "offer_discussion",
+            InteractionType::Other => "other",
         }
     }
 }
 
 // ======================================================
-// Note Type (aligned with schema: general, feedback, reminder, other)
+// Note Type
 // ======================================================
 #[derive(Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "TEXT")]
@@ -246,6 +286,9 @@ pub enum NoteType {
     #[sqlx(rename = "reminder")]
     #[serde(rename = "reminder")]
     Reminder,
+    #[sqlx(rename = "summary")]
+    #[serde(rename = "summary")]
+    Summary,
     #[sqlx(rename = "other")]
     #[serde(rename = "other")]
     Other,
@@ -257,6 +300,7 @@ impl NoteType {
             NoteType::General => "general",
             NoteType::Feedback => "feedback",
             NoteType::Reminder => "reminder",
+            NoteType::Summary => "summary",
             NoteType::Other => "other",
         }
     }

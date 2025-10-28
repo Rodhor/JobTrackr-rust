@@ -10,24 +10,24 @@ use sqlx::SqlitePool;
 pub async fn create_reminder_service(
     pool: &SqlitePool,
     application_id: Option<i64>,
-    contact_id: Option<i64>,
-    note_id: Option<i64>,
     job_listing_id: Option<i64>,
+    interaction_id: Option<i64>,
+    note_id: Option<i64>,
     company_id: Option<i64>,
     person_id: Option<i64>,
     reminder_date: &NaiveDate,
-    title: Option<&str>,
+    title: &str,
     message: Option<&str>,
     is_completed: bool,
 ) -> JsonResult {
-    info!("Creating reminder: {:?}", title.unwrap_or("Untitled"));
+    info!("Creating reminder: {:?}", title);
 
     let result = reminder::create_reminder(
         pool,
         application_id,
-        contact_id,
-        note_id,
         job_listing_id,
+        interaction_id,
+        note_id,
         company_id,
         person_id,
         reminder_date,
@@ -43,8 +43,7 @@ pub async fn create_reminder_service(
             let json = serde_json::json!({
                 "status": "success",
                 "message": format!(
-                    "Reminder '{}' created successfully.",
-                    record.title.as_deref().unwrap_or("Untitled")
+                    "Reminder '{}' created successfully.",record.id
                 ),
                 "data": record
             });
@@ -129,9 +128,9 @@ pub async fn update_reminder_service(
     pool: &SqlitePool,
     id: &i64,
     application_id: Option<i64>,
-    contact_id: Option<i64>,
-    note_id: Option<i64>,
     job_listing_id: Option<i64>,
+    interaction_id: Option<i64>,
+    note_id: Option<i64>,
     company_id: Option<i64>,
     person_id: Option<i64>,
     reminder_date: Option<&NaiveDate>,
@@ -145,9 +144,9 @@ pub async fn update_reminder_service(
         pool,
         *id,
         application_id,
-        contact_id,
-        note_id,
         job_listing_id,
+        interaction_id,
+        note_id,
         company_id,
         person_id,
         reminder_date,

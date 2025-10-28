@@ -63,8 +63,8 @@ pub async fn create_company(
             industry,
             website,
             phone_number,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         "#,
         name,
         street_address,
@@ -86,7 +86,7 @@ pub async fn create_company(
 // Get by ID
 // ======================================================
 pub async fn get_company_by_id(pool: &SqlitePool, id: i64) -> Result<Company, Error> {
-    let company = query_as!(
+    query_as!(
         Company,
         r#"
         SELECT
@@ -100,24 +100,22 @@ pub async fn get_company_by_id(pool: &SqlitePool, id: i64) -> Result<Company, Er
             industry,
             website,
             phone_number,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         FROM company
         WHERE id = ?
         "#,
         id
     )
     .fetch_one(pool)
-    .await?;
-
-    Ok(company)
+    .await
 }
 
 // ======================================================
 // Get all
 // ======================================================
 pub async fn get_all_companies(pool: &SqlitePool) -> Result<Vec<Company>, Error> {
-    let companies = query_as!(
+    query_as!(
         Company,
         r#"
         SELECT
@@ -131,15 +129,14 @@ pub async fn get_all_companies(pool: &SqlitePool) -> Result<Vec<Company>, Error>
             industry,
             website,
             phone_number,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         FROM company
+        ORDER BY name COLLATE NOCASE
         "#
     )
     .fetch_all(pool)
-    .await?;
-
-    Ok(companies)
+    .await
 }
 
 // ======================================================
@@ -175,13 +172,11 @@ pub async fn update_company(
     let (sql, binds) = build_update_sql("company", "id", id, fields);
 
     let mut query = sqlx::query_as::<_, Company>(&sql);
-    for val in binds.iter().take(binds.len() - 1) {
+    for val in &binds {
         query = query.bind(val);
     }
-    query = query.bind(binds.last().unwrap());
 
-    let company = query.fetch_one(pool).await?;
-    Ok(company)
+    query.fetch_one(pool).await
 }
 
 // ======================================================

@@ -9,22 +9,24 @@ use sqlx::SqlitePool;
 #[tauri::command]
 pub async fn create_note_command(
     pool: tauri::State<'_, SqlitePool>,
-    contact_id: Option<i64>,
+    interaction_id: Option<i64>,
     job_listing_id: Option<i64>,
     application_id: Option<i64>,
     person_id: Option<i64>,
     company_id: Option<i64>,
     note_type: Option<NoteType>,
+    title: Option<String>,
     content: Option<String>,
 ) -> JsonResult {
     note_service::create_note_service(
         &pool,
-        contact_id,
+        interaction_id,
         job_listing_id,
         application_id,
         person_id,
         company_id,
         note_type.as_ref(),
+        title.as_deref(),
         content.as_deref(),
     )
     .await
@@ -53,23 +55,25 @@ pub async fn get_all_notes_command(pool: tauri::State<'_, SqlitePool>) -> JsonRe
 pub async fn update_note_command(
     pool: tauri::State<'_, SqlitePool>,
     id: i64,
-    contact_id: Option<i64>,
+    interaction_id: Option<i64>,
     job_listing_id: Option<i64>,
     application_id: Option<i64>,
     person_id: Option<i64>,
     company_id: Option<i64>,
     note_type: Option<NoteType>,
+    title: Option<String>,
     content: Option<String>,
 ) -> JsonResult {
     note_service::update_note_service(
         &pool,
         &id,
-        contact_id,
+        interaction_id,
         job_listing_id,
         application_id,
         person_id,
         company_id,
         note_type.as_ref(),
+        title.as_deref(),
         content.as_deref(),
     )
     .await

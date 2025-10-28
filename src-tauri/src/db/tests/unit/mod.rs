@@ -1,6 +1,6 @@
 mod application;
 mod company;
-mod contact;
+mod interactions;
 mod job_listing;
 mod note;
 mod person;

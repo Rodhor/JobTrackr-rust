@@ -1,0 +1,80 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT\n            id AS \"id!: i64\",\n            interaction_type AS \"interaction_type: InteractionType\",\n            interaction_date AS \"interaction_date!: NaiveDate\",\n            subject,\n            summary,\n            medium,\n            application_id,\n            person_id,\n            company_id,\n            created_at AS \"created_at!: NaiveDateTime\",\n            updated_at AS \"updated_at!: NaiveDateTime\"\n        FROM interaction\n        WHERE application_id = ?\n        ORDER BY interaction_date DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "interaction_type: InteractionType",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "interaction_date!: NaiveDate",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "subject",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "summary",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "medium",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "application_id",
+        "ordinal": 6,
+        "type_info": "Int64"
+      },
+      {
+        "name": "person_id",
+        "ordinal": 7,
+        "type_info": "Int64"
+      },
+      {
+        "name": "company_id",
+        "ordinal": 8,
+        "type_info": "Int64"
+      },
+      {
+        "name": "created_at!: NaiveDateTime",
+        "ordinal": 9,
+        "type_info": "Datetime"
+      },
+      {
+        "name": "updated_at!: NaiveDateTime",
+        "ordinal": 10,
+        "type_info": "Datetime"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "19e94affc9211baf2a313cb8890e38b46e5d6adffe1ff05a06a9d93d653f2abb"
+}

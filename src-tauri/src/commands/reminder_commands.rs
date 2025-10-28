@@ -10,17 +10,16 @@ use sqlx::SqlitePool;
 pub async fn create_reminder_command(
     pool: tauri::State<'_, SqlitePool>,
     application_id: Option<i64>,
-    contact_id: Option<i64>,
+    interaction_id: Option<i64>,
     note_id: Option<i64>,
     job_listing_id: Option<i64>,
     company_id: Option<i64>,
     person_id: Option<i64>,
     reminder_date: String,
-    title: Option<String>,
-    message: Option<String>,
+    title: &str,
+    message: Option<&str>,
     is_completed: bool,
 ) -> JsonResult {
-    // Parse date string into NaiveDate
     let parsed_date = match NaiveDate::parse_from_str(&reminder_date, "%Y-%m-%d") {
         Ok(date) => date,
         Err(_) => {
@@ -35,14 +34,14 @@ pub async fn create_reminder_command(
     reminder_service::create_reminder_service(
         &pool,
         application_id,
-        contact_id,
+        interaction_id,
         note_id,
         job_listing_id,
         company_id,
         person_id,
         &parsed_date,
-        title.as_deref(),
-        message.as_deref(),
+        title,
+        message,
         is_completed,
     )
     .await
@@ -72,7 +71,7 @@ pub async fn update_reminder_command(
     pool: tauri::State<'_, SqlitePool>,
     id: i64,
     application_id: Option<i64>,
-    contact_id: Option<i64>,
+    interaction_id: Option<i64>,
     note_id: Option<i64>,
     job_listing_id: Option<i64>,
     company_id: Option<i64>,
@@ -82,7 +81,6 @@ pub async fn update_reminder_command(
     message: Option<String>,
     is_completed: Option<bool>,
 ) -> JsonResult {
-    // Parse optional date
     let parsed_date = match reminder_date {
         Some(ref d) => match NaiveDate::parse_from_str(d, "%Y-%m-%d") {
             Ok(date) => Some(date),
@@ -101,7 +99,7 @@ pub async fn update_reminder_command(
         &pool,
         &id,
         application_id,
-        contact_id,
+        interaction_id,
         note_id,
         job_listing_id,
         company_id,

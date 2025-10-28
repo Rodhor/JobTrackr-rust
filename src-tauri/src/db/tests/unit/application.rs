@@ -21,8 +21,6 @@ mod tests {
             Some(1),
             Some(&Stage::Applied),
             &today,
-            Some("/tmp/cv.pdf"),
-            Some("/tmp/cover.pdf"),
             Some("Initial note"),
         )
         .await
@@ -31,11 +29,6 @@ mod tests {
         assert_eq!(created.job_listing_id, Some(1));
         assert_eq!(created.stage, Some(Stage::Applied));
         assert_eq!(created.applied_date, today);
-        assert_eq!(created.cv_file_path.as_deref(), Some("/tmp/cv.pdf"));
-        assert_eq!(
-            created.cover_letter_file_path.as_deref(),
-            Some("/tmp/cover.pdf")
-        );
         assert_eq!(created.application_notes.as_deref(), Some("Initial note"));
 
         // ======================================================
@@ -59,8 +52,6 @@ mod tests {
             Some(1),
             Some(&Stage::Interviewing),
             Some(&new_date),
-            Some("/tmp/new_cv.pdf"),
-            Some("/tmp/new_cover.pdf"),
             Some("Updated note"),
         )
         .await
@@ -68,11 +59,6 @@ mod tests {
 
         assert_eq!(updated.stage, Some(Stage::Interviewing));
         assert_eq!(updated.applied_date, new_date);
-        assert_eq!(updated.cv_file_path.as_deref(), Some("/tmp/new_cv.pdf"));
-        assert_eq!(
-            updated.cover_letter_file_path.as_deref(),
-            Some("/tmp/new_cover.pdf")
-        );
         assert_eq!(updated.application_notes.as_deref(), Some("Updated note"));
 
         // ======================================================

@@ -10,8 +10,6 @@ pub async fn create_application_command(
     job_listing_id: Option<i64>,
     stage: Option<Stage>,
     applied_date: String,
-    cv_file_path: Option<String>,
-    cover_letter_file_path: Option<String>,
     application_notes: Option<String>,
 ) -> JsonResult {
     let parsed_date = match NaiveDate::parse_from_str(&applied_date, "%Y-%m-%d") {
@@ -30,8 +28,6 @@ pub async fn create_application_command(
         job_listing_id,
         stage.as_ref(),
         &parsed_date,
-        cv_file_path.as_deref(),
-        cover_letter_file_path.as_deref(),
         application_notes.as_deref(),
     )
     .await
@@ -44,8 +40,6 @@ pub async fn update_application_command(
     job_listing_id: Option<i64>,
     stage: Option<Stage>,
     applied_date: Option<String>,
-    cv_file_path: Option<String>,
-    cover_letter_file_path: Option<String>,
     application_notes: Option<String>,
 ) -> JsonResult {
     let parsed_date = match applied_date {
@@ -68,8 +62,6 @@ pub async fn update_application_command(
         job_listing_id,
         stage.as_ref(),
         parsed_date.as_ref(),
-        cv_file_path.as_deref(),
-        cover_letter_file_path.as_deref(),
         application_notes.as_deref(),
     )
     .await

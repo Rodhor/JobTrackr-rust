@@ -69,8 +69,8 @@ pub async fn create_job_listing(
             currency AS "currency: Currency",
             description,
             url,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         "#,
         company_id,
         title,
@@ -93,7 +93,7 @@ pub async fn create_job_listing(
 // Get by ID
 // ======================================================
 pub async fn get_job_listing_by_id(pool: &SqlitePool, id: i64) -> Result<JobListing, Error> {
-    let job_listing = query_as!(
+    query_as!(
         JobListing,
         r#"
         SELECT
@@ -108,24 +108,22 @@ pub async fn get_job_listing_by_id(pool: &SqlitePool, id: i64) -> Result<JobList
             currency AS "currency: Currency",
             description,
             url,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         FROM job_listing
         WHERE id = ?
         "#,
         id
     )
     .fetch_one(pool)
-    .await?;
-
-    Ok(job_listing)
+    .await
 }
 
 // ======================================================
 // Get all
 // ======================================================
 pub async fn get_all_job_listings(pool: &SqlitePool) -> Result<Vec<JobListing>, Error> {
-    let listings = query_as!(
+    query_as!(
         JobListing,
         r#"
         SELECT
@@ -140,16 +138,14 @@ pub async fn get_all_job_listings(pool: &SqlitePool) -> Result<Vec<JobListing>, 
             currency AS "currency: Currency",
             description,
             url,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         FROM job_listing
         ORDER BY created_at DESC
         "#
     )
     .fetch_all(pool)
-    .await?;
-
-    Ok(listings)
+    .await
 }
 
 // ======================================================
@@ -159,7 +155,7 @@ pub async fn get_job_listings_by_company_id(
     pool: &SqlitePool,
     company_id: i64,
 ) -> Result<Vec<JobListing>, Error> {
-    let listings = query_as!(
+    query_as!(
         JobListing,
         r#"
         SELECT
@@ -174,8 +170,8 @@ pub async fn get_job_listings_by_company_id(
             currency AS "currency: Currency",
             description,
             url,
-            created_at,
-            updated_at
+            created_at AS "created_at!: NaiveDateTime",
+            updated_at AS "updated_at!: NaiveDateTime"
         FROM job_listing
         WHERE company_id = ?
         ORDER BY created_at DESC
@@ -183,9 +179,7 @@ pub async fn get_job_listings_by_company_id(
         company_id
     )
     .fetch_all(pool)
-    .await?;
-
-    Ok(listings)
+    .await
 }
 
 // ======================================================
@@ -233,8 +227,7 @@ pub async fn update_job_listing(
         query = query.bind(val);
     }
 
-    let job_listing = query.fetch_one(pool).await?;
-    Ok(job_listing)
+    query.fetch_one(pool).await
 }
 
 // ======================================================

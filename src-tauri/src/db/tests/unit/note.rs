@@ -16,23 +16,25 @@ mod tests {
         // ======================================================
         let created = create_note(
             &pool,
-            Some(1), // contact_id from seed
+            Some(1), // interaction_id from seed
             Some(1), // job_listing_id from seed
             Some(1), // application_id from seed
             Some(1), // person_id from seed
             Some(1), // company_id from seed
             Some(&NoteType::General),
+            Some("Initial note title"),
             Some("Initial note content"),
         )
         .await
         .expect("failed to create note");
 
-        assert_eq!(created.contact_id, Some(1));
+        assert_eq!(created.interaction_id, Some(1));
         assert_eq!(created.job_listing_id, Some(1));
         assert_eq!(created.application_id, Some(1));
         assert_eq!(created.person_id, Some(1));
         assert_eq!(created.company_id, Some(1));
         assert_eq!(created.note_type, Some(NoteType::General));
+        assert_eq!(created.title.as_deref(), Some("Initial note title"));
         assert_eq!(created.content.as_deref(), Some("Initial note content"));
 
         // ======================================================
@@ -45,6 +47,7 @@ mod tests {
         assert_eq!(fetched.id, created.id);
         assert_eq!(fetched.note_type, Some(NoteType::General));
         assert_eq!(fetched.content.as_deref(), Some("Initial note content"));
+        assert_eq!(fetched.title.as_deref(), Some("Initial note title"));
 
         // ======================================================
         // Update
@@ -58,6 +61,7 @@ mod tests {
             Some(1),
             Some(1),
             Some(&NoteType::Feedback),
+            Some("Updated title"),
             Some("Updated content"),
         )
         .await
@@ -65,6 +69,7 @@ mod tests {
 
         assert_eq!(updated.id, created.id);
         assert_eq!(updated.note_type, Some(NoteType::Feedback));
+        assert_eq!(updated.title.as_deref(), Some("Updated title"));
         assert_eq!(updated.content.as_deref(), Some("Updated content"));
 
         // ======================================================
@@ -82,12 +87,12 @@ mod tests {
         assert!(by_app.iter().any(|n| n.id == updated.id));
 
         // ======================================================
-        // Get by Contact ID
+        // Get by Interaction ID
         // ======================================================
-        let by_contact = get_notes_by_contact_id(&pool, 1)
+        let by_interaction = get_notes_by_interaction_id(&pool, 1)
             .await
-            .expect("failed to get notes by contact");
-        assert!(by_contact.iter().any(|n| n.id == updated.id));
+            .expect("failed to get notes by interaction");
+        assert!(by_interaction.iter().any(|n| n.id == updated.id));
 
         // ======================================================
         // Delete

@@ -9,27 +9,29 @@ use sqlx::SqlitePool;
 // ======================================================
 pub async fn create_note_service(
     pool: &SqlitePool,
-    contact_id: Option<i64>,
+    interaction_id: Option<i64>,
     job_listing_id: Option<i64>,
     application_id: Option<i64>,
     person_id: Option<i64>,
     company_id: Option<i64>,
     note_type: Option<&NoteType>,
+    title: Option<&str>,
     content: Option<&str>,
 ) -> JsonResult {
     info!(
-        "Creating note (contact_id={:?}, job_listing_id={:?}, application_id={:?})",
-        contact_id, job_listing_id, application_id
+        "Creating note (interaction_id={:?}, job_listing_id={:?}, application_id={:?})",
+        interaction_id, job_listing_id, application_id
     );
 
     let result = note::create_note(
         pool,
-        contact_id,
+        interaction_id,
         job_listing_id,
         application_id,
         person_id,
         company_id,
         note_type,
+        title,
         content,
     )
     .await;
@@ -118,12 +120,13 @@ pub async fn get_all_notes_service(pool: &SqlitePool) -> JsonResult {
 pub async fn update_note_service(
     pool: &SqlitePool,
     id: &i64,
-    contact_id: Option<i64>,
+    interaction_id: Option<i64>,
     job_listing_id: Option<i64>,
     application_id: Option<i64>,
     person_id: Option<i64>,
     company_id: Option<i64>,
     note_type: Option<&NoteType>,
+    title: Option<&str>,
     content: Option<&str>,
 ) -> JsonResult {
     info!("Updating note ID: {}", id);
@@ -131,12 +134,13 @@ pub async fn update_note_service(
     let result = note::update_note(
         pool,
         *id,
-        contact_id,
+        interaction_id,
         job_listing_id,
         application_id,
         person_id,
         company_id,
         note_type,
+        title,
         content,
     )
     .await;
