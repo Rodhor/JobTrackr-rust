@@ -1,10 +1,10 @@
-import type { Currency, DefaultWorkType, SeniorityLevel } from "./enums";
+import type { WorkType, SeniorityLevel, Currency } from "./enums";
 
 export interface JobListing {
   id: number;
   companyId: number;
   title: string;
-  workType?: DefaultWorkType;
+  workType?: WorkType;
   category?: string;
   seniorityLevel?: SeniorityLevel;
   salaryMin?: number;

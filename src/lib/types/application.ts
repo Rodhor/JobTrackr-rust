@@ -5,8 +5,6 @@ export interface Application {
   jobListingId?: number;
   stage: Stage;
   appliedDate: string;
-  cvFilePath?: string;
-  coverLetterFilePath?: string;
   applicationNotes?: string;
   createdAt: string;
   updatedAt: string;

@@ -2,13 +2,14 @@ import type { NoteType } from "./enums";
 
 export interface Note {
   id: number;
-  contactId?: number;
+  interactionId?: number;
   jobListingId?: number;
   applicationId?: number;
   personId?: number;
   companyId?: number;
   noteType?: NoteType;
+  title?: string;
   content?: string;
-  createAt: string;
+  createdAt: string;
   updatedAt: string;
 }

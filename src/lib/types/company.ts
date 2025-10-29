@@ -1,4 +1,4 @@
-import type { DefaultWorkType } from "./enums";
+import type { WorkType } from "./enums";
 
 export interface Company {
   id: number;
@@ -7,7 +7,7 @@ export interface Company {
   zipCode?: string;
   city?: string;
   country?: string;
-  defaultWorkType?: DefaultWorkType;
+  defaultWorkType?: WorkType;
   industry?: string;
   website?: string;
   phoneNumber?: string;

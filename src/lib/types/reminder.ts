@@ -1,15 +1,15 @@
 export interface Reminder {
   id: number;
-  contactId?: number;
-  jobListingId?: number;
-  applicationId?: number;
-  personId?: number;
-  companyId?: number;
-  noteId: number;
-  reminderDate?: string;
-  title?: string;
+  title: string;
   message?: string;
-  isCompleted?: Boolean;
-  createAt: string;
+  reminderDate: string;
+  isCompleted: boolean;
+  applicationId?: number;
+  jobListingId?: number;
+  interactionId?: number;
+  noteId?: number;
+  companyId?: number;
+  personId?: number;
+  createdAt: string;
   updatedAt: string;
 }

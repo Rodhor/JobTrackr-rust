@@ -1,4 +1,4 @@
-import type { Role } from "$lib/types/enums";
+import type { Role } from "./enums";
 
 export interface Person {
   id: number;
