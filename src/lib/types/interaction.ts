@@ -1,7 +1,7 @@
+import type { BaseEntity } from "./baseType";
 import type { InteractionType } from "./enums";
 
-export interface Interaction {
-  id: number;
+export interface Interaction extends BaseEntity {
   interactionType: InteractionType;
   interactionDate: string;
   subject?: string;
@@ -10,6 +10,4 @@ export interface Interaction {
   applicationId?: number;
   personId?: number;
   companyId?: number;
-  createdAt: string;
-  updatedAt: string;
 }

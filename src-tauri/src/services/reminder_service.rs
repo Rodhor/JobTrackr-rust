@@ -1,8 +1,22 @@
 use crate::db::queries::reminder;
 use crate::logger::*;
 use crate::services::service_types::JsonResult;
+use crate::services::service_utils::add_display_label;
 use chrono::NaiveDate;
+use serde_json::{json, Value};
 use sqlx::SqlitePool;
+
+// ======================================================
+// Helper: Format display label for reminder
+// ======================================================
+fn format_reminder_label(title: &str, id: i64) -> String {
+    let t = title.trim();
+    if !t.is_empty() {
+        t.to_string()
+    } else {
+        format!("Reminder ID: {}", id)
+    }
+}
 
 // ======================================================
 // Create Reminder
@@ -40,18 +54,21 @@ pub async fn create_reminder_service(
     match result {
         Ok(record) => {
             info!("Reminder created successfully. ID: {}", record.id);
-            let json = serde_json::json!({
+
+            let display_label = Some(format_reminder_label(&record.title, record.id));
+            let data = add_display_label(&record, display_label);
+
+            let json = json!({
                 "status": "success",
-                "message": format!(
-                    "Reminder '{}' created successfully.",record.id
-                ),
-                "data": record
+                "message": format!("Reminder '{}' created successfully.", record.title),
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error creating reminder: {}", e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to create reminder: {}", e)
             });
@@ -71,16 +88,21 @@ pub async fn get_reminder_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResu
     match result {
         Ok(record) => {
             info!("Reminder retrieved successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let display_label = Some(format_reminder_label(&record.title, record.id));
+            let data = add_display_label(&record, display_label);
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Reminder {} retrieved successfully.", id),
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error retrieving reminder {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to retrieve reminder {}: {}", id, e)
             });
@@ -103,16 +125,26 @@ pub async fn get_all_reminders_service(pool: &SqlitePool) -> JsonResult {
                 "Reminders retrieved successfully ({} total).",
                 records.len()
             );
-            let json = serde_json::json!({
+
+            let data: Vec<Value> = records
+                .into_iter()
+                .map(|r| {
+                    let display_label = Some(format_reminder_label(&r.title, r.id));
+                    add_display_label(&r, display_label)
+                })
+                .collect();
+
+            let json = json!({
                 "status": "success",
                 "message": "All reminders retrieved successfully.",
-                "data": records
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error retrieving reminders: {}", e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to retrieve reminders: {}", e)
             });
@@ -159,16 +191,21 @@ pub async fn update_reminder_service(
     match result {
         Ok(record) => {
             info!("Reminder updated successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let display_label = Some(format_reminder_label(&record.title, record.id));
+            let data = add_display_label(&record, display_label);
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Reminder {} updated successfully.", id),
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error updating reminder {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to update reminder {}: {}", id, e)
             });
@@ -188,7 +225,7 @@ pub async fn delete_reminder_service(pool: &SqlitePool, id: &i64) -> JsonResult 
     match result {
         Ok(_) => {
             info!("Reminder deleted successfully. ID: {}", id);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "success",
                 "message": format!("Reminder {} deleted successfully.", id)
             });
@@ -196,7 +233,7 @@ pub async fn delete_reminder_service(pool: &SqlitePool, id: &i64) -> JsonResult 
         }
         Err(e) => {
             error!("Error deleting reminder {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to delete reminder {}: {}", id, e)
             });

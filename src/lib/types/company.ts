@@ -1,7 +1,7 @@
+import type { BaseEntity } from "./baseType";
 import type { WorkType } from "./enums";
 
-export interface Company {
-  id: number;
+export interface Company extends BaseEntity {
   name: string;
   streetAddress?: string;
   zipCode?: string;
@@ -11,6 +11,4 @@ export interface Company {
   industry?: string;
   website?: string;
   phoneNumber?: string;
-  createdAt: string;
-  updatedAt: string;
 }

@@ -1,7 +1,7 @@
+import type { BaseEntity } from "./baseType";
 import type { Role } from "./enums";
 
-export interface Person {
-  id: number;
+export interface Person extends BaseEntity {
   firstName: string;
   lastName: string;
   email?: string;
@@ -9,6 +9,4 @@ export interface Person {
   role?: Role;
   linkedinUrl?: string;
   companyId?: number;
-  createdAt: string;
-  updatedAt: string;
 }

@@ -2,6 +2,8 @@ use crate::db::models::enums::WorkType;
 use crate::db::queries::company;
 use crate::logger::*;
 use crate::services::service_types::JsonResult;
+use crate::services::service_utils::add_display_label;
+use serde_json::{json, Value};
 use sqlx::SqlitePool;
 
 // ======================================================
@@ -38,16 +40,20 @@ pub async fn create_company_service(
     match result {
         Ok(record) => {
             info!("Company created successfully. ID: {}", record.id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, Some(record.name.as_str()));
+
+            let json = json!({
                 "status": "success",
-                "message": format!("Company '{}' created successfully.", name),
-                "data": record
+                "message": format!("Company '{}' created successfully.", record.name),
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error creating company '{}': {}", name, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to create company '{}': {}", name, e)
             });
@@ -67,16 +73,20 @@ pub async fn get_company_by_id_service(pool: &SqlitePool, id: &i64) -> JsonResul
     match result {
         Ok(record) => {
             info!("Company retrieved successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, Some(record.name.as_str()));
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Company {} retrieved successfully.", id),
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error retrieving company {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to retrieve company {}: {}", id, e)
             });
@@ -99,16 +109,23 @@ pub async fn get_all_companies_service(pool: &SqlitePool) -> JsonResult {
                 "Companies retrieved successfully ({} total).",
                 records.len()
             );
-            let json = serde_json::json!({
+
+            let data: Vec<Value> = records
+                .into_iter()
+                .map(|r| add_display_label(&r, Some(r.name.as_str())))
+                .collect();
+
+            let json = json!({
                 "status": "success",
                 "message": "All companies retrieved successfully.",
-                "data": records
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error retrieving companies: {}", e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to retrieve companies: {}", e)
             });
@@ -153,16 +170,20 @@ pub async fn update_company_service(
     match result {
         Ok(record) => {
             info!("Company updated successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, Some(record.name.as_str()));
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Company {} updated successfully.", id),
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error updating company {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to update company {}: {}", id, e)
             });
@@ -182,18 +203,22 @@ pub async fn delete_company_service(pool: &SqlitePool, id: &i64) -> JsonResult {
     match result {
         Ok(_) => {
             info!("Company deleted successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Company {} deleted successfully.", id)
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error deleting company {}: {}", id, e);
-            let json = serde_json::json!({
+
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to delete company {}: {}", id, e)
             });
+
             Err(json.to_string())
         }
     }

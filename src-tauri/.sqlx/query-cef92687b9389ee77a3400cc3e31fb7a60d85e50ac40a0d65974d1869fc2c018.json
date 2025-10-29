@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT title FROM job_listing WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "title",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "cef92687b9389ee77a3400cc3e31fb7a60d85e50ac40a0d65974d1869fc2c018"
+}

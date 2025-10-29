@@ -1,5 +1,6 @@
-export interface Reminder {
-  id: number;
+import type { BaseEntity } from "./baseType";
+
+export interface Reminder extends BaseEntity {
   title: string;
   message?: string;
   reminderDate: string;
@@ -10,6 +11,4 @@ export interface Reminder {
   noteId?: number;
   companyId?: number;
   personId?: number;
-  createdAt: string;
-  updatedAt: string;
 }

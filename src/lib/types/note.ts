@@ -1,7 +1,7 @@
+import type { BaseEntity } from "./baseType";
 import type { NoteType } from "./enums";
 
-export interface Note {
-  id: number;
+export interface Note extends BaseEntity {
   interactionId?: number;
   jobListingId?: number;
   applicationId?: number;
@@ -10,6 +10,4 @@ export interface Note {
   noteType?: NoteType;
   title?: string;
   content?: string;
-  createdAt: string;
-  updatedAt: string;
 }

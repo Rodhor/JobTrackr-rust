@@ -2,7 +2,9 @@ use crate::db::models::enums::InteractionType;
 use crate::db::queries::interaction;
 use crate::logger::*;
 use crate::services::service_types::JsonResult;
+use crate::services::service_utils::add_display_label;
 use chrono::NaiveDate;
+use serde_json::{json, Value};
 use sqlx::SqlitePool;
 
 // ======================================================
@@ -40,16 +42,20 @@ pub async fn create_interaction_service(
     match result {
         Ok(record) => {
             info!("Interaction created successfully. ID: {}", record.id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, record.summary.as_deref());
+
+            let json = json!({
                 "status": "success",
                 "message": "Interaction created successfully.",
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error creating interaction: {}", e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to create interaction: {}", e)
             });
@@ -69,16 +75,20 @@ pub async fn get_interaction_by_id_service(pool: &SqlitePool, id: &i64) -> JsonR
     match result {
         Ok(record) => {
             info!("Interaction retrieved successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, record.summary.as_deref());
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Interaction {} retrieved successfully.", id),
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error retrieving interaction {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to retrieve interaction {}: {}", id, e)
             });
@@ -101,16 +111,23 @@ pub async fn get_all_interactions_service(pool: &SqlitePool) -> JsonResult {
                 "Interactions retrieved successfully ({} total).",
                 records.len()
             );
-            let json = serde_json::json!({
+
+            let data: Vec<Value> = records
+                .into_iter()
+                .map(|r| add_display_label(&r, r.summary.as_deref()))
+                .collect();
+
+            let json = json!({
                 "status": "success",
                 "message": "All interactions retrieved successfully.",
-                "data": records
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error retrieving interactions: {}", e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to retrieve interactions: {}", e)
             });
@@ -153,16 +170,20 @@ pub async fn update_interaction_service(
     match result {
         Ok(record) => {
             info!("Interaction updated successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, record.summary.as_deref());
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Interaction {} updated successfully.", id),
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error updating interaction {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to update interaction {}: {}", id, e)
             });
@@ -182,18 +203,22 @@ pub async fn delete_interaction_service(pool: &SqlitePool, id: &i64) -> JsonResu
     match result {
         Ok(_) => {
             info!("Interaction deleted successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Interaction {} deleted successfully.", id)
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error deleting interaction {}: {}", id, e);
-            let json = serde_json::json!({
+
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to delete interaction {}: {}", id, e)
             });
+
             Err(json.to_string())
         }
     }

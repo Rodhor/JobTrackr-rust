@@ -1,7 +1,7 @@
+import type { BaseEntity } from "./baseType";
 import type { WorkType, SeniorityLevel, Currency } from "./enums";
 
-export interface JobListing {
-  id: number;
+export interface JobListing extends BaseEntity {
   companyId: number;
   title: string;
   workType?: WorkType;
@@ -12,6 +12,4 @@ export interface JobListing {
   currency?: Currency;
   description?: string;
   url?: string;
-  createdAt: string;
-  updatedAt: string;
 }

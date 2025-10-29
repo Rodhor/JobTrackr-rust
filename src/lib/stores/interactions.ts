@@ -1,23 +1,23 @@
 import { writable } from "svelte/store";
 import { invoke } from "@tauri-apps/api/core";
-import type { Contact } from "$lib/types/contact";
+import type { Interaction } from "$lib/types/interaction";
 import type { BackendResponse } from "$lib/types/backendResponse";
 
 /**
  * ---------------------------------------------------------------------
- * Reactive contact list store
+ * Reactive interaction list store
  * ---------------------------------------------------------------------
  */
-export const contacts = writable<Contact[]>([]);
+export const contacts = writable<Interaction[]>([]);
 
 /**
  * ---------------------------------------------------------------------
- * Load all contacts from backend
+ * Load all interactions from backend
  * ---------------------------------------------------------------------
  */
-export async function loadContacts() {
-  const raw = await invoke<string>("get_all_contacts_command");
-  const res = JSON.parse(raw) as BackendResponse<Contact[]>;
+export async function loadInteractions() {
+  const raw = await invoke<string>("get_all_interactions_command");
+  const res = JSON.parse(raw) as BackendResponse<Interaction[]>;
 
   if (res.status === "success" && res.data) {
     contacts.set(res.data);
@@ -28,14 +28,14 @@ export async function loadContacts() {
 
 /**
  * ---------------------------------------------------------------------
- * Create a new contact
+ * Create a new interaction
  * ---------------------------------------------------------------------
  */
-export async function createContact(
-  payload: Omit<Contact, "id" | "createdAt" | "updatedAt">,
+export async function createInteraction(
+  payload: Omit<Interaction, "id" | "createdAt" | "updatedAt">,
 ) {
-  const raw = await invoke<string>("create_contact_command", payload);
-  const res = JSON.parse(raw) as BackendResponse<Contact>;
+  const raw = await invoke<string>("create_interaction_command", payload);
+  const res = JSON.parse(raw) as BackendResponse<Interaction>;
 
   if (res.status === "success" && res.data) {
     contacts.update((list) => [...list, res.data!]);
@@ -46,15 +46,18 @@ export async function createContact(
 
 /**
  * ---------------------------------------------------------------------
- * Update existing contact
+ * Update existing interaction
  * ---------------------------------------------------------------------
  */
-export async function updateContact(id: number, updates: Partial<Contact>) {
-  const raw = await invoke<string>("update_contact_command", {
+export async function updateInteraction(
+  id: number,
+  updates: Partial<Interaction>,
+) {
+  const raw = await invoke<string>("update_interaction_command", {
     id,
     ...updates,
   });
-  const res = JSON.parse(raw) as BackendResponse<Contact>;
+  const res = JSON.parse(raw) as BackendResponse<Interaction>;
 
   if (res.status === "success" && res.data) {
     contacts.update((list) => list.map((c) => (c.id === id ? res.data! : c)));
@@ -65,11 +68,11 @@ export async function updateContact(id: number, updates: Partial<Contact>) {
 
 /**
  * ---------------------------------------------------------------------
- * Delete contact
+ * Delete interaction
  * ---------------------------------------------------------------------
  */
-export async function deleteContact(id: number) {
-  const raw = await invoke<string>("delete_contact_command", { id });
+export async function deleteInteraction(id: number) {
+  const raw = await invoke<string>("delete_interaction_command", { id });
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {

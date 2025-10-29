@@ -2,6 +2,8 @@ use crate::db::models::enums::{Currency, SeniorityLevel, WorkType};
 use crate::db::queries::job_listing;
 use crate::logger::*;
 use crate::services::service_types::JsonResult;
+use crate::services::service_utils::add_display_label;
+use serde_json::{json, Value};
 use sqlx::SqlitePool;
 
 // ======================================================
@@ -40,16 +42,20 @@ pub async fn create_job_listing_service(
     match result {
         Ok(record) => {
             info!("Job listing created successfully. ID: {}", record.id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, Some(record.title.as_str()));
+
+            let json = json!({
                 "status": "success",
-                "message": format!("Job listing '{}' created successfully.", title),
-                "data": record
+                "message": format!("Job listing '{}' created successfully.", record.title),
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error creating job listing '{}': {}", title, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to create job listing '{}': {}", title, e)
             });
@@ -69,16 +75,20 @@ pub async fn get_job_listing_by_id_service(pool: &SqlitePool, id: &i64) -> JsonR
     match result {
         Ok(record) => {
             info!("Job listing retrieved successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, Some(record.title.as_str()));
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Job listing {} retrieved successfully.", id),
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error retrieving job listing {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to retrieve job listing {}: {}", id, e)
             });
@@ -101,16 +111,23 @@ pub async fn get_all_job_listings_service(pool: &SqlitePool) -> JsonResult {
                 "Job listings retrieved successfully ({} total).",
                 records.len()
             );
-            let json = serde_json::json!({
+
+            let data: Vec<Value> = records
+                .into_iter()
+                .map(|r| add_display_label(&r, Some(r.title.as_str())))
+                .collect();
+
+            let json = json!({
                 "status": "success",
                 "message": "All job listings retrieved successfully.",
-                "data": records
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error retrieving job listings: {}", e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to retrieve job listings: {}", e)
             });
@@ -157,16 +174,20 @@ pub async fn update_job_listing_service(
     match result {
         Ok(record) => {
             info!("Job listing updated successfully. ID: {}", id);
-            let json = serde_json::json!({
+
+            let data = add_display_label(&record, Some(record.title.as_str()));
+
+            let json = json!({
                 "status": "success",
                 "message": format!("Job listing {} updated successfully.", id),
-                "data": record
+                "data": data
             });
+
             Ok(json.to_string())
         }
         Err(e) => {
             error!("Error updating job listing {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to update job listing {}: {}", id, e)
             });
@@ -186,7 +207,7 @@ pub async fn delete_job_listing_service(pool: &SqlitePool, id: &i64) -> JsonResu
     match result {
         Ok(_) => {
             info!("Job listing deleted successfully. ID: {}", id);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "success",
                 "message": format!("Job listing {} deleted successfully.", id)
             });
@@ -194,7 +215,7 @@ pub async fn delete_job_listing_service(pool: &SqlitePool, id: &i64) -> JsonResu
         }
         Err(e) => {
             error!("Error deleting job listing {}: {}", id, e);
-            let json = serde_json::json!({
+            let json = json!({
                 "status": "error",
                 "message": format!("Failed to delete job listing {}: {}", id, e)
             });
