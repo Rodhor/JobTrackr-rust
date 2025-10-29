@@ -66,3 +66,22 @@ pub async fn update_application_command(
     )
     .await
 }
+
+// ======================================================
+// Get Application by ID Command
+// ======================================================
+#[tauri::command]
+pub async fn get_application_by_id_command(
+    pool: tauri::State<'_, SqlitePool>,
+    id: i64,
+) -> JsonResult {
+    application_service::get_application_by_id_service(&pool, &id).await
+}
+
+// ======================================================
+// Get All applications Command
+// ======================================================
+#[tauri::command]
+pub async fn get_all_applications_command(pool: tauri::State<'_, SqlitePool>) -> JsonResult {
+    application_service::get_all_applications_service(&pool).await
+}
