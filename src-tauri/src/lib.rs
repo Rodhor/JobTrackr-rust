@@ -47,6 +47,7 @@ pub async fn run() {
             update_application_command,
             get_application_by_id_command,
             get_all_applications_command,
+            delete_application_command,
             // ===============================
             // Companies
             // ===============================

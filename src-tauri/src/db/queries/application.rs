@@ -5,6 +5,7 @@ use serde::Serialize;
 use sqlx::{query_as, Error, FromRow, SqlitePool};
 
 #[derive(FromRow, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Application {
     pub id: i64,
     pub job_listing_id: Option<i64>,

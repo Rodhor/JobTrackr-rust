@@ -4,6 +4,7 @@ use serde::Serialize;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
 #[derive(FromRow, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Reminder {
     pub id: i64,
     pub application_id: Option<i64>,

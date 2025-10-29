@@ -85,3 +85,11 @@ pub async fn get_application_by_id_command(
 pub async fn get_all_applications_command(pool: tauri::State<'_, SqlitePool>) -> JsonResult {
     application_service::get_all_applications_service(&pool).await
 }
+
+// ======================================================
+// Delete Application Command
+// ======================================================
+#[tauri::command]
+pub async fn delete_application_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
+    application_service::delete_application_service(&pool, &id).await
+}

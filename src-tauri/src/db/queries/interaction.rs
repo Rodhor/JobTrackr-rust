@@ -5,6 +5,7 @@ use serde::Serialize;
 use sqlx::{query, query_as, Error, FromRow, SqlitePool};
 
 #[derive(FromRow, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Interaction {
     pub id: i64,
     pub interaction_type: InteractionType,
