@@ -15,6 +15,7 @@
         WorkTypeDisplay,
         SeniorityLevelDisplay,
     } from "$lib/types/enums";
+    import { companies } from "$lib/stores/companies";
 
     // ----------------------------------------------------------
     // State
@@ -78,10 +79,21 @@
 
 <!-- ----------------------------------------------------------
 Header
------------------------------------------------------------ -->
+<!-- ----------------------------------------------------------- -->
 <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-semibold tracking-tight">Job Listings</h1>
-    <Button onclick={handleCreate}>New Listing</Button>
+    <h1 class="text-2xl font-semibold tracking-tight">Listings</h1>
+
+    {#if $companies.length === 0}
+        <Button
+            disabled
+            variant="secondary"
+            title="Add a company before creating applications."
+        >
+            Add a company first
+        </Button>
+    {:else}
+        <Button onclick={handleCreate}>New Listing</Button>
+    {/if}
 </div>
 
 <JobListingDialog
