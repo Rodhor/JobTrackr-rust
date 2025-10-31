@@ -82,3 +82,30 @@ pub async fn update_interaction_command(
     )
     .await
 }
+
+// ======================================================
+// Get Interaction by ID Command
+// ======================================================
+#[tauri::command]
+pub async fn get_interaction_by_id_command(
+    pool: tauri::State<'_, SqlitePool>,
+    id: i64,
+) -> JsonResult {
+    interaction_service::get_interaction_by_id_service(&pool, &id).await
+}
+
+// ======================================================
+// Get All interactions Command
+// ======================================================
+#[tauri::command]
+pub async fn get_all_interactions_command(pool: tauri::State<'_, SqlitePool>) -> JsonResult {
+    interaction_service::get_all_interactions_service(&pool).await
+}
+
+// ======================================================
+// Delete interactions Command
+// ======================================================
+#[tauri::command]
+pub async fn delete_interaction_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
+    interaction_service::delete_interaction_service(&pool, &id).await
+}

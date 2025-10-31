@@ -61,6 +61,9 @@ pub async fn run() {
             // ===============================
             create_interaction_command,
             update_interaction_command,
+            get_all_interactions_command,
+            get_interaction_by_id_command,
+            delete_interaction_command,
             // ===============================
             // Job Listings
             // ===============================
