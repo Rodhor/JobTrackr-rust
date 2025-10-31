@@ -1,0 +1,38 @@
+name: Build JobTrackr (Tauri)
+
+on:
+  push:
+    tags:
+      - "v*" # Runs when you push a tag like v0.1.0
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        with:
+          tagName: v__VERSION__ # auto from git tag
+          releaseName: "JobTrackr v__VERSION__"
+          releaseBody: "Automated Tauri build for JobTrackr."
+          includeDebug: false
+          includeRelease: true
