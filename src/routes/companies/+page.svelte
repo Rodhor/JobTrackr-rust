@@ -1,59 +1,55 @@
 <script lang="ts">
-    import { companies } from "$lib/stores/companies";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import { Badge } from "$lib/components/ui/badge/index.js";
+    import { onMount } from "svelte";
+    import {
+        companies,
+        loadCompanies,
+        deleteCompany,
+    } from "$lib/stores/companies";
+    import { Button } from "$lib/components/ui/button";
+    import { Badge } from "$lib/components/ui/badge";
+    import CompanyDialog from "$lib/components/formDialogs/CompanyDialog.svelte";
     import type { Company } from "$lib/types/company";
+    import { writable } from "svelte/store";
 
     // ----------------------------------------------------------
-    // Mock data (showcase only)
+    // State
     // ----------------------------------------------------------
-    const mockCompanies: Company[] = [
-        {
-            id: 1,
-            name: "TechCorp",
-            city: "Berlin",
-            country: "Germany",
-            industry: "Software Development",
-            website: "https://techcorp.example.com",
-            createdAt: "2025-09-10 08:45:00",
-            updatedAt: "2025-09-25 12:20:00",
-        },
-        {
-            id: 2,
-            name: "InnovaWorks",
-            city: "Copenhagen",
-            country: "Denmark",
-            industry: "Consulting",
-            website: "https://innova.example.com",
-            createdAt: "2025-10-02 10:15:00",
-            updatedAt: "2025-10-22 11:05:00",
-        },
-        {
-            id: 3,
-            name: "DataForge",
-            city: "Munich",
-            country: "Germany",
-            industry: "Data Analytics",
-            website: "https://dataforge.example.com",
-            createdAt: "2025-09-20 09:10:00",
-            updatedAt: "2025-10-10 16:30:00",
-        },
-        {
-            id: 4,
-            name: "FutureLab",
-            city: "Stockholm",
-            country: "Sweden",
-            industry: "Research",
-            website: "https://futurelab.example.com",
-            createdAt: "2025-08-05 13:00:00",
-            updatedAt: "2025-09-01 09:45:00",
-        },
-    ];
+    const dialogOpen = writable(false);
+    const mode = writable<"create" | "edit">("create");
+    const selectedCompany = writable<Company | null>(null);
 
-    $companies = mockCompanies;
+    // ----------------------------------------------------------
+    // Lifecycle
+    // ----------------------------------------------------------
+    onMount(loadCompanies);
+
+    // ----------------------------------------------------------
+    // Handlers
+    // ----------------------------------------------------------
+    function handleCreate() {
+        selectedCompany.set(null);
+        mode.set("create");
+        dialogOpen.set(true);
+    }
+
+    function handleEdit(company: Company) {
+        selectedCompany.set(company);
+        mode.set("edit");
+        dialogOpen.set(true);
+    }
+
+    async function handleDelete(id: number) {
+        try {
+            await deleteCompany(id);
+        } catch (err) {
+            console.error("Failed to delete company:", err);
+        }
+    }
 
     function formatDate(dateStr: string) {
+        if (!dateStr) return "—";
         const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
         return date.toLocaleDateString(undefined, {
             year: "numeric",
             month: "short",
@@ -62,12 +58,24 @@
     }
 </script>
 
-<!-- Header -->
+<!-- ----------------------------------------------------------
+Header
+----------------------------------------------------------- -->
 <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-semibold tracking-tight">Companies</h1>
+    <Button onclick={handleCreate}>New Company</Button>
 </div>
 
-<!-- Table -->
+<!-- Shared Dialog (create/edit) -->
+<CompanyDialog
+    bind:open={$dialogOpen}
+    mode={$mode}
+    existingCompany={$selectedCompany}
+/>
+
+<!-- ----------------------------------------------------------
+Companies Table
+----------------------------------------------------------- -->
 <div
     class="overflow-hidden rounded-lg border border-border bg-background shadow-sm"
 >
@@ -80,6 +88,7 @@
                 <th class="px-4 py-3">City</th>
                 <th class="px-4 py-3">Country</th>
                 <th class="px-4 py-3">Industry</th>
+                <th class="px-4 py-3">Website</th>
                 <th class="px-4 py-3">Last Updated</th>
                 <th class="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -87,19 +96,35 @@
         <tbody>
             {#each $companies as c (c.id)}
                 <tr class="border-t hover:bg-muted/30 transition-colors">
-                    <td class="px-4 py-3 font-medium text-foreground">
-                        {c.name}
-                    </td>
+                    <td class="px-4 py-3 font-medium text-foreground"
+                        >{c.name}</td
+                    >
                     <td class="px-4 py-3">{c.city}</td>
                     <td class="px-4 py-3">{c.country}</td>
                     <td
-                        class="px-4 py-3 truncate max-w-[180px] text-muted-foreground"
+                        class="px-4 py-3 text-muted-foreground truncate max-w-[160px]"
                     >
                         {c.industry || "—"}
                     </td>
+                    <td
+                        class="px-4 py-3 text-blue-600 hover:underline truncate max-w-[200px]"
+                    >
+                        <a href={c.website} target="_blank">{c.website}</a>
+                    </td>
                     <td class="px-4 py-3">{formatDate(c.updatedAt)}</td>
-                    <td class="px-4 py-3 text-right">
-                        <Button size="sm" variant="destructive">Delete</Button>
+                    <td class="px-4 py-3 text-right flex justify-end gap-2">
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onclick={() => handleEdit(c)}>Edit</Button
+                        >
+                        <Button
+                            size="sm"
+                            variant="destructive"
+                            onclick={() => handleDelete(c.id)}
+                        >
+                            Delete
+                        </Button>
                     </td>
                 </tr>
             {/each}
@@ -107,8 +132,8 @@
             {#if $companies.length === 0}
                 <tr>
                     <td
+                        colspan="7"
                         class="px-4 py-10 text-center text-sm text-muted-foreground"
-                        colspan="6"
                     >
                         No companies yet.
                     </td>

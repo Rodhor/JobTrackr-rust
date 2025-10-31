@@ -149,7 +149,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/contacts`}
+                                href={`${base}/interactions`}
                                 class="flex items-center gap-4"
                             >
                                 <PhoneCallIcon class="h-4 w-4" />

@@ -8,7 +8,7 @@ import type { BackendResponse } from "$lib/types/backendResponse";
  * Reactive interaction list store
  * ---------------------------------------------------------------------
  */
-export const contacts = writable<Interaction[]>([]);
+export const interactions = writable<Interaction[]>([]);
 
 /**
  * ---------------------------------------------------------------------
@@ -20,7 +20,7 @@ export async function loadInteractions() {
   const res = JSON.parse(raw) as BackendResponse<Interaction[]>;
 
   if (res.status === "success" && res.data) {
-    contacts.set(res.data);
+    interactions.set(res.data);
   } else {
     console.error(res.message);
   }
@@ -38,7 +38,7 @@ export async function createInteraction(
   const res = JSON.parse(raw) as BackendResponse<Interaction>;
 
   if (res.status === "success" && res.data) {
-    contacts.update((list) => [...list, res.data!]);
+    interactions.update((list) => [...list, res.data!]);
   } else {
     console.error(res.message);
   }
@@ -60,7 +60,9 @@ export async function updateInteraction(
   const res = JSON.parse(raw) as BackendResponse<Interaction>;
 
   if (res.status === "success" && res.data) {
-    contacts.update((list) => list.map((c) => (c.id === id ? res.data! : c)));
+    interactions.update((list) =>
+      list.map((i) => (i.id === id ? res.data! : i)),
+    );
   } else {
     console.error(res.message);
   }
@@ -76,7 +78,7 @@ export async function deleteInteraction(id: number) {
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {
-    contacts.update((list) => list.filter((c) => c.id !== id));
+    interactions.update((list) => list.filter((i) => i.id !== id));
   } else {
     console.error(res.message);
   }

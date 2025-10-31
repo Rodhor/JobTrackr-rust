@@ -50,7 +50,7 @@ export async function createReminder(
  * ---------------------------------------------------------------------
  */
 export async function updateReminder(id: number, updates: Partial<Reminder>) {
-  const raw = await invoke<string>("update_note_command", {
+  const raw = await invoke<string>("update_reminder_command", {
     id,
     ...updates,
   });

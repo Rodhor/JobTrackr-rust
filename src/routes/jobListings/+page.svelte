@@ -1,70 +1,60 @@
 <script lang="ts">
-    import { jobListings } from "$lib/stores/jobListings";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import { Badge } from "$lib/components/ui/badge/index.js";
+    import { onMount } from "svelte";
+    import {
+        jobListings,
+        loadJobListings,
+        deleteJobListing,
+    } from "$lib/stores/jobListings";
+    import { Button } from "$lib/components/ui/button";
+    import { Badge } from "$lib/components/ui/badge";
+    import JobListingDialog from "$lib/components/formDialogs/JobListingDialog.svelte";
     import type { JobListing } from "$lib/types/jobListing";
-    import type {
-        DefaultWorkType,
-        SeniorityLevel,
-        Currency,
+    import { writable } from "svelte/store";
+    import {
+        WorkType,
+        WorkTypeDisplay,
+        SeniorityLevelDisplay,
     } from "$lib/types/enums";
 
     // ----------------------------------------------------------
-    // Mock data (showcase only)
+    // State
     // ----------------------------------------------------------
-    const mockJobListings: JobListing[] = [
-        {
-            id: 1,
-            companyId: 1,
-            title: "Frontend Developer",
-            workType: "remote",
-            category: "Engineering",
-            seniorityLevel: "mid",
-            salaryMin: 50000,
-            salaryMax: 65000,
-            currency: "EUR",
-            description: "Develop and maintain UI components using Svelte.",
-            url: "https://example.com/frontend-job",
-            createdAt: "2025-10-01 09:00:00",
-            updatedAt: "2025-10-15 12:00:00",
-        },
-        {
-            id: 2,
-            companyId: 2,
-            title: "Backend Developer",
-            workType: "hybrid",
-            category: "Software Engineering",
-            seniorityLevel: "senior",
-            salaryMin: 70000,
-            salaryMax: 85000,
-            currency: "EUR",
-            description:
-                "Implement APIs and database logic using Rust and SQLite.",
-            url: "https://example.com/backend-job",
-            createdAt: "2025-09-12 11:00:00",
-            updatedAt: "2025-09-30 10:30:00",
-        },
-        {
-            id: 3,
-            companyId: 3,
-            title: "Data Analyst",
-            workType: "onsite",
-            category: "Analytics",
-            seniorityLevel: "junior",
-            salaryMin: 40000,
-            salaryMax: 48000,
-            currency: "EUR",
-            description: "Analyze recruitment data and create insight reports.",
-            url: "https://example.com/data-analyst",
-            createdAt: "2025-08-05 08:45:00",
-            updatedAt: "2025-08-20 09:20:00",
-        },
-    ];
+    const dialogOpen = writable(false);
+    const mode = writable<"create" | "edit">("create");
+    const selectedJobListing = writable<JobListing | null>(null);
 
-    $jobListings = mockJobListings;
+    // ----------------------------------------------------------
+    // Lifecycle
+    // ----------------------------------------------------------
+    onMount(loadJobListings);
+
+    // ----------------------------------------------------------
+    // Handlers
+    // ----------------------------------------------------------
+    function handleCreate() {
+        selectedJobListing.set(null);
+        mode.set("create");
+        dialogOpen.set(true);
+    }
+
+    function handleEdit(listing: JobListing) {
+        selectedJobListing.set(listing);
+        mode.set("edit");
+        dialogOpen.set(true);
+    }
+
+    async function handleDelete(id: number) {
+        try {
+            await deleteJobListing(id);
+        } catch (err) {
+            console.error("Failed to delete job listing:", err);
+        }
+    }
 
     function formatDate(dateStr: string) {
+        if (!dateStr) return "—";
         const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
         return date.toLocaleDateString(undefined, {
             year: "numeric",
             month: "short",
@@ -72,13 +62,13 @@
         });
     }
 
-    function typeColor(type?: DefaultWorkType) {
+    function typeColor(type?: WorkType) {
         switch (type) {
-            case "remote":
+            case WorkType.Remote:
                 return "bg-blue-100 text-blue-800";
-            case "onsite":
+            case WorkType.InOffice:
                 return "bg-green-100 text-green-800";
-            case "hybrid":
+            case WorkType.Hybrid:
                 return "bg-yellow-100 text-yellow-800";
             default:
                 return "bg-muted text-foreground";
@@ -86,12 +76,23 @@
     }
 </script>
 
-<!-- Header -->
+<!-- ----------------------------------------------------------
+Header
+----------------------------------------------------------- -->
 <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-semibold tracking-tight">Job Listings</h1>
+    <Button onclick={handleCreate}>New Listing</Button>
 </div>
 
-<!-- Table -->
+<JobListingDialog
+    bind:open={$dialogOpen}
+    mode={$mode}
+    existingJobListing={$selectedJobListing}
+/>
+
+<!-- ----------------------------------------------------------
+Table
+----------------------------------------------------------- -->
 <div
     class="overflow-hidden rounded-lg border border-border bg-background shadow-sm"
 >
@@ -108,19 +109,24 @@
                 <th class="px-4 py-3 text-right">Actions</th>
             </tr>
         </thead>
+
         <tbody>
             {#each $jobListings as j (j.id)}
                 <tr class="border-t hover:bg-muted/30 transition-colors">
-                    <td class="px-4 py-3 font-medium text-foreground">
-                        {j.title}
-                    </td>
+                    <td class="px-4 py-3 font-medium text-foreground"
+                        >{j.title}</td
+                    >
                     <td class="px-4 py-3">
-                        <Badge class={typeColor(j.workType)}>
-                            {j.workType || "—"}
+                        <Badge class={typeColor(j.workType as WorkType)}>
+                            {WorkTypeDisplay[j.workType as WorkType] || "—"}
                         </Badge>
                     </td>
-                    <td class="px-4 py-3 capitalize">
-                        {j.seniorityLevel || "—"}
+                    <td class="px-4 py-3">
+                        {#if j.seniorityLevel}
+                            {SeniorityLevelDisplay[j.seniorityLevel]}
+                        {:else}
+                            —
+                        {/if}
                     </td>
                     <td class="px-4 py-3 text-muted-foreground">
                         {#if j.salaryMin && j.salaryMax}
@@ -130,8 +136,21 @@
                         {/if}
                     </td>
                     <td class="px-4 py-3">{formatDate(j.createdAt)}</td>
-                    <td class="px-4 py-3 text-right">
-                        <Button size="sm" variant="destructive">Delete</Button>
+                    <td class="px-4 py-3 text-right flex justify-end gap-2">
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onclick={() => handleEdit(j)}
+                        >
+                            Edit
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="destructive"
+                            onclick={() => handleDelete(j.id)}
+                        >
+                            Delete
+                        </Button>
                     </td>
                 </tr>
             {/each}
@@ -139,8 +158,8 @@
             {#if $jobListings.length === 0}
                 <tr>
                     <td
-                        class="px-4 py-10 text-center text-sm text-muted-foreground"
                         colspan="6"
+                        class="px-4 py-10 text-center text-sm text-muted-foreground"
                     >
                         No job listings yet.
                     </td>
