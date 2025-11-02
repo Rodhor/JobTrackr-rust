@@ -1,111 +1,125 @@
+use crate::command_utils::{parse_optional_date, parse_required_date};
 use crate::db::models::enums::InteractionType;
-use crate::services::interaction_service;
+use crate::services::interaction_service::{
+    create_interaction_service, delete_interaction_service, get_all_interactions_service,
+    get_interaction_by_id_service, update_interaction_service,
+};
 use crate::services::service_types::JsonResult;
-use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::SqlitePool;
 
+#[derive(Deserialize)]
+#[serde(tag = "action", content = "payload")]
+pub enum InteractionCommand {
+    Create {
+        interaction_type: InteractionType,
+        interaction_date: String,
+        subject: Option<String>,
+        summary: Option<String>,
+        medium: Option<String>,
+        application_id: Option<i64>,
+        person_id: Option<i64>,
+        company_id: Option<i64>,
+    },
+    Update {
+        id: i64,
+        interaction_type: Option<InteractionType>,
+        interaction_date: Option<String>,
+        subject: Option<String>,
+        summary: Option<String>,
+        medium: Option<String>,
+        application_id: Option<i64>,
+        person_id: Option<i64>,
+        company_id: Option<i64>,
+    },
+    GetById {
+        id: i64,
+    },
+    ListAll,
+    Delete {
+        id: i64,
+    },
+}
+
 #[tauri::command]
-pub async fn create_interaction_command(
+pub async fn handle_interaction_command(
     pool: tauri::State<'_, SqlitePool>,
-    interaction_type: InteractionType,
-    interaction_date: String,
-    subject: Option<String>,
-    summary: Option<String>,
-    medium: Option<String>,
-    application_id: Option<i64>,
-    person_id: Option<i64>,
-    company_id: Option<i64>,
+    command: InteractionCommand,
 ) -> JsonResult {
-    let parsed_date = match NaiveDate::parse_from_str(&interaction_date, "%Y-%m-%d") {
-        Ok(d) => d,
-        Err(_) => {
-            let json = serde_json::json!({
-                "status": "error",
-                "message": "Invalid date format. Expected YYYY-MM-DD."
-            });
-            return Err(json.to_string());
+    match command {
+        // ======================================================
+        // Create
+        // ======================================================
+        InteractionCommand::Create {
+            interaction_type,
+            interaction_date,
+            subject,
+            summary,
+            medium,
+            application_id,
+            person_id,
+            company_id,
+        } => {
+            let parsed_date = parse_required_date(interaction_date)?;
+
+            create_interaction_service(
+                &pool,
+                &interaction_type,
+                &parsed_date,
+                subject.as_deref(),
+                summary.as_deref(),
+                medium.as_deref(),
+                application_id,
+                person_id,
+                company_id,
+            )
+            .await
         }
-    };
 
-    interaction_service::create_interaction_service(
-        &pool,
-        &interaction_type,
-        &parsed_date,
-        subject.as_deref(),
-        summary.as_deref(),
-        medium.as_deref(),
-        application_id,
-        person_id,
-        company_id,
-    )
-    .await
-}
+        // ======================================================
+        // Update
+        // ======================================================
+        InteractionCommand::Update {
+            id,
+            interaction_type,
+            interaction_date,
+            subject,
+            summary,
+            medium,
+            application_id,
+            person_id,
+            company_id,
+        } => {
+            let parsed_date = parse_optional_date(interaction_date)?;
 
-#[tauri::command]
-pub async fn update_interaction_command(
-    pool: tauri::State<'_, SqlitePool>,
-    id: i64,
-    interaction_type: Option<InteractionType>,
-    interaction_date: Option<String>,
-    subject: Option<String>,
-    summary: Option<String>,
-    medium: Option<String>,
-    application_id: Option<i64>,
-    person_id: Option<i64>,
-    company_id: Option<i64>,
-) -> JsonResult {
-    let parsed_date = match interaction_date {
-        Some(ref d) => match NaiveDate::parse_from_str(d, "%Y-%m-%d") {
-            Ok(v) => Some(v),
-            Err(_) => {
-                let json = serde_json::json!({
-                    "status": "error",
-                    "message": "Invalid date format. Expected YYYY-MM-DD."
-                });
-                return Err(json.to_string());
-            }
-        },
-        None => None,
-    };
+            update_interaction_service(
+                &pool,
+                &id,
+                interaction_type.as_ref(),
+                parsed_date.as_ref(),
+                subject.as_deref(),
+                summary.as_deref(),
+                medium.as_deref(),
+                application_id,
+                person_id,
+                company_id,
+            )
+            .await
+        }
 
-    interaction_service::update_interaction_service(
-        &pool,
-        &id,
-        interaction_type.as_ref(),
-        parsed_date.as_ref(),
-        subject.as_deref(),
-        summary.as_deref(),
-        medium.as_deref(),
-        application_id,
-        person_id,
-        company_id,
-    )
-    .await
-}
+        // ======================================================
+        // Get by ID
+        // ======================================================
+        InteractionCommand::GetById { id } => get_interaction_by_id_service(&pool, &id).await,
 
-// ======================================================
-// Get Interaction by ID Command
-// ======================================================
-#[tauri::command]
-pub async fn get_interaction_by_id_command(
-    pool: tauri::State<'_, SqlitePool>,
-    id: i64,
-) -> JsonResult {
-    interaction_service::get_interaction_by_id_service(&pool, &id).await
-}
+        // ======================================================
+        // List All
+        // ======================================================
+        InteractionCommand::ListAll => get_all_interactions_service(&pool).await,
 
-// ======================================================
-// Get All interactions Command
-// ======================================================
-#[tauri::command]
-pub async fn get_all_interactions_command(pool: tauri::State<'_, SqlitePool>) -> JsonResult {
-    interaction_service::get_all_interactions_service(&pool).await
-}
-
-// ======================================================
-// Delete interactions Command
-// ======================================================
-#[tauri::command]
-pub async fn delete_interaction_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
-    interaction_service::delete_interaction_service(&pool, &id).await
+        // ======================================================
+        // Delete
+        // ======================================================
+        InteractionCommand::Delete { id } => delete_interaction_service(&pool, &id).await,
+    }
 }

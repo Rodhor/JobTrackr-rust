@@ -1,95 +1,101 @@
+use crate::commands::command_utils::{parse_optional_date, parse_required_date};
 use crate::db::models::enums::Stage;
-use crate::services::application_service;
+use crate::services::application_service::{
+    create_application_service, delete_application_service, get_all_applications_service,
+    get_application_by_id_service, update_application_service,
+};
 use crate::services::service_types::JsonResult;
-use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::SqlitePool;
 
+#[derive(Deserialize)]
+#[serde(tag = "action", content = "payload")]
+pub enum ApplicationCommand {
+    Create {
+        job_listing_id: Option<i64>,
+        stage: Option<Stage>,
+        applied_date: String,
+        application_notes: Option<String>,
+    },
+    Update {
+        id: i64,
+        job_listing_id: Option<i64>,
+        stage: Option<Stage>,
+        applied_date: Option<String>,
+        application_notes: Option<String>,
+    },
+    GetById {
+        id: i64,
+    },
+    ListAll,
+    Delete {
+        id: i64,
+    },
+}
+
 #[tauri::command]
-pub async fn create_application_command(
+pub async fn handle_application_command(
     pool: tauri::State<'_, SqlitePool>,
-    job_listing_id: Option<i64>,
-    stage: Option<Stage>,
-    applied_date: String,
-    application_notes: Option<String>,
+    command: ApplicationCommand,
 ) -> JsonResult {
-    let parsed_date = match NaiveDate::parse_from_str(&applied_date, "%Y-%m-%d") {
-        Ok(d) => d,
-        Err(_) => {
-            let json = serde_json::json!({
-                "status": "error",
-                "message": "Invalid date format. Expected YYYY-MM-DD."
-            });
-            return Err(json.to_string());
+    match command {
+        // ======================================================
+        // Create
+        // ======================================================
+        ApplicationCommand::Create {
+            job_listing_id,
+            stage,
+            applied_date,
+            application_notes,
+        } => {
+            let parsed_date = parse_required_date(applied_date)?;
+
+            create_application_service(
+                &pool,
+                job_listing_id,
+                stage.as_ref(),
+                &parsed_date,
+                application_notes.as_deref(),
+            )
+            .await
         }
-    };
 
-    application_service::create_application_service(
-        &pool,
-        job_listing_id,
-        stage.as_ref(),
-        &parsed_date,
-        application_notes.as_deref(),
-    )
-    .await
-}
+        // ======================================================
+        // Update
+        // ======================================================
+        ApplicationCommand::Update {
+            id,
+            job_listing_id,
+            stage,
+            applied_date,
+            application_notes,
+        } => {
+            let parsed_date = parse_optional_date(applied_date)?;
 
-#[tauri::command]
-pub async fn update_application_command(
-    pool: tauri::State<'_, SqlitePool>,
-    id: i64,
-    job_listing_id: Option<i64>,
-    stage: Option<Stage>,
-    applied_date: Option<String>,
-    application_notes: Option<String>,
-) -> JsonResult {
-    let parsed_date = match applied_date {
-        Some(ref d) => match NaiveDate::parse_from_str(d, "%Y-%m-%d") {
-            Ok(v) => Some(v),
-            Err(_) => {
-                let json = serde_json::json!({
-                    "status": "error",
-                    "message": "Invalid date format. Expected YYYY-MM-DD."
-                });
-                return Err(json.to_string());
-            }
-        },
-        None => None,
-    };
+            update_application_service(
+                &pool,
+                &id,
+                job_listing_id,
+                stage.as_ref(),
+                parsed_date.as_ref(),
+                application_notes.as_deref(),
+            )
+            .await
+        }
 
-    application_service::update_application_service(
-        &pool,
-        &id,
-        job_listing_id,
-        stage.as_ref(),
-        parsed_date.as_ref(),
-        application_notes.as_deref(),
-    )
-    .await
-}
+        // ======================================================
+        // Get by ID
+        // ======================================================
+        ApplicationCommand::GetById { id } => get_application_by_id_service(&pool, &id).await,
 
-// ======================================================
-// Get Application by ID Command
-// ======================================================
-#[tauri::command]
-pub async fn get_application_by_id_command(
-    pool: tauri::State<'_, SqlitePool>,
-    id: i64,
-) -> JsonResult {
-    application_service::get_application_by_id_service(&pool, &id).await
-}
+        // ======================================================
+        // List All
+        // ======================================================
+        ApplicationCommand::ListAll => get_all_applications_service(&pool).await,
 
-// ======================================================
-// Get All applications Command
-// ======================================================
-#[tauri::command]
-pub async fn get_all_applications_command(pool: tauri::State<'_, SqlitePool>) -> JsonResult {
-    application_service::get_all_applications_service(&pool).await
-}
-
-// ======================================================
-// Delete Application Command
-// ======================================================
-#[tauri::command]
-pub async fn delete_application_command(pool: tauri::State<'_, SqlitePool>, id: i64) -> JsonResult {
-    application_service::delete_application_service(&pool, &id).await
+        // ======================================================
+        // Delete
+        // ======================================================
+        ApplicationCommand::Delete { id } => delete_application_service(&pool, &id).await,
+    }
 }
