@@ -1,7 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { resolve } from "$app/paths";
-
     import {
         Card,
         CardHeader,
@@ -13,24 +12,35 @@
     import { Separator } from "$lib/components/ui/separator";
     import { Briefcase, Bell, StickyNote, ArrowRight } from "lucide-svelte";
 
+    // Load only the essential stores immediately
     import { applications, loadApplications } from "$lib/stores/applications";
-    import { notes, loadNotes } from "$lib/stores/notes";
-    import { jobListings, loadJobListings } from "$lib/stores/jobListings";
-    import { people, loadPeople } from "$lib/stores/people";
     import { reminders, loadReminders } from "$lib/stores/reminders";
-    import { companies, loadCompanies } from "$lib/stores/companies";
-    import { interactions, loadInteractions } from "$lib/stores/interactions";
+    import { notes, loadNotes } from "$lib/stores/notes";
 
+    // Lazy-load background data (companies, job listings, people, interactions)
     onMount(async () => {
-        await Promise.all([
-            loadApplications(),
-            loadCompanies(),
-            loadNotes(),
-            loadJobListings(),
-            loadPeople(),
-            loadReminders(),
-            loadInteractions(),
-        ]);
+        await Promise.all([loadApplications(), loadReminders(), loadNotes()]);
+
+        setTimeout(async () => {
+            const [
+                { loadCompanies },
+                { loadJobListings },
+                { loadPeople },
+                { loadInteractions },
+            ] = await Promise.all([
+                import("$lib/stores/companies"),
+                import("$lib/stores/jobListings"),
+                import("$lib/stores/people"),
+                import("$lib/stores/interactions"),
+            ]);
+
+            await Promise.all([
+                loadCompanies(),
+                loadJobListings(),
+                loadPeople(),
+                loadInteractions(),
+            ]);
+        }, 1000);
     });
 
     function formatDate(dateString?: string) {
@@ -54,9 +64,9 @@
         </p>
 
         <div class="grid gap-6 md:grid-cols-3">
-            <!-- =========================================================== -->
+            <!-- ======================================================= -->
             <!-- Applications -->
-            <!-- =========================================================== -->
+            <!-- ======================================================= -->
             <Card class="hover:bg-muted/10 transition-colors">
                 <CardHeader class="pb-3">
                     <CardTitle class="flex items-center gap-2">
@@ -109,9 +119,9 @@
                 </CardContent>
             </Card>
 
-            <!-- =========================================================== -->
+            <!-- ======================================================= -->
             <!-- Reminders -->
-            <!-- =========================================================== -->
+            <!-- ======================================================= -->
             <Card class="hover:bg-muted/10 transition-colors">
                 <CardHeader class="pb-3">
                     <CardTitle class="flex items-center gap-2">
@@ -161,9 +171,9 @@
                 </CardContent>
             </Card>
 
-            <!-- =========================================================== -->
+            <!-- ======================================================= -->
             <!-- Notes -->
-            <!-- =========================================================== -->
+            <!-- ======================================================= -->
             <Card class="hover:bg-muted/10 transition-colors">
                 <CardHeader class="pb-3">
                     <CardTitle class="flex items-center gap-2">
