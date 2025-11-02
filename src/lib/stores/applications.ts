@@ -5,8 +5,16 @@ import type { BackendResponse } from "$lib/types/backendResponse";
 
 export const applications = writable<Application[]>([]);
 
+/**
+ * ---------------------------------------------------------------------
+ * Load all applications
+ * ---------------------------------------------------------------------
+ */
 export async function loadApplications() {
-  const raw = await invoke<string>("get_all_applications_command");
+  const raw = await invoke<string>("handle_application_command", {
+    command: { action: "ListAll" },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Application[]>;
 
   if (res.status === "success" && res.data) {
@@ -16,16 +24,32 @@ export async function loadApplications() {
   }
 }
 
+/**
+ * ---------------------------------------------------------------------
+ * Load single application by ID
+ * ---------------------------------------------------------------------
+ */
 export async function loadApplicationById(id: number) {
-  const raw = await invoke<string>("get_application_by_id_command", { id });
+  const raw = await invoke<string>("handle_application_command", {
+    command: { action: "GetById", payload: { id } },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Application>;
   return res.status === "success" ? (res.data ?? null) : null;
 }
 
+/**
+ * ---------------------------------------------------------------------
+ * Create new application
+ * ---------------------------------------------------------------------
+ */
 export async function createApplication(
   payload: Omit<Application, "id" | "createdAt" | "updatedAt">,
 ) {
-  const raw = await invoke<string>("create_application_command", payload);
+  const raw = await invoke<string>("handle_application_command", {
+    command: { action: "Create", payload },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Application>;
 
   if (res.status === "success" && res.data) {
@@ -35,14 +59,19 @@ export async function createApplication(
   }
 }
 
+/**
+ * ---------------------------------------------------------------------
+ * Update existing application
+ * ---------------------------------------------------------------------
+ */
 export async function updateApplication(
   id: number,
   updates: Partial<Application>,
 ) {
-  const raw = await invoke<string>("update_application_command", {
-    id,
-    ...updates,
+  const raw = await invoke<string>("handle_application_command", {
+    command: { action: "Update", payload: { id, ...updates } },
   });
+
   const res = JSON.parse(raw) as BackendResponse<Application>;
 
   if (res.status === "success" && res.data) {
@@ -54,8 +83,16 @@ export async function updateApplication(
   }
 }
 
+/**
+ * ---------------------------------------------------------------------
+ * Delete application
+ * ---------------------------------------------------------------------
+ */
 export async function deleteApplication(id: number) {
-  const raw = await invoke<string>("delete_application_command", { id });
+  const raw = await invoke<string>("handle_application_command", {
+    command: { action: "Delete", payload: { id } },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {

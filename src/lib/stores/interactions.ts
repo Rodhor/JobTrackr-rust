@@ -16,7 +16,10 @@ export const interactions = writable<Interaction[]>([]);
  * ---------------------------------------------------------------------
  */
 export async function loadInteractions() {
-  const raw = await invoke<string>("get_all_interactions_command");
+  const raw = await invoke<string>("handle_interaction_command", {
+    command: { action: "ListAll" },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Interaction[]>;
 
   if (res.status === "success" && res.data) {
@@ -34,7 +37,10 @@ export async function loadInteractions() {
 export async function createInteraction(
   payload: Omit<Interaction, "id" | "createdAt" | "updatedAt">,
 ) {
-  const raw = await invoke<string>("create_interaction_command", payload);
+  const raw = await invoke<string>("handle_interaction_command", {
+    command: { action: "Create", payload },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Interaction>;
 
   if (res.status === "success" && res.data) {
@@ -53,10 +59,10 @@ export async function updateInteraction(
   id: number,
   updates: Partial<Interaction>,
 ) {
-  const raw = await invoke<string>("update_interaction_command", {
-    id,
-    ...updates,
+  const raw = await invoke<string>("handle_interaction_command", {
+    command: { action: "Update", payload: { id, ...updates } },
   });
+
   const res = JSON.parse(raw) as BackendResponse<Interaction>;
 
   if (res.status === "success" && res.data) {
@@ -74,7 +80,10 @@ export async function updateInteraction(
  * ---------------------------------------------------------------------
  */
 export async function deleteInteraction(id: number) {
-  const raw = await invoke<string>("delete_interaction_command", { id });
+  const raw = await invoke<string>("handle_interaction_command", {
+    command: { action: "Delete", payload: { id } },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {

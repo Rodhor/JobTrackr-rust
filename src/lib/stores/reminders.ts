@@ -16,7 +16,10 @@ export const reminders = writable<Reminder[]>([]);
  * ---------------------------------------------------------------------
  */
 export async function loadReminders() {
-  const raw = await invoke<string>("get_all_reminders_command");
+  const raw = await invoke<string>("handle_reminder_command", {
+    command: { action: "ListAll" },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Reminder[]>;
 
   if (res.status === "success" && res.data) {
@@ -34,7 +37,10 @@ export async function loadReminders() {
 export async function createReminder(
   payload: Omit<Reminder, "id" | "createdAt" | "updatedAt">,
 ) {
-  const raw = await invoke<string>("create_reminder_command", payload);
+  const raw = await invoke<string>("handle_reminder_command", {
+    command: { action: "Create", payload },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Reminder>;
 
   if (res.status === "success" && res.data) {
@@ -50,10 +56,10 @@ export async function createReminder(
  * ---------------------------------------------------------------------
  */
 export async function updateReminder(id: number, updates: Partial<Reminder>) {
-  const raw = await invoke<string>("update_reminder_command", {
-    id,
-    ...updates,
+  const raw = await invoke<string>("handle_reminder_command", {
+    command: { action: "Update", payload: { id, ...updates } },
   });
+
   const res = JSON.parse(raw) as BackendResponse<Reminder>;
 
   if (res.status === "success" && res.data) {
@@ -69,7 +75,10 @@ export async function updateReminder(id: number, updates: Partial<Reminder>) {
  * ---------------------------------------------------------------------
  */
 export async function deleteReminder(id: number) {
-  const raw = await invoke<string>("delete_reminder_command", { id });
+  const raw = await invoke<string>("handle_reminder_command", {
+    command: { action: "Delete", payload: { id } },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {

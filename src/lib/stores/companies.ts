@@ -16,7 +16,9 @@ export const companies = writable<Company[]>([]);
  * ---------------------------------------------------------------------
  */
 export async function loadCompanies() {
-  const raw = await invoke<string>("get_all_companies_command");
+  const raw = await invoke<string>("handle_company_command", {
+    command: { action: "ListAll" },
+  });
   const res = JSON.parse(raw) as BackendResponse<Company[]>;
 
   if (res.status === "success" && res.data) {
@@ -34,7 +36,9 @@ export async function loadCompanies() {
 export async function createCompany(
   payload: Omit<Company, "id" | "createdAt" | "updatedAt">,
 ) {
-  const raw = await invoke<string>("create_company_command", payload);
+  const raw = await invoke<string>("handle_company_command", {
+    command: { action: "Create", payload },
+  });
   const res = JSON.parse(raw) as BackendResponse<Company>;
 
   if (res.status === "success" && res.data) {
@@ -50,9 +54,8 @@ export async function createCompany(
  * ---------------------------------------------------------------------
  */
 export async function updateCompany(id: number, updates: Partial<Company>) {
-  const raw = await invoke<string>("update_company_command", {
-    id,
-    ...updates,
+  const raw = await invoke<string>("handle_company_command", {
+    command: { action: "Update", payload: { id, ...updates } },
   });
   const res = JSON.parse(raw) as BackendResponse<Company>;
 
@@ -69,7 +72,9 @@ export async function updateCompany(id: number, updates: Partial<Company>) {
  * ---------------------------------------------------------------------
  */
 export async function deleteCompany(id: number) {
-  const raw = await invoke<string>("delete_company_command", { id });
+  const raw = await invoke<string>("handle_company_command", {
+    command: { action: "Delete", payload: { id } },
+  });
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {

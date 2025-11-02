@@ -16,7 +16,10 @@ export const notes = writable<Note[]>([]);
  * ---------------------------------------------------------------------
  */
 export async function loadNotes() {
-  const raw = await invoke<string>("get_all_notes_command");
+  const raw = await invoke<string>("handle_note_command", {
+    command: { action: "ListAll" },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Note[]>;
 
   if (res.status === "success" && res.data) {
@@ -34,7 +37,10 @@ export async function loadNotes() {
 export async function createNote(
   payload: Omit<Note, "id" | "createdAt" | "updatedAt">,
 ) {
-  const raw = await invoke<string>("create_note_command", payload);
+  const raw = await invoke<string>("handle_note_command", {
+    command: { action: "Create", payload },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Note>;
 
   if (res.status === "success" && res.data) {
@@ -50,10 +56,10 @@ export async function createNote(
  * ---------------------------------------------------------------------
  */
 export async function updateNote(id: number, updates: Partial<Note>) {
-  const raw = await invoke<string>("update_note_command", {
-    id,
-    ...updates,
+  const raw = await invoke<string>("handle_note_command", {
+    command: { action: "Update", payload: { id, ...updates } },
   });
+
   const res = JSON.parse(raw) as BackendResponse<Note>;
 
   if (res.status === "success" && res.data) {
@@ -69,7 +75,10 @@ export async function updateNote(id: number, updates: Partial<Note>) {
  * ---------------------------------------------------------------------
  */
 export async function deleteNote(id: number) {
-  const raw = await invoke<string>("delete_note_command", { id });
+  const raw = await invoke<string>("handle_note_command", {
+    command: { action: "Delete", payload: { id } },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {

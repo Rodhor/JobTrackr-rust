@@ -16,7 +16,10 @@ export const people = writable<Person[]>([]);
  * ---------------------------------------------------------------------
  */
 export async function loadPeople() {
-  const raw = await invoke<string>("get_all_persons_command");
+  const raw = await invoke<string>("handle_person_command", {
+    command: { action: "ListAll" },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Person[]>;
 
   if (res.status === "success" && res.data) {
@@ -34,7 +37,10 @@ export async function loadPeople() {
 export async function createPerson(
   payload: Omit<Person, "id" | "createdAt" | "updatedAt">,
 ) {
-  const raw = await invoke<string>("create_person_command", payload);
+  const raw = await invoke<string>("handle_person_command", {
+    command: { action: "Create", payload },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Person>;
 
   if (res.status === "success" && res.data) {
@@ -50,7 +56,10 @@ export async function createPerson(
  * ---------------------------------------------------------------------
  */
 export async function updatePerson(id: number, updates: Partial<Person>) {
-  const raw = await invoke<string>("update_person_command", { id, ...updates });
+  const raw = await invoke<string>("handle_person_command", {
+    command: { action: "Update", payload: { id, ...updates } },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<Person>;
 
   if (res.status === "success" && res.data) {
@@ -66,7 +75,10 @@ export async function updatePerson(id: number, updates: Partial<Person>) {
  * ---------------------------------------------------------------------
  */
 export async function deletePerson(id: number) {
-  const raw = await invoke<string>("delete_person_command", { id });
+  const raw = await invoke<string>("handle_person_command", {
+    command: { action: "Delete", payload: { id } },
+  });
+
   const res = JSON.parse(raw) as BackendResponse<null>;
 
   if (res.status === "success") {
