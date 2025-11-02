@@ -7,71 +7,53 @@ pub mod utils;
 use crate::commands::*;
 use crate::db::connection::init_db;
 use crate::logger::*;
-use sqlx::SqlitePool;
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[tokio::main]
 pub async fn run() {
-    // ============================================================
-    // 1. Initialize logger
-    // ============================================================
-    logger::init();
-    info!("Logger initialized.");
-
-    // ============================================================
-    // 2. Initialize database connection pool
-    // ============================================================
-    let pool: SqlitePool = init_db().await;
-    info!("Database initialized and ready.");
-
-    // ============================================================
-    // 3. Build Tauri app and register backend command handlers
-    // ============================================================
     tauri::Builder::default()
-        // --------------------------------------------------------
-        // Plugins
-        // --------------------------------------------------------
         .plugin(tauri_plugin_opener::init())
-        // --------------------------------------------------------
-        // Global managed state
-        // --------------------------------------------------------
-        .manage(pool)
-        // --------------------------------------------------------
-        // Command registration
-        // --------------------------------------------------------
+        .setup(|app| {
+            // Clone to produce an owned handle with 'static lifetime
+            let app_handle = app.app_handle().clone();
+
+            // Run async init in background to avoid blocking UI
+            tauri::async_runtime::spawn(async move {
+                // Logger (blocking)
+                if let Err(e) = tokio::task::spawn_blocking(|| {
+                    logger::init();
+                    info!("Logger initialized.");
+                })
+                .await
+                {
+                    eprintln!("Logger initialization failed: {:?}", e);
+                    return;
+                }
+
+                // Database (async)
+                match init_db().await {
+                    Ok(pool) => {
+                        info!("Database initialized and ready.");
+                        app_handle.manage(pool);
+                    }
+                    Err(e) => {
+                        error!("Database initialization failed: {:?}", e);
+                    }
+                }
+            });
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
-            // ===============================
-            // Applications
-            // ===============================
             handle_application_command,
-            // ===============================
-            // Companies
-            // ===============================
             handle_company_command,
-            // ===============================
-            // Interactions
-            // ===============================
             handle_interaction_command,
-            // ===============================
-            // Job Listings
-            // ===============================
             handle_job_listing_command,
-            // ===============================
-            // Notes
-            // ===============================
             handle_note_command,
-            // ===============================
-            // Persons
-            // ===============================
             handle_person_command,
-            // ===============================
-            // Reminders
-            // ===============================
             handle_reminder_command,
         ])
-        // ============================================================
-        // 4. Launch application
-        // ============================================================
         .run(tauri::generate_context!())
         .expect("Error while running JobTrackr application");
 }
