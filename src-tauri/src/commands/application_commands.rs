@@ -11,12 +11,14 @@ use sqlx::SqlitePool;
 #[derive(Deserialize)]
 #[serde(tag = "action", content = "payload")]
 pub enum ApplicationCommand {
+    #[serde(rename_all = "camelCase")]
     Create {
         job_listing_id: Option<i64>,
         stage: Option<Stage>,
         applied_date: String,
         application_notes: Option<String>,
     },
+    #[serde(rename_all = "camelCase")]
     Update {
         id: i64,
         job_listing_id: Option<i64>,
@@ -32,7 +34,6 @@ pub enum ApplicationCommand {
         id: i64,
     },
 }
-
 #[tauri::command]
 pub async fn handle_application_command(
     pool: tauri::State<'_, SqlitePool>,

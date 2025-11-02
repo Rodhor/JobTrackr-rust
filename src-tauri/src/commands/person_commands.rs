@@ -10,6 +10,7 @@ use sqlx::SqlitePool;
 #[derive(Deserialize)]
 #[serde(tag = "action", content = "payload")]
 pub enum PersonCommand {
+    #[serde(rename_all = "camelCase")]
     Create {
         first_name: String,
         last_name: String,
@@ -19,6 +20,7 @@ pub enum PersonCommand {
         linkedin_url: Option<String>,
         company_id: Option<i64>,
     },
+    #[serde(rename_all = "camelCase")]
     Update {
         id: i64,
         first_name: Option<String>,
