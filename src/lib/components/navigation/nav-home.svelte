@@ -2,7 +2,6 @@
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import HomeIcon from "@lucide/svelte/icons/home";
-    import { base } from "$app/paths";
     import { useSidebar } from "$lib/components/ui/sidebar/index.js";
 
     const sidebar = useSidebar();
@@ -14,7 +13,7 @@
             <Tooltip.Root>
                 <Tooltip.Trigger>
                     <Sidebar.MenuButton>
-                        <a href={`${base}/`} class="flex items-center gap-4">
+                        <a href={"/"} class="flex items-center gap-4">
                             <HomeIcon class="h-[1.2rem] w-[1.2rem]" />
                             {#if sidebar.state === "expanded"}
                                 <span class="truncate">Home</span>

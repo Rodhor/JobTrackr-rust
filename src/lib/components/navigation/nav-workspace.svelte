@@ -11,9 +11,6 @@
     import StickyNoteIcon from "@lucide/svelte/icons/sticky-note";
     import ListIcon from "@lucide/svelte/icons/list";
     import BellIcon from "@lucide/svelte/icons/bell";
-    import SettingsIcon from "@lucide/svelte/icons/settings";
-
-    import { base } from "$app/paths";
 
     const sidebar = useSidebar();
 </script>
@@ -29,7 +26,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/dashboard`}
+                                href={"/dashboard"}
                                 class="flex items-center gap-4"
                             >
                                 <LayoutDashboardIcon class="h-4 w-4" />
@@ -53,7 +50,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/jobListings`}
+                                href={"jobListings"}
                                 class="flex items-center gap-4"
                             >
                                 <ListIcon class="h-4 w-4" />
@@ -77,7 +74,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/applications`}
+                                href={"/applications"}
                                 class="flex items-center gap-4"
                             >
                                 <BriefcaseIcon class="h-4 w-4" />
@@ -101,7 +98,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/companies`}
+                                href={"/companies"}
                                 class="flex items-center gap-4"
                             >
                                 <Building2Icon class="h-4 w-4" />
@@ -124,10 +121,7 @@
                 <Tooltip.Root>
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
-                            <a
-                                href={`${base}/people`}
-                                class="flex items-center gap-4"
-                            >
+                            <a href={"/people"} class="flex items-center gap-4">
                                 <UsersIcon class="h-4 w-4" />
                                 {#if sidebar.state === "expanded"}<span
                                         class="truncate">People</span
@@ -149,7 +143,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/interactions`}
+                                href={"/interactions"}
                                 class="flex items-center gap-4"
                             >
                                 <PhoneCallIcon class="h-4 w-4" />
@@ -172,10 +166,7 @@
                 <Tooltip.Root>
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
-                            <a
-                                href={`${base}/notes`}
-                                class="flex items-center gap-4"
-                            >
+                            <a href={"/notes"} class="flex items-center gap-4">
                                 <StickyNoteIcon class="h-4 w-4" />
                                 {#if sidebar.state === "expanded"}<span
                                         class="truncate">Notes</span
@@ -196,7 +187,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/reminders`}
+                                href={"/reminders"}
                                 class="flex items-center gap-4"
                             >
                                 <BellIcon class="h-4 w-4" />

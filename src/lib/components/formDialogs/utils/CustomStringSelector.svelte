@@ -31,12 +31,11 @@
 </script>
 
 <Select.Root type="single" bind:value={selectedValue}>
-    <Select.Trigger class="w-[180px]">
+    <Select.Trigger class="w-full">
         {triggerContent}
     </Select.Trigger>
-    <Select.Content>
+    <Select.Content class="w-full">
         <Select.Group>
-            <Select.Label>Selection</Select.Label>
             {#each selectionOptions as o (o.value)}
                 <Select.Item value={String(o.value)}>{o.label}</Select.Item>
             {/each}

@@ -41,8 +41,8 @@
 </script>
 
 <Select.Root type="single" bind:value={internalValue}>
-    <Select.Trigger class="w-[180px]">{triggerContent()}</Select.Trigger>
-    <Select.Content>
+    <Select.Trigger class="w-full">{triggerContent()}</Select.Trigger>
+    <Select.Content class="w-full">
         <Select.Group>
             <Select.Label>Selection</Select.Label>
             {#each selectionOptions() as o (o.value)}

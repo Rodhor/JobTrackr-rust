@@ -8,8 +8,6 @@
     import FileSpreadsheetIcon from "@lucide/svelte/icons/file-spreadsheet";
     import DatabaseIcon from "@lucide/svelte/icons/database";
 
-    import { base } from "$app/paths";
-
     const sidebar = useSidebar();
 </script>
 
@@ -24,7 +22,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/export/csv`}
+                                href={"/export/csv"}
                                 class="flex items-center gap-4"
                             >
                                 <FileSpreadsheetIcon class="h-4 w-4" />
@@ -48,7 +46,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/export/excel`}
+                                href={"/export/excel"}
                                 class="flex items-center gap-4"
                             >
                                 <FileDownIcon class="h-4 w-4" />
@@ -72,7 +70,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/export/json`}
+                                href={"/export/json"}
                                 class="flex items-center gap-4"
                             >
                                 <FileJsonIcon class="h-4 w-4" />
@@ -96,7 +94,7 @@
                     <Tooltip.Trigger>
                         <Sidebar.MenuButton>
                             <a
-                                href={`${base}/export/backup`}
+                                href={"/export/backup"}
                                 class="flex items-center gap-4"
                             >
                                 <DatabaseIcon class="h-4 w-4" />
