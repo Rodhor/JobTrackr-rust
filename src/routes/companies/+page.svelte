@@ -6,37 +6,11 @@
         deleteCompany,
     } from "$lib/stores/companies";
     import { Button } from "$lib/components/ui/button";
-    import { Badge } from "$lib/components/ui/badge";
-    import CompanyDialog from "$lib/components/formDialogs/CompanyDialog.svelte";
-    import type { Company } from "$lib/types/company";
-    import { writable } from "svelte/store";
-
-    // ----------------------------------------------------------
-    // State
-    // ----------------------------------------------------------
-    const dialogOpen = writable(false);
-    const mode = writable<"create" | "edit">("create");
-    const selectedCompany = writable<Company | null>(null);
 
     // ----------------------------------------------------------
     // Lifecycle
     // ----------------------------------------------------------
     onMount(loadCompanies);
-
-    // ----------------------------------------------------------
-    // Handlers
-    // ----------------------------------------------------------
-    function handleCreate() {
-        selectedCompany.set(null);
-        mode.set("create");
-        dialogOpen.set(true);
-    }
-
-    function handleEdit(company: Company) {
-        selectedCompany.set(company);
-        mode.set("edit");
-        dialogOpen.set(true);
-    }
 
     async function handleDelete(id: number) {
         try {
@@ -63,15 +37,8 @@ Header
 ----------------------------------------------------------- -->
 <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-semibold tracking-tight">Companies</h1>
-    <Button onclick={handleCreate}>New Company</Button>
+    <Button href="/companies/create">New Company</Button>
 </div>
-
-<!-- Shared Dialog (create/edit) -->
-<CompanyDialog
-    bind:open={$dialogOpen}
-    mode={$mode}
-    existingCompany={$selectedCompany}
-/>
 
 <!-- ----------------------------------------------------------
 Companies Table
@@ -111,17 +78,19 @@ Companies Table
                     >
                         <a href={c.website} target="_blank">{c.website}</a>
                     </td>
-                    <td class="px-4 py-3">{formatDate(c.updatedAt)}</td>
+                    <td class="px-4 py-3">
+                        {c.updatedAt ? formatDate(c.updatedAt) : "—"}
+                    </td>
                     <td class="px-4 py-3 text-right flex justify-end gap-2">
                         <Button
                             size="sm"
                             variant="outline"
-                            onclick={() => handleEdit(c)}>Edit</Button
+                            href="/companies/{c.id}">Edit</Button
                         >
                         <Button
                             size="sm"
                             variant="destructive"
-                            onclick={() => handleDelete(c.id)}
+                            onclick={() => c.id && handleDelete(c.id)}
                         >
                             Delete
                         </Button>

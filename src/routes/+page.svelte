@@ -20,27 +20,6 @@
     // Lazy-load background data (companies, job listings, people, interactions)
     onMount(async () => {
         await Promise.all([loadApplications(), loadReminders(), loadNotes()]);
-
-        setTimeout(async () => {
-            const [
-                { loadCompanies },
-                { loadJobListings },
-                { loadPeople },
-                { loadInteractions },
-            ] = await Promise.all([
-                import("$lib/stores/companies"),
-                import("$lib/stores/jobListings"),
-                import("$lib/stores/people"),
-                import("$lib/stores/interactions"),
-            ]);
-
-            await Promise.all([
-                loadCompanies(),
-                loadJobListings(),
-                loadPeople(),
-                loadInteractions(),
-            ]);
-        }, 1000);
     });
 
     function formatDate(dateString?: string) {

@@ -5,18 +5,17 @@
 
     let {
         enumObject,
-        selectedValue = $bindable(""),
+        selectedValue = $bindable<string | undefined>(undefined),
         label = "Select option",
     }: {
         enumObject: EnumLike;
-        selectedValue: string;
+        selectedValue: string | undefined;
         label?: string;
     } = $props();
 
-    // Convert enum to label/value pairs
     const selectionOptions = $derived(() =>
         Object.entries(enumObject)
-            .filter(([key, value]) => isNaN(Number(key))) // filter numeric reverse mappings
+            .filter(([key]) => isNaN(Number(key)))
             .map(([key, value]) => ({
                 label: key.replace(/_/g, " "),
                 value: String(value),
@@ -30,10 +29,9 @@
 </script>
 
 <Select.Root type="single" bind:value={selectedValue}>
-    <Select.Trigger class="w-[180px]">{triggerContent()}</Select.Trigger>
-    <Select.Content>
+    <Select.Trigger class="w-full">{triggerContent()}</Select.Trigger>
+    <Select.Content class="w-full">
         <Select.Group>
-            <Select.Label>{label}</Select.Label>
             {#each selectionOptions() as o (o.value)}
                 <Select.Item value={o.value}>{o.label}</Select.Item>
             {/each}

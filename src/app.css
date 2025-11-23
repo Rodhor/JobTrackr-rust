@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* custom css */
+.required::after {
+    content: " *";
+    color: #dc2626;
+}
+
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
