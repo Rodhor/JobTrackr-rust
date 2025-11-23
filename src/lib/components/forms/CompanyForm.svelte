@@ -106,7 +106,7 @@
         />
     </div>
     <div class="flex justify-between mt-4">
-        <Button variant="destructive" href="{base}/companies">Cancel</Button>
+        <Button variant="destructive" href="/companies">Cancel</Button>
         <Button disabled={invalidSubmit()} onclick={submit}>Submit</Button>
     </div>
 </section>
