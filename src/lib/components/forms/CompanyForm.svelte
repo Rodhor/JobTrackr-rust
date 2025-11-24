@@ -6,7 +6,6 @@
     import type { Company } from "$lib/types/company";
     import { Button } from "$lib/components/ui/button";
     import { goto } from "$app/navigation";
-    import { onMount } from "svelte";
     import {
         updateCompany,
         createCompany,
@@ -26,7 +25,7 @@
         phoneNumber: "",
     });
 
-    onMount(() => {
+    $effect(() => {
         if (!companyID) return;
         const found = $companies.find((c) => c.id === companyID);
         if (found) Object.assign(form, found);
@@ -35,7 +34,7 @@
     const invalidSubmit = $derived(() => !form.name);
 
     async function submit() {
-        if (invalidSubmit()) return; // call it
+        if (invalidSubmit()) return;
         if (companyID) {
             await updateCompany(Number(companyID), form);
         } else {

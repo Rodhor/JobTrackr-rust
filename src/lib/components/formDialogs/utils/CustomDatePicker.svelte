@@ -2,33 +2,40 @@
     import * as Popover from "$lib/components/ui/popover";
     import { cn } from "$lib/utils";
     import {
-        DateFormatter,
         type DateValue,
         getLocalTimeZone,
+        parseDate,
     } from "@internationalized/date";
     import CalendarIcon from "@lucide/svelte/icons/calendar";
     import { Calendar } from "$lib/components/ui/calendar/index.js";
     import { buttonVariants } from "$lib/components/ui/button";
 
-    // props
     let {
-        selectedDate = $bindable<DateValue | undefined>(undefined),
-        formatLocale = "de-DE",
+        selectedDate = $bindable<string | undefined>(undefined),
     }: {
-        selectedDate: DateValue | undefined;
-        formatLocale?: string;
+        selectedDate: string | undefined;
     } = $props();
 
-    // internal
-    const df = new DateFormatter(formatLocale, { dateStyle: "long" });
-    let contentRef = $state<HTMLElement | null>(null);
-
-    // derived ISO value for backend or form use
-    const isoDate = $derived(
-        selectedDate
-            ? selectedDate.toDate(getLocalTimeZone()).toISOString()
-            : "",
+    let internalDate = $state<DateValue | undefined>(
+        selectedDate ? parseDate(selectedDate) : undefined,
     );
+
+    $effect(() => {
+        if (!internalDate) {
+            selectedDate = undefined;
+            return;
+        }
+
+        const d = internalDate.toDate(getLocalTimeZone());
+
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+
+        selectedDate = `${yyyy}-${mm}-${dd}`;
+    });
+
+    let contentRef = $state<HTMLElement | null>(null);
 </script>
 
 <Popover.Root>
@@ -36,16 +43,14 @@
         class={cn(
             buttonVariants({ variant: "outline" }),
             "!flex items-center justify-between gap-2",
-            !selectedDate && "text-muted-foreground",
+            !internalDate && "text-muted-foreground",
         )}
     >
         <CalendarIcon class="size-4 opacity-60" />
-        {selectedDate
-            ? df.format(selectedDate.toDate(getLocalTimeZone()))
-            : "Pick a date"}
+        {selectedDate ?? "Pick a date"}
     </Popover.Trigger>
 
     <Popover.Content bind:ref={contentRef} class="w-auto p-0">
-        <Calendar type="single" bind:value={selectedDate} />
+        <Calendar type="single" bind:value={internalDate} />
     </Popover.Content>
 </Popover.Root>

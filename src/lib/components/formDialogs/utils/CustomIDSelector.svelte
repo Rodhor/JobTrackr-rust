@@ -1,53 +1,50 @@
 <script lang="ts">
     import * as Select from "$lib/components/ui/select";
-    import type { Readable } from "svelte/store";
 
     type NamedEntity = { id: number; displayLabel: string };
-    type Option = { value: number; label: string };
 
     let {
-        sourceStore,
-        selectedId = $bindable<number | null>(null),
+        items,
+        selectedId = $bindable<number | undefined>(undefined),
     }: {
-        sourceStore: Readable<NamedEntity[]>;
-        selectedId: number | null;
+        items: NamedEntity[];
+        selectedId: number | undefined;
     } = $props();
 
-    let internalValue = $state(selectedId ? String(selectedId) : "");
-
-    // new syntax: $derived returns a function
-    const derivedId = $derived(() =>
-        internalValue ? Number(internalValue) : null,
+    let internalValue = $state(
+        selectedId !== undefined ? String(selectedId) : "",
     );
 
-    // sync to parent (call derivedId())
     $effect(() => {
-        selectedId = derivedId();
+        selectedId = internalValue !== "" ? Number(internalValue) : undefined;
     });
 
     const selectionOptions = $derived(() =>
-        $sourceStore.map(
-            (o: NamedEntity): Option => ({
-                value: o.id,
-                label: o.displayLabel,
-            }),
-        ),
+        items.map((o) => ({
+            label: o.displayLabel,
+            value: String(o.id),
+        })),
     );
 
     const triggerContent = $derived(() => {
-        const match = selectionOptions().find((o) => o.value === derivedId());
+        const match = selectionOptions().find(
+            (o) => Number(o.value) === selectedId,
+        );
         return match ? match.label : "Select option";
     });
 </script>
 
-<Select.Root type="single" bind:value={internalValue}>
-    <Select.Trigger class="w-full">{triggerContent()}</Select.Trigger>
-    <Select.Content class="w-full">
-        <Select.Group>
-            <Select.Label>Selection</Select.Label>
-            {#each selectionOptions() as o (o.value)}
-                <Select.Item value={String(o.value)}>{o.label}</Select.Item>
-            {/each}
-        </Select.Group>
-    </Select.Content>
-</Select.Root>
+{#if items.length === 0}
+    <div class="text-sm text-muted-foreground">No items available</div>
+{:else}
+    <Select.Root type="single" bind:value={internalValue}>
+        <Select.Trigger class="w-full">{triggerContent()}</Select.Trigger>
+        <Select.Content class="w-full">
+            <Select.Group>
+                {#each selectionOptions() as o (o.value)}
+                    <Select.Item value={o.value}>{o.label}</Select.Item>
+                {/each}
+            </Select.Group>
+        </Select.Content>
+    </Select.Root>
+{/if}

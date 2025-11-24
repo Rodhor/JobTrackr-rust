@@ -7,7 +7,6 @@
     } from "$lib/stores/applications";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
-    import ApplicationDialog from "$lib/components/formDialogs/ApplicationDialog.svelte";
     import { Stage } from "$lib/types/enums";
     import type { Application } from "$lib/types/application";
     import { writable } from "svelte/store";
@@ -90,15 +89,8 @@ Header
 ----------------------------------------------------------- -->
 <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-semibold tracking-tight">Applications</h1>
-    <Button onclick={handleCreate}>New Application</Button>
+    <Button href={"applications/create"}>New Application</Button>
 </div>
-
-<!-- Shared Dialog (used for both create & edit) -->
-<ApplicationDialog
-    bind:open={$dialogOpen}
-    mode={$mode}
-    existingApplication={$selectedApplication}
-/>
 
 <!-- ----------------------------------------------------------
 Applications Table
@@ -138,14 +130,12 @@ Applications Table
                         <Button
                             size="sm"
                             variant="outline"
-                            onclick={() => handleEdit(a)}
+                            href="/applications/{a.id}">Edit</Button
                         >
-                            Edit
-                        </Button>
                         <Button
                             size="sm"
                             variant="destructive"
-                            onclick={() => handleDelete(a.id)}
+                            onclick={() => handleDelete(a.id!)}
                         >
                             Delete
                         </Button>
