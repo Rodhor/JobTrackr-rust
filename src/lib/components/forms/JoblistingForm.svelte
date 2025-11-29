@@ -39,6 +39,9 @@
         description: "",
         url: "",
     });
+
+    let companyId = $state<number | undefined>(undefined);
+
     $effect(() => {
         if (!joblistingID) return;
         const found = $jobListings.find((j) => j.id === joblistingID);
@@ -46,35 +49,17 @@
             Object.assign(form, found);
             // Also sync the company selector
             if (found.companyId) {
-                result = [found.companyId, false];
+                companyId = found.companyId;
             }
         }
     });
 
-    // State is a tuple: [Value (ID or String), IsManualMode]
-    let result = $state<[number | string | undefined, boolean]>([
-        undefined,
-        false,
-    ]);
-
-    const invalidSubmit = $derived(
-        () => result[0] === undefined || result[0] === "",
-    );
+    const invalidSubmit = $derived(companyId === undefined);
 
     async function submit() {
-        if (invalidSubmit()) return;
+        if (invalidSubmit) return;
 
-        const [companyValue, isManual] = result;
-
-        // If manual mode, create a new company first
-        if (isManual) {
-            const newCompany = await createCompany({
-                name: String(companyValue),
-            });
-            form.companyId = newCompany.id;
-        } else {
-            form.companyId = Number(companyValue);
-        }
+        form.companyId = companyId;
 
         // Create or update job listing
         if (joblistingID) {
@@ -95,7 +80,7 @@
         <Label class="py-2 required">Company:</Label>
         <CustomIDSelectCreate
             {items}
-            bind:value={result}
+            bind:value={companyId}
             caller="jobListings"
             createNew="companies"
         />
@@ -174,6 +159,6 @@
 
     <div class="flex justify-between mt-4">
         <Button variant="destructive" href="/jobListings">Cancel</Button>
-        <Button disabled={invalidSubmit()} onclick={submit}>Submit</Button>
+        <Button disabled={invalidSubmit} onclick={submit}>Submit</Button>
     </div>
 </section>

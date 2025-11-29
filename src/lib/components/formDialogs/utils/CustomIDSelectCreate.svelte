@@ -6,27 +6,24 @@
     import { newlyCreatedCompanyId } from "$lib/stores/formState";
 
     type NamedEntity = { id: number; displayLabel: string };
-    type ComponentState = [number | string | undefined, boolean];
 
     let {
         items,
         caller,
         createNew,
-        value = $bindable<ComponentState>([undefined, false]),
+        value = $bindable<number | undefined>(undefined),
     }: {
         items: NamedEntity[];
         caller?: string;
         createNew?: string;
-        value: ComponentState;
+        value: number | undefined;
     } = $props();
 
     // -- State --
     let selectValue = $state<string>("");
-    let textValue = $state<string>("");
 
     // -- Derived Logic --
     const noItemsAvailable = $derived(items.length === 0);
-    const isManualMode = $derived(value[1] || noItemsAvailable);
 
     const selectionOptions = $derived.by(() =>
         items.map((o) => ({
@@ -49,36 +46,16 @@
 
     // -- Synchronization --
     $effect(() => {
-        const [incomingVal, incomingIsManual] = value;
-
-        if (incomingVal === undefined) return;
-
-        if (incomingIsManual || noItemsAvailable) {
-            if (typeof incomingVal === "string") {
-                textValue = incomingVal;
-            }
-        } else if (typeof incomingVal === "number") {
-            selectValue = String(incomingVal);
+        if (value !== undefined) {
+            selectValue = String(value);
         }
     });
 
     $effect(() => {
-        if (!isManualMode && selectValue) {
-            value = [Number(selectValue), false];
+        if (selectValue) {
+            value = Number(selectValue);
         }
     });
-
-    $effect(() => {
-        if (noItemsAvailable && !value[1]) {
-            value = [textValue, true];
-        }
-    });
-
-    // -- Event Handlers --
-    function handleInputChange(e: Event) {
-        textValue = (e.target as HTMLInputElement).value;
-        value = [textValue, true];
-    }
 
     // -- Listen for newly created company --
     onMount(() => {
@@ -86,7 +63,7 @@
             if (id !== undefined && items.length > 0) {
                 const newCompany = items.find((c) => c.id === id);
                 if (newCompany) {
-                    value = [id, false];
+                    value = id;
                     selectValue = String(id);
                     newlyCreatedCompanyId.set(undefined); // Reset
                 }
@@ -99,29 +76,18 @@
 
 <div class="flex w-full items-center gap-2">
     <div class="flex-grow">
-        {#if isManualMode}
-            <Input
-                type="text"
-                placeholder={noItemsAvailable
-                    ? "No items available.  Enter manually."
-                    : "Enter custom value... "}
-                value={textValue}
-                oninput={handleInputChange}
-            />
-        {:else}
-            <Select.Root type="single" bind:value={selectValue}>
-                <Select.Trigger class="w-full">
-                    {triggerContent}
-                </Select.Trigger>
-                <Select.Content class="w-full">
-                    <Select.Group>
-                        {#each selectionOptions as o (o.value)}
-                            <Select.Item value={o.value}>{o.label}</Select.Item>
-                        {/each}
-                    </Select.Group>
-                </Select.Content>
-            </Select.Root>
-        {/if}
+        <Select.Root type="single" bind:value={selectValue}>
+            <Select.Trigger class="w-full">
+                {triggerContent}
+            </Select.Trigger>
+            <Select.Content class="w-full">
+                <Select.Group>
+                    {#each selectionOptions as o (o.value)}
+                        <Select.Item value={o.value}>{o.label}</Select.Item>
+                    {/each}
+                </Select.Group>
+            </Select.Content>
+        </Select.Root>
     </div>
 
     {#if !noItemsAvailable}
