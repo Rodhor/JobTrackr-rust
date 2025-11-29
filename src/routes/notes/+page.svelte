@@ -2,29 +2,10 @@
     import { onMount } from "svelte";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
-    import NoteDialog from "$lib/components/formDialogs/NoteDialog.svelte";
     import { notes, loadNotes, deleteNote } from "$lib/stores/notes";
-    import { writable } from "svelte/store";
     import { NoteType, NoteTypeDisplay } from "$lib/types/enums";
-    import type { Note } from "$lib/types/note";
-
-    const dialogOpen = writable(false);
-    const mode = writable<"create" | "edit">("create");
-    const selectedNote = writable<Note | null>(null);
 
     onMount(loadNotes);
-
-    function handleCreate() {
-        selectedNote.set(null);
-        mode.set("create");
-        dialogOpen.set(true);
-    }
-
-    function handleEdit(note: Note) {
-        selectedNote.set(note);
-        mode.set("edit");
-        dialogOpen.set(true);
-    }
 
     async function handleDelete(id: number) {
         try {
@@ -66,10 +47,8 @@ Header
 ----------------------------------------------------------- -->
 <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-semibold tracking-tight">Notes</h1>
-    <Button onclick={handleCreate}>New Note</Button>
+    <Button href="/notes/create">New Note</Button>
 </div>
-
-<NoteDialog bind:open={$dialogOpen} mode={$mode} existingNote={$selectedNote} />
 
 <!-- ----------------------------------------------------------
 Notes Table
@@ -122,15 +101,14 @@ Notes Table
                     </td>
                     <td class="px-4 py-3">{formatDate(n.createdAt)}</td>
                     <td class="px-4 py-3 text-right flex justify-end gap-2">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onclick={() => handleEdit(n)}>Edit</Button
+                        <Button size="sm" variant="outline" href="/notes/{n.id}"
+                            >Edit</Button
                         >
                         <Button
                             size="sm"
                             variant="destructive"
-                            onclick={() => handleDelete(n.id)}>Delete</Button
+                            onclick={() => n.id && handleDelete(n.id)}
+                            >Delete</Button
                         >
                     </td>
                 </tr>

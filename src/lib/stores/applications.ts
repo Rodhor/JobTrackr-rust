@@ -45,7 +45,7 @@ export async function loadApplicationById(id: number) {
  */
 export async function createApplication(
   payload: Omit<Application, "id" | "createdAt" | "updatedAt">,
-) {
+): Promise<Application> {
   const raw = await invoke<string>("handle_application_command", {
     command: { action: "Create", payload },
   });
@@ -54,8 +54,10 @@ export async function createApplication(
 
   if (res.status === "success" && res.data) {
     applications.update((list) => [...list, res.data!]);
+    return res.data;
   } else {
     console.error(res.message);
+    throw new Error(res.message);
   }
 }
 

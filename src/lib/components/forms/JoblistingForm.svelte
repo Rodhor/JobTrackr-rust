@@ -3,6 +3,7 @@
     import CustomIDSelectCreate from "$lib/components/formDialogs/utils/CustomIDSelectCreate.svelte";
     import { Button } from "$lib/components/ui/button";
     import { companies, createCompany } from "$lib/stores/companies";
+    import { newlyCreatedApplicationId } from "$lib/stores/formState";
     import {
         createJobListing,
         jobListings,
@@ -15,7 +16,10 @@
     import { Label } from "../ui/label";
     import { Textarea } from "../ui/textarea";
 
-    let { joblistingID }: { joblistingID?: number } = $props();
+    let {
+        joblistingID,
+        caller,
+    }: { joblistingID?: number; caller?: string | null } = $props();
 
     // Prepare items for the component
     const items = $derived(
@@ -59,17 +63,26 @@
     async function submit() {
         if (invalidSubmit) return;
 
-        form.companyId = companyId;
+        let createdListing: JobListing;
 
         // Create or update job listing
         if (joblistingID) {
             await updateJobListing(Number(joblistingID), form);
+            createdListing = form;
         } else {
-            await createJobListing(form);
+            createdListing = await createJobListing(form);
         }
 
         console.log($state.snapshot(form));
-        goto("/jobListings");
+        if (caller && !joblistingID) {
+            newlyCreatedApplicationId.set(createdListing.id);
+        }
+
+        if (caller) {
+            goto(`/${caller}/create`);
+        } else {
+            goto("/jobListings");
+        }
     }
 </script>
 
@@ -158,7 +171,12 @@
     </div>
 
     <div class="flex justify-between mt-4">
-        <Button variant="destructive" href="/jobListings">Cancel</Button>
+        <Button
+            variant="destructive"
+            href={caller ? `/${caller}/create?` : "/jobListings"}
+        >
+            Cancel
+        </Button>
         <Button disabled={invalidSubmit} onclick={submit}>Submit</Button>
     </div>
 </section>

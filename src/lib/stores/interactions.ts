@@ -36,7 +36,7 @@ export async function loadInteractions() {
  */
 export async function createInteraction(
   payload: Omit<Interaction, "id" | "createdAt" | "updatedAt">,
-) {
+): Promise<Interaction> {
   const raw = await invoke<string>("handle_interaction_command", {
     command: { action: "Create", payload },
   });
@@ -45,8 +45,10 @@ export async function createInteraction(
 
   if (res.status === "success" && res.data) {
     interactions.update((list) => [...list, res.data!]);
+    return res.data;
   } else {
     console.error(res.message);
+    throw new Error(res.message);
   }
 }
 

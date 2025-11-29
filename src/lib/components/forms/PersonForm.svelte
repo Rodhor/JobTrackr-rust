@@ -2,6 +2,7 @@
     import { goto } from "$app/navigation";
     import { Button } from "$lib/components/ui/button";
     import { companies } from "$lib/stores/companies";
+    import { newlyCreatedPersonId } from "$lib/stores/formState";
     import { people, createPerson, updatePerson } from "$lib/stores/people";
     import { Role } from "$lib/types/enums";
     import type { Person } from "$lib/types/person";
@@ -10,7 +11,8 @@
     import { Input } from "../ui/input";
     import { Label } from "../ui/label";
 
-    let { personID }: { personID?: number } = $props();
+    let { personID, caller }: { personID?: number; caller?: string | null } =
+        $props();
 
     const items = $derived(
         $companies
@@ -44,14 +46,25 @@
     async function submit() {
         if (invalidSubmit) return;
 
+        let createdPerson: Person;
         if (personID) {
             await updatePerson(Number(personID), form);
+            createdPerson = form;
         } else {
-            await createPerson(form);
+            createdPerson = await createPerson(form);
         }
 
         console.log($state.snapshot(form));
-        goto("/people");
+
+        if (caller && !personID) {
+            newlyCreatedPersonId.set(createdPerson.id);
+        }
+
+        if (caller) {
+            goto(`/${caller}/create`);
+        } else {
+            goto("/people");
+        }
     }
 </script>
 
@@ -128,7 +141,12 @@
     </div>
 
     <div class="flex justify-between mt-6">
-        <Button variant="destructive" href="/people">Cancel</Button>
+        <Button
+            variant="destructive"
+            href={caller ? `/${caller}/create?` : "/people"}
+        >
+            Cancel
+        </Button>
         <Button disabled={invalidSubmit} onclick={submit}>
             {personID ? "Update" : "Create"}
         </Button>

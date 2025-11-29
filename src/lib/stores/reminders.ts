@@ -36,7 +36,7 @@ export async function loadReminders() {
  */
 export async function createReminder(
   payload: Omit<Reminder, "id" | "createdAt" | "updatedAt">,
-) {
+): Promise<Reminder> {
   const raw = await invoke<string>("handle_reminder_command", {
     command: { action: "Create", payload },
   });
@@ -45,8 +45,10 @@ export async function createReminder(
 
   if (res.status === "success" && res.data) {
     reminders.update((list) => [...list, res.data!]);
+    return res.data;
   } else {
     console.error(res.message);
+    throw new Error(res.message);
   }
 }
 

@@ -36,7 +36,7 @@ export async function loadPeople() {
  */
 export async function createPerson(
   payload: Omit<Person, "id" | "createdAt" | "updatedAt">,
-) {
+): Promise<Person> {
   const raw = await invoke<string>("handle_person_command", {
     command: { action: "Create", payload },
   });
@@ -45,8 +45,10 @@ export async function createPerson(
 
   if (res.status === "success" && res.data) {
     people.update((list) => [...list, res.data!]);
+    return res.data;
   } else {
     console.error(res.message);
+    throw new Error(res.message);
   }
 }
 

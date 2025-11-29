@@ -14,8 +14,12 @@
     import { jobListings } from "$lib/stores/jobListings";
     import CustomDatePicker from "../formDialogs/utils/CustomDatePicker.svelte";
     import { Textarea } from "../ui/textarea";
+    import { newlyCreatedApplicationId } from "$lib/stores/formState";
 
-    let { applicationID }: { applicationID?: number } = $props();
+    let {
+        applicationID,
+        caller,
+    }: { applicationID?: number; caller?: string | null } = $props();
 
     let form = $state<Application>({
         jobListingId: undefined,
@@ -42,18 +46,30 @@
 
     async function submit() {
         if (invalidSubmit()) return;
+
+        let createdApplication: Application;
+
         if (applicationID) {
             await updateApplication(Number(applicationID), form);
+            createdApplication = form;
         } else {
-            await createApplication(form);
+            createdApplication = await createApplication(form);
         }
         console.log($state.snapshot(form));
-        goto("/applications");
+        if (caller && !applicationID) {
+            newlyCreatedApplicationId.set(createdApplication.id);
+        }
+
+        if (caller) {
+            goto(`/${caller}/create`);
+        } else {
+            goto("/applications");
+        }
     }
 </script>
 
 <section class="w-1/3 mx-auto flex flex-col justify-center gap-3">
-    <h1 class="text-xl font-extrabold py-4">Create a new Company</h1>
+    <h1 class="text-xl font-extrabold py-4">Create a new Application</h1>
 
     <div>
         <Label for="joblisting" class="py-2">Joblisting</Label>
@@ -84,7 +100,12 @@
         />
     </div>
     <div class="flex justify-between mt-4">
-        <Button variant="destructive" href="/applications">Cancel</Button>
+        <Button
+            variant="destructive"
+            href={caller ? `/${caller}/create?` : "/applications"}
+        >
+            Cancel
+        </Button>
         <Button disabled={invalidSubmit()} onclick={submit}>Submit</Button>
     </div>
 </section>

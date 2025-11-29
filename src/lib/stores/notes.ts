@@ -36,7 +36,7 @@ export async function loadNotes() {
  */
 export async function createNote(
   payload: Omit<Note, "id" | "createdAt" | "updatedAt">,
-) {
+): Promise<Note> {
   const raw = await invoke<string>("handle_note_command", {
     command: { action: "Create", payload },
   });
@@ -45,8 +45,10 @@ export async function createNote(
 
   if (res.status === "success" && res.data) {
     notes.update((list) => [...list, res.data!]);
+    return res.data;
   } else {
     console.error(res.message);
+    throw new Error(res.message);
   }
 }
 

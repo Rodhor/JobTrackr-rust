@@ -36,7 +36,7 @@ export async function loadJobListings() {
  */
 export async function createJobListing(
   payload: Omit<JobListing, "id" | "createdAt" | "updatedAt">,
-) {
+): Promise<JobListing> {
   const raw = await invoke<string>("handle_job_listing_command", {
     command: { action: "Create", payload },
   });
@@ -45,8 +45,10 @@ export async function createJobListing(
 
   if (res.status === "success" && res.data) {
     jobListings.update((list) => [...list, res.data!]);
+    return res.data;
   } else {
     console.error(res.message);
+    throw new Error(res.message);
   }
 }
 

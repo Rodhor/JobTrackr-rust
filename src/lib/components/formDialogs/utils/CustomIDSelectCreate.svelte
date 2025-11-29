@@ -1,9 +1,14 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import * as Select from "$lib/components/ui/select";
-    import { Input } from "$lib/components/ui/input";
     import { Button } from "$lib/components/ui/button";
-    import { newlyCreatedCompanyId } from "$lib/stores/formState";
+    import {
+        newlyCreatedCompanyId,
+        newlyCreatedPersonId,
+        newlyCreatedJoblistingId,
+        newlyCreatedApplicationId,
+        newlyCreatedInteractionId,
+    } from "$lib/stores/formState";
 
     type NamedEntity = { id: number; displayLabel: string };
 
@@ -44,6 +49,15 @@
         return `/${createNew}/create?${params.toString()}`;
     });
 
+    // Map createNew type to corresponding store
+    const storeMap = {
+        companies: newlyCreatedCompanyId,
+        people: newlyCreatedPersonId,
+        jobListings: newlyCreatedJoblistingId,
+        applications: newlyCreatedApplicationId,
+        interactions: newlyCreatedInteractionId,
+    };
+
     // -- Synchronization --
     $effect(() => {
         if (value !== undefined) {
@@ -57,15 +71,18 @@
         }
     });
 
-    // -- Listen for newly created company --
+    // -- Listen for newly created items --
     onMount(() => {
-        const unsubscribe = newlyCreatedCompanyId.subscribe((id) => {
+        const store = storeMap[createNew as keyof typeof storeMap];
+        if (!store) return;
+
+        const unsubscribe = store.subscribe((id) => {
             if (id !== undefined && items.length > 0) {
-                const newCompany = items.find((c) => c.id === id);
-                if (newCompany) {
+                const newItem = items.find((item) => item.id === id);
+                if (newItem) {
                     value = id;
                     selectValue = String(id);
-                    newlyCreatedCompanyId.set(undefined); // Reset
+                    store.set(undefined); // Reset
                 }
             }
         });
@@ -76,9 +93,13 @@
 
 <div class="flex w-full items-center gap-2">
     <div class="flex-grow">
-        <Select.Root type="single" bind:value={selectValue}>
+        <Select.Root
+            type="single"
+            bind:value={selectValue}
+            disabled={noItemsAvailable}
+        >
             <Select.Trigger class="w-full">
-                {triggerContent}
+                {noItemsAvailable ? "No options available" : triggerContent}
             </Select.Trigger>
             <Select.Content class="w-full">
                 <Select.Group>
@@ -90,7 +111,5 @@
         </Select.Root>
     </div>
 
-    {#if !noItemsAvailable}
-        <Button href={createUrl}>Create new</Button>
-    {/if}
+    <Button href={createUrl}>Create new</Button>
 </div>
