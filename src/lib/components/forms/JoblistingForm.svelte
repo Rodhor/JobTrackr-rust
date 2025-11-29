@@ -8,14 +8,7 @@
         jobListings,
         updateJobListing,
     } from "$lib/stores/jobListings";
-    import {
-        Currency,
-        CurrencyDisplay,
-        SeniorityLevel,
-        SeniorityLevelDisplay,
-        WorkType,
-        WorkTypeDisplay,
-    } from "$lib/types/enums";
+    import { Currency, SeniorityLevel, WorkType } from "$lib/types/enums";
     import type { JobListing } from "$lib/types/jobListing";
     import CustomEnumSelector from "../formDialogs/utils/CustomEnumSelector.svelte";
     import { Input } from "../ui/input";
@@ -100,7 +93,12 @@
 
     <div>
         <Label class="py-2 required">Company:</Label>
-        <CustomIDSelectCreate {items} bind:value={result} />
+        <CustomIDSelectCreate
+            {items}
+            bind:value={result}
+            caller="jobListings"
+            createNew="companies"
+        />
     </div>
 
     <div>

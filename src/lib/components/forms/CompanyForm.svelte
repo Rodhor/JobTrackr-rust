@@ -11,8 +11,10 @@
         createCompany,
         companies,
     } from "$lib/stores/companies";
+    import { newlyCreatedCompanyId } from "$lib/stores/formState";
 
-    let { companyID }: { companyID?: number } = $props();
+    let { companyID, caller }: { companyID?: number; caller?: string | null } =
+        $props();
 
     let form = $state<Company>({
         name: "",
@@ -35,13 +37,29 @@
 
     async function submit() {
         if (invalidSubmit()) return;
+
+        let createdCompany: Company;
+
         if (companyID) {
             await updateCompany(Number(companyID), form);
+            createdCompany = form;
         } else {
-            await createCompany(form);
+            createdCompany = await createCompany(form);
         }
+
         console.log($state.snapshot(form));
-        goto("/companies");
+
+        // Set the store with the newly created company ID
+        if (caller && !companyID) {
+            newlyCreatedCompanyId.set(createdCompany.id);
+        }
+
+        // Then redirect
+        if (caller) {
+            goto(`/${caller}/create`);
+        } else {
+            goto("/companies");
+        }
     }
 </script>
 
@@ -104,7 +122,12 @@
         />
     </div>
     <div class="flex justify-between mt-4">
-        <Button variant="destructive" href="/companies">Cancel</Button>
+        <Button
+            variant="destructive"
+            href={caller ? `/${caller}/create?` : "/companies"}
+        >
+            Cancel
+        </Button>
         <Button disabled={invalidSubmit()} onclick={submit}>Submit</Button>
     </div>
 </section>

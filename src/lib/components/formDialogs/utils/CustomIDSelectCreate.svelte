@@ -1,17 +1,22 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import * as Select from "$lib/components/ui/select";
     import { Input } from "$lib/components/ui/input";
-    import { Checkbox } from "$lib/components/ui/checkbox";
-    import { Label } from "$lib/components/ui/label";
+    import { Button } from "$lib/components/ui/button";
+    import { newlyCreatedCompanyId } from "$lib/stores/formState";
 
     type NamedEntity = { id: number; displayLabel: string };
     type ComponentState = [number | string | undefined, boolean];
 
     let {
         items,
+        caller,
+        createNew,
         value = $bindable<ComponentState>([undefined, false]),
     }: {
         items: NamedEntity[];
+        caller?: string;
+        createNew?: string;
         value: ComponentState;
     } = $props();
 
@@ -35,8 +40,14 @@
         return option?.label ?? "Select option";
     });
 
+    const createUrl = $derived.by(() => {
+        const params = new URLSearchParams();
+        if (caller) params.set("caller", caller);
+        if (createNew) params.set("createNew", createNew);
+        return `/${createNew}/create?${params.toString()}`;
+    });
+
     // -- Synchronization --
-    // Sync external props to internal state
     $effect(() => {
         const [incomingVal, incomingIsManual] = value;
 
@@ -51,14 +62,12 @@
         }
     });
 
-    // Sync internal select to external state
     $effect(() => {
         if (!isManualMode && selectValue) {
             value = [Number(selectValue), false];
         }
     });
 
-    // Force manual mode when items become empty
     $effect(() => {
         if (noItemsAvailable && !value[1]) {
             value = [textValue, true];
@@ -71,13 +80,21 @@
         value = [textValue, true];
     }
 
-    function handleCheckboxChange(checked: boolean) {
-        if (checked) {
-            value = [textValue, true];
-        } else {
-            value = [selectValue ? Number(selectValue) : undefined, false];
-        }
-    }
+    // -- Listen for newly created company --
+    onMount(() => {
+        const unsubscribe = newlyCreatedCompanyId.subscribe((id) => {
+            if (id !== undefined && items.length > 0) {
+                const newCompany = items.find((c) => c.id === id);
+                if (newCompany) {
+                    value = [id, false];
+                    selectValue = String(id);
+                    newlyCreatedCompanyId.set(undefined); // Reset
+                }
+            }
+        });
+
+        return unsubscribe;
+    });
 </script>
 
 <div class="flex w-full items-center gap-2">
@@ -108,15 +125,6 @@
     </div>
 
     {#if !noItemsAvailable}
-        <div class="flex items-center space-x-2">
-            <Checkbox
-                id="manual-mode"
-                checked={value[1]}
-                onCheckedChange={handleCheckboxChange}
-            />
-            <Label for="manual-mode" class="text-sm font-medium cursor-pointer">
-                Manual entry
-            </Label>
-        </div>
+        <Button href={createUrl}>Create new</Button>
     {/if}
 </div>
