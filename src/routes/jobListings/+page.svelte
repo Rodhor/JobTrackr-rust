@@ -5,6 +5,7 @@
         loadJobListings,
         deleteJobListing,
     } from "$lib/stores/jobListings";
+    import { companies } from "$lib/stores/companies";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
     import {
@@ -34,6 +35,11 @@
             month: "short",
             day: "numeric",
         });
+    }
+
+    function getCompanyName(companyId?: number) {
+        if (!companyId) return "—";
+        return $companies.find((c) => c.id === companyId)?.name ?? "—";
     }
 
     function typeColor(type?: WorkType) {
@@ -70,6 +76,7 @@ Table
         >
             <tr>
                 <th class="px-4 py-3">Title</th>
+                <th class="px-4 py-3">Company</th>
                 <th class="px-4 py-3">Work Type</th>
                 <th class="px-4 py-3">Seniority</th>
                 <th class="px-4 py-3">Salary</th>
@@ -84,6 +91,9 @@ Table
                     <td class="px-4 py-3 font-medium text-foreground"
                         >{j.title}</td
                     >
+                    <td class="px-4 py-3 text-muted-foreground">
+                        {getCompanyName(j.companyId)}
+                    </td>
                     <td class="px-4 py-3">
                         <Badge class={typeColor(j.workType as WorkType)}>
                             {WorkTypeDisplay[j.workType as WorkType] || "—"}
@@ -128,7 +138,7 @@ Table
             {#if $jobListings.length === 0}
                 <tr>
                     <td
-                        colspan="6"
+                        colspan="7"
                         class="px-4 py-10 text-center text-sm text-muted-foreground"
                     >
                         No job listings yet.
