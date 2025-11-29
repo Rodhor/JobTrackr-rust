@@ -1,6 +1,5 @@
 <script lang="ts">
     import { Label } from "$lib/components/ui/label";
-    import { Input } from "$lib/components/ui/input";
     import CustomEnumSelector from "$lib/components/formDialogs/utils/CustomEnumSelector.svelte";
     import { Stage } from "$lib/types/enums";
     import { Button } from "$lib/components/ui/button";
@@ -48,7 +47,7 @@
         } else {
             await createApplication(form);
         }
-        console.log(form);
+        console.log($state.snapshot(form));
         goto("/applications");
     }
 </script>

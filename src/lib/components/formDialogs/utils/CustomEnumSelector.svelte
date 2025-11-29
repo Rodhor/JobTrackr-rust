@@ -14,12 +14,10 @@
     } = $props();
 
     const selectionOptions = $derived(() =>
-        Object.entries(enumObject)
-            .filter(([key]) => isNaN(Number(key)))
-            .map(([key, value]) => ({
-                label: key.replace(/_/g, " "),
-                value: String(value),
-            })),
+        Object.entries(enumObject).map(([key, value]) => ({
+            label: key.replace(/_/g, " "),
+            value: String(value),
+        })),
     );
 
     const triggerContent = $derived(() => {

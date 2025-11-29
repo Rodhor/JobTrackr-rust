@@ -40,7 +40,7 @@
         } else {
             await createCompany(form);
         }
-        console.log(form);
+        console.log($state.snapshot(form));
         goto("/companies");
     }
 </script>

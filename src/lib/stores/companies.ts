@@ -35,7 +35,7 @@ export async function loadCompanies() {
  */
 export async function createCompany(
   payload: Omit<Company, "id" | "createdAt" | "updatedAt">,
-) {
+): Promise<Company> {
   const raw = await invoke<string>("handle_company_command", {
     command: { action: "Create", payload },
   });
@@ -43,8 +43,10 @@ export async function createCompany(
 
   if (res.status === "success" && res.data) {
     companies.update((list) => [...list, res.data!]);
+    return res.data; // Add this line
   } else {
     console.error(res.message);
+    throw new Error(res.message); // Also throw on error
   }
 }
 

@@ -7,42 +7,15 @@
     } from "$lib/stores/jobListings";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
-    import JobListingDialog from "$lib/components/formDialogs/JobListingDialog.svelte";
-    import type { JobListing } from "$lib/types/jobListing";
-    import { writable } from "svelte/store";
     import {
         WorkType,
         WorkTypeDisplay,
         SeniorityLevelDisplay,
     } from "$lib/types/enums";
-    import { companies } from "$lib/stores/companies";
+    import { loadCompanies } from "$lib/stores/companies";
 
-    // ----------------------------------------------------------
-    // State
-    // ----------------------------------------------------------
-    const dialogOpen = writable(false);
-    const mode = writable<"create" | "edit">("create");
-    const selectedJobListing = writable<JobListing | null>(null);
-
-    // ----------------------------------------------------------
-    // Lifecycle
-    // ----------------------------------------------------------
     onMount(loadJobListings);
-
-    // ----------------------------------------------------------
-    // Handlers
-    // ----------------------------------------------------------
-    function handleCreate() {
-        selectedJobListing.set(null);
-        mode.set("create");
-        dialogOpen.set(true);
-    }
-
-    function handleEdit(listing: JobListing) {
-        selectedJobListing.set(listing);
-        mode.set("edit");
-        dialogOpen.set(true);
-    }
+    onMount(loadCompanies);
 
     async function handleDelete(id: number) {
         try {
@@ -82,25 +55,8 @@ Header
 <!-- ----------------------------------------------------------- -->
 <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-semibold tracking-tight">Listings</h1>
-
-    {#if $companies.length === 0}
-        <Button
-            disabled
-            variant="secondary"
-            title="Add a company before creating applications."
-        >
-            Add a company first
-        </Button>
-    {:else}
-        <Button onclick={handleCreate}>New Listing</Button>
-    {/if}
+    <Button href="jobListings/create">New Listing</Button>
 </div>
-
-<JobListingDialog
-    bind:open={$dialogOpen}
-    mode={$mode}
-    existingJobListing={$selectedJobListing}
-/>
 
 <!-- ----------------------------------------------------------
 Table
@@ -147,19 +103,21 @@ Table
                             —
                         {/if}
                     </td>
-                    <td class="px-4 py-3">{formatDate(j.createdAt)}</td>
+                    <td class="px-4 py-3">
+                        {j.createdAt ? formatDate(j.createdAt) : "—"}
+                    </td>
                     <td class="px-4 py-3 text-right flex justify-end gap-2">
                         <Button
                             size="sm"
                             variant="outline"
-                            onclick={() => handleEdit(j)}
+                            href="/jobListings/{j.id}"
                         >
                             Edit
                         </Button>
                         <Button
                             size="sm"
                             variant="destructive"
-                            onclick={() => handleDelete(j.id)}
+                            onclick={() => j.id && handleDelete(j.id)}
                         >
                             Delete
                         </Button>
