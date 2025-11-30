@@ -1,50 +1,13 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import {
-        interactions,
-        loadInteractions,
-        deleteInteraction,
-    } from "$lib/stores/interactions";
+    import { interactions, deleteInteraction } from "$lib/stores/interactions";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
     import InteractionDialog from "$lib/components/formDialogs/InteractionDialog.svelte";
     import type { Interaction } from "$lib/types/interaction";
-    import { writable } from "svelte/store";
     import { InteractionType, InteractionTypeDisplay } from "$lib/types/enums";
 
-    // ----------------------------------------------------------
-    // State
-    // ----------------------------------------------------------
-    const dialogOpen = writable(false);
-    const mode = writable<"create" | "edit">("create");
-    const selectedInteraction = writable<Interaction | null>(null);
-
-    // ----------------------------------------------------------
-    // Lifecycle
-    // ----------------------------------------------------------
-    onMount(loadInteractions);
-
-    // ----------------------------------------------------------
-    // Handlers
-    // ----------------------------------------------------------
-    function handleCreate() {
-        selectedInteraction.set(null);
-        mode.set("create");
-        dialogOpen.set(true);
-    }
-
-    function handleEdit(interaction: Interaction) {
-        selectedInteraction.set(interaction);
-        mode.set("edit");
-        dialogOpen.set(true);
-    }
-
     async function handleDelete(id: number) {
-        try {
-            await deleteInteraction(id);
-        } catch (err) {
-            console.error("Failed to delete interaction:", err);
-        }
+        await deleteInteraction(id);
     }
 
     function formatDate(dateStr: string) {
@@ -83,15 +46,8 @@ Header
 ----------------------------------------------------------- -->
 <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-semibold tracking-tight">Interactions</h1>
-    <Button onclick={handleCreate}>New Interaction</Button>
+    <Button href="/interactions/create">New Interaction</Button>
 </div>
-
-<!-- Shared Dialog -->
-<InteractionDialog
-    bind:open={$dialogOpen}
-    mode={$mode}
-    existingInteraction={$selectedInteraction}
-/>
 
 <!-- ----------------------------------------------------------
 Interactions Table
@@ -133,12 +89,12 @@ Interactions Table
                         <Button
                             size="sm"
                             variant="outline"
-                            onclick={() => handleEdit(i)}>Edit</Button
+                            href="/interactions/{i.id}">Edit</Button
                         >
                         <Button
                             size="sm"
                             variant="destructive"
-                            onclick={() => handleDelete(i.id)}
+                            onclick={() => i.id && handleDelete(i.id)}
                         >
                             Delete
                         </Button>

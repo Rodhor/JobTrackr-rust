@@ -1,49 +1,53 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { Button } from "$lib/components/ui/button";
+    import { Switch } from "$lib/components/ui/switch";
+    import { notes } from "$lib/stores/notes";
     import { companies } from "$lib/stores/companies";
-    import { createNote, notes, updateNote } from "$lib/stores/notes";
     import { people } from "$lib/stores/people";
     import { jobListings } from "$lib/stores/jobListings";
     import { applications } from "$lib/stores/applications";
-    import { interactions } from "$lib/stores/interactions";
-    import { NoteType } from "$lib/types/enums";
-    import type { Note } from "$lib/types/note";
-    import CustomEnumSelector from "../formDialogs/utils/CustomEnumSelector.svelte";
+    import {
+        createReminder,
+        reminders,
+        updateReminder,
+    } from "$lib/stores/reminders";
+    import type { Reminder } from "$lib/types/reminder";
     import CustomIDSelectCreate from "../formDialogs/utils/CustomIDSelectCreate.svelte";
+    import CustomDatePicker from "../formDialogs/utils/CustomDatePicker.svelte";
     import { Input } from "../ui/input";
     import { Label } from "../ui/label";
     import { Textarea } from "../ui/textarea";
     import {
+        newlyCreatedReminderId,
         newlyCreatedNoteId,
-        newlyCreatedCompanyId,
-        newlyCreatedPersonId,
-        newlyCreatedJobListingId,
         newlyCreatedApplicationId,
-        newlyCreatedInteractionId,
+        newlyCreatedPersonId,
+        newlyCreatedCompanyId,
+        newlyCreatedJobListingId,
     } from "$lib/stores/formState";
     import { onMount } from "svelte";
 
     let {
-        noteID,
+        reminderID,
         callerChain = [],
-    }: { noteID?: number; callerChain?: string[] } = $props();
+    }: { reminderID?: number; callerChain?: string[] } = $props();
 
-    const companyItems = $derived(
-        $companies
-            .filter((c) => c.id !== undefined)
-            .map((c) => ({
-                id: c.id!,
-                displayLabel: c.name,
+    const noteItems = $derived(
+        $notes
+            .filter((n) => n.id !== undefined)
+            .map((n) => ({
+                id: n.id!,
+                displayLabel: n.title || `Note #${n.id}`,
             })),
     );
 
-    const personItems = $derived(
-        $people
-            .filter((p) => p.id !== undefined)
-            .map((p) => ({
-                id: p.id!,
-                displayLabel: `${p.firstName} ${p.lastName}`,
+    const applicationItems = $derived(
+        $applications
+            .filter((a) => a.id !== undefined)
+            .map((a) => ({
+                id: a.id!,
+                displayLabel: `Application #${a.id}`,
             })),
     );
 
@@ -56,57 +60,51 @@
             .filter((j) => j.id !== undefined && j.companyId === companyId)
             .map((j) => ({
                 id: j.id!,
-                displayLabel: j.title,
+                displayLabel: j.title || `Job Listing #${j.id}`,
             }));
     });
 
-    const applicationItems = $derived(
-        $applications
-            .filter((a) => a.id !== undefined)
-            .map((a) => ({
-                id: a.id!,
-                displayLabel: `Application #${a.id}`,
+    const personItems = $derived(
+        $people
+            .filter((p) => p.id !== undefined)
+            .map((p) => ({
+                id: p.id!,
+                displayLabel: `${p.firstName} ${p.lastName}`,
             })),
     );
 
-    const interactionItems = $derived(
-        $interactions
-            .filter((i) => i.id !== undefined)
-            .map((i) => ({
-                id: i.id!,
-                displayLabel: `Interaction #${i.id}`,
+    const companyItems = $derived(
+        $companies
+            .filter((c) => c.id !== undefined)
+            .map((c) => ({
+                id: c.id!,
+                displayLabel: c.name || `Company #${c.id}`,
             })),
     );
 
-    let form = $state<Note>({
-        interactionId: undefined,
+    let form = $state<Reminder>({
+        title: "",
+        message: "",
+        reminderDate: new Date().toISOString().split("T")[0],
+        isCompleted: false,
+        noteId: undefined,
         jobListingId: undefined,
         applicationId: undefined,
         personId: undefined,
         companyId: undefined,
-        noteType: NoteType.General,
-        title: "",
-        content: "",
     });
 
-    // Separate state variables for binding (like JoblistingForm)
-    let companyId = $state<number | undefined>(undefined);
-    let personId = $state<number | undefined>(undefined);
-    let jobListingId = $state<number | undefined>(undefined);
+    // Separate state variables for binding
+    let noteId = $state<number | undefined>(undefined);
     let applicationId = $state<number | undefined>(undefined);
-    let interactionId = $state<number | undefined>(undefined);
+    let jobListingId = $state<number | undefined>(undefined);
+    let personId = $state<number | undefined>(undefined);
+    let companyId = $state<number | undefined>(undefined);
+    let reminderDate = $state<string>(new Date().toISOString().split("T")[0]);
 
     // Sync state variables to form
     $effect(() => {
-        form.companyId = companyId;
-    });
-
-    $effect(() => {
-        form.personId = personId;
-    });
-
-    $effect(() => {
-        form.jobListingId = jobListingId;
+        form.noteId = noteId;
     });
 
     $effect(() => {
@@ -114,7 +112,19 @@
     });
 
     $effect(() => {
-        form.interactionId = interactionId;
+        form.jobListingId = jobListingId;
+    });
+
+    $effect(() => {
+        form.personId = personId;
+    });
+
+    $effect(() => {
+        form.companyId = companyId;
+    });
+
+    $effect(() => {
+        form.reminderDate = reminderDate;
     });
 
     // Clear job listing when company changes
@@ -125,44 +135,45 @@
     });
 
     $effect(() => {
-        if (!noteID) return;
-        const found = $notes.find((n) => n.id === noteID);
+        if (!reminderID) return;
+        const found = $reminders.find((r) => r.id === reminderID);
         if (found) {
             Object.assign(form, found);
             // Sync to state variables too
-            if (found.companyId) companyId = found.companyId;
-            if (found.personId) personId = found.personId;
-            if (found.jobListingId) jobListingId = found.jobListingId;
+            if (found.noteId) noteId = found.noteId;
             if (found.applicationId) applicationId = found.applicationId;
-            if (found.interactionId) interactionId = found.interactionId;
+            if (found.jobListingId) jobListingId = found.jobListingId;
+            if (found.personId) personId = found.personId;
+            if (found.companyId) companyId = found.companyId;
+            reminderDate = found.reminderDate;
         }
     });
 
-    const invalidSubmit = $derived(!form.title || !form.content);
+    const invalidSubmit = $derived(!form.title || !form.message);
 
     // Listen for newly created items when returning from nested forms
     onMount(() => {
         const unsubscribers: (() => void)[] = [];
 
-        // Subscribe to company store
+        // Subscribe to note store
         unsubscribers.push(
-            newlyCreatedCompanyId.subscribe((id) => {
+            newlyCreatedNoteId.subscribe((id) => {
                 if (id !== undefined) {
-                    console.log("Auto-selecting newly created company:", id);
-                    companyId = id;
-                    jobListingId = undefined; // Clear job listing when company changes
-                    setTimeout(() => newlyCreatedCompanyId.set(undefined), 0);
+                    noteId = id;
+                    setTimeout(() => newlyCreatedNoteId.set(undefined), 0);
                 }
             }),
         );
 
-        // Subscribe to person store
+        // Subscribe to application store
         unsubscribers.push(
-            newlyCreatedPersonId.subscribe((id) => {
+            newlyCreatedApplicationId.subscribe((id) => {
                 if (id !== undefined) {
-                    console.log("Auto-selecting newly created person:", id);
-                    personId = id;
-                    setTimeout(() => newlyCreatedPersonId.set(undefined), 0);
+                    applicationId = id;
+                    setTimeout(
+                        () => newlyCreatedApplicationId.set(undefined),
+                        0,
+                    );
                 }
             }),
         );
@@ -171,17 +182,9 @@
         unsubscribers.push(
             newlyCreatedJobListingId.subscribe((id) => {
                 if (id !== undefined) {
-                    console.log(
-                        "Auto-selecting newly created job listing:",
-                        id,
-                    );
                     // Find the job listing to get its company ID
                     const jobListing = $jobListings.find((j) => j.id === id);
                     if (jobListing && jobListing.companyId) {
-                        console.log(
-                            "Setting company from job listing:",
-                            jobListing.companyId,
-                        );
                         companyId = jobListing.companyId;
                         // Now set the job listing after company is set
                         setTimeout(() => {
@@ -199,36 +202,23 @@
             }),
         );
 
-        // Subscribe to application store
+        // Subscribe to person store
         unsubscribers.push(
-            newlyCreatedApplicationId.subscribe((id) => {
+            newlyCreatedPersonId.subscribe((id) => {
                 if (id !== undefined) {
-                    console.log(
-                        "Auto-selecting newly created application:",
-                        id,
-                    );
-                    applicationId = id;
-                    setTimeout(
-                        () => newlyCreatedApplicationId.set(undefined),
-                        0,
-                    );
+                    personId = id;
+                    setTimeout(() => newlyCreatedPersonId.set(undefined), 0);
                 }
             }),
         );
 
-        // Subscribe to interaction store
+        // Subscribe to company store
         unsubscribers.push(
-            newlyCreatedInteractionId.subscribe((id) => {
+            newlyCreatedCompanyId.subscribe((id) => {
                 if (id !== undefined) {
-                    console.log(
-                        "Auto-selecting newly created interaction:",
-                        id,
-                    );
-                    interactionId = id;
-                    setTimeout(
-                        () => newlyCreatedInteractionId.set(undefined),
-                        0,
-                    );
+                    companyId = id;
+                    jobListingId = undefined; // Clear job listing when company changes
+                    setTimeout(() => newlyCreatedCompanyId.set(undefined), 0);
                 }
             }),
         );
@@ -241,17 +231,17 @@
     async function submit() {
         if (invalidSubmit) return;
 
-        let createdNote: Note;
+        let createdReminder: Reminder;
 
-        if (noteID) {
-            await updateNote(Number(noteID), form);
-            createdNote = form;
+        if (reminderID) {
+            await updateReminder(Number(reminderID), form);
+            createdReminder = form;
         } else {
-            createdNote = await createNote(form);
+            createdReminder = await createReminder(form);
         }
 
-        if (callerChain.length > 0 && !noteID) {
-            newlyCreatedNoteId.set(createdNote.id);
+        if (callerChain.length > 0 && !reminderID) {
+            newlyCreatedReminderId.set(createdReminder.id);
         }
 
         // Go back to where we came from
@@ -273,7 +263,7 @@
                 await goto(url);
             }
         } else {
-            await goto("/notes");
+            await goto("/reminders");
         }
     }
 
@@ -282,39 +272,59 @@
             const url = `/${callerChain[0]}/create`;
             goto(url);
         } else {
-            goto("/notes");
+            goto("/reminders");
         }
     }
 </script>
 
 <section class="w-1/3 mx-auto flex flex-col justify-center gap-4">
     <h1 class="text-xl font-extrabold">
-        {noteID ? "Edit Note" : "Create a new Note"}
+        {reminderID ? "Edit Reminder" : "Create a new Reminder"}
     </h1>
 
     <div class="space-y-4">
+        <!-- Title -->
+        <div>
+            <Label for="title" class="py-2 required">Title</Label>
+            <Input
+                id="title"
+                bind:value={form.title}
+                placeholder="Reminder title"
+            />
+        </div>
+
+        <!-- Date & Status Row -->
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <Label for="reminderDate" class="py-2 required">Date</Label>
+                <CustomDatePicker bind:selectedDate={reminderDate} />
+            </div>
+            <div>
+                <Label class="py-2">Status</Label>
+                <div
+                    class="flex items-center h-10 px-3 border border-input rounded-md bg-background"
+                >
+                    <span class="text-sm text-muted-foreground">
+                        {form.isCompleted ? "Done" : "Pending"}
+                    </span>
+                    <Switch bind:checked={form.isCompleted} />
+                </div>
+            </div>
+        </div>
+
+        <!-- Company -->
         <div>
             <Label for="company" class="py-2">Company</Label>
             <CustomIDSelectCreate
                 items={companyItems}
                 bind:value={companyId}
                 {callerChain}
-                currentPage="notes"
+                currentPage="reminders"
                 createNew="companies"
             />
         </div>
 
-        <div>
-            <Label for="person" class="py-2">Person</Label>
-            <CustomIDSelectCreate
-                items={personItems}
-                bind:value={personId}
-                {callerChain}
-                currentPage="notes"
-                createNew="people"
-            />
-        </div>
-
+        <!-- Job Listing -->
         <div>
             <Label for="jobListing" class="py-2">
                 Job Listing
@@ -328,57 +338,55 @@
                 items={jobListingItems}
                 bind:value={jobListingId}
                 {callerChain}
-                currentPage="notes"
+                currentPage="reminders"
                 createNew="jobListings"
                 disabled={companyId === undefined}
             />
         </div>
 
+        <!-- Application -->
         <div>
             <Label for="application" class="py-2">Application</Label>
             <CustomIDSelectCreate
                 items={applicationItems}
                 bind:value={applicationId}
                 {callerChain}
-                currentPage="notes"
+                currentPage="reminders"
                 createNew="applications"
             />
         </div>
 
+        <!-- Person -->
         <div>
-            <Label for="interaction" class="py-2">Interaction</Label>
+            <Label for="person" class="py-2">Person</Label>
             <CustomIDSelectCreate
-                items={interactionItems}
-                bind:value={interactionId}
+                items={personItems}
+                bind:value={personId}
                 {callerChain}
-                currentPage="notes"
-                createNew="interactions"
+                currentPage="reminders"
+                createNew="people"
             />
         </div>
 
+        <!-- Note -->
         <div>
-            <Label for="noteType" class="py-2">Note Type</Label>
-            <CustomEnumSelector
-                enumObject={NoteType}
-                bind:selectedValue={form.noteType}
+            <Label for="note" class="py-2">Note</Label>
+            <CustomIDSelectCreate
+                items={noteItems}
+                bind:value={noteId}
+                {callerChain}
+                currentPage="reminders"
+                createNew="notes"
             />
         </div>
 
+        <!-- Message -->
         <div>
-            <Label for="title" class="py-2 required">Title</Label>
-            <Input
-                id="title"
-                bind:value={form.title}
-                placeholder="Note title..."
-            />
-        </div>
-
-        <div>
-            <Label for="content" class="py-2 required">Content</Label>
+            <Label for="message" class="py-2 required">Message</Label>
             <Textarea
-                id="content"
-                bind:value={form.content}
-                placeholder="Note content..."
+                id="message"
+                bind:value={form.message}
+                placeholder="Reminder details..."
                 rows={6}
             />
         </div>
@@ -387,7 +395,7 @@
     <div class="flex justify-between mt-6">
         <Button variant="destructive" onclick={handleCancel}>Cancel</Button>
         <Button disabled={invalidSubmit} onclick={submit}>
-            {noteID ? "Update" : "Create"}
+            {reminderID ? "Update" : "Create"}
         </Button>
     </div>
 </section>

@@ -5,7 +5,7 @@
     import {
         newlyCreatedCompanyId,
         newlyCreatedPersonId,
-        newlyCreatedJoblistingId,
+        newlyCreatedJobListingId,
         newlyCreatedApplicationId,
         newlyCreatedInteractionId,
     } from "$lib/stores/formState";
@@ -14,13 +14,17 @@
 
     let {
         items,
-        caller,
+        callerChain = [],
         createNew,
+        currentPage,
+        disabled = false,
         value = $bindable<number | undefined>(undefined),
     }: {
         items: NamedEntity[];
-        caller?: string;
+        callerChain?: string[];
         createNew?: string;
+        currentPage?: string;
+        disabled?: boolean;
         value: number | undefined;
     } = $props();
 
@@ -29,6 +33,7 @@
 
     // -- Derived Logic --
     const noItemsAvailable = $derived(items.length === 0);
+    const isDisabled = $derived(noItemsAvailable || disabled);
 
     const selectionOptions = $derived.by(() =>
         items.map((o) => ({
@@ -44,16 +49,26 @@
 
     const createUrl = $derived.by(() => {
         const params = new URLSearchParams();
-        if (caller) params.set("caller", caller);
-        if (createNew) params.set("createNew", createNew);
-        return `/${createNew}/create?${params.toString()}`;
+        // Add current page to chain
+        const newChain = currentPage
+            ? [...callerChain, currentPage]
+            : callerChain;
+        console.log("===== CustomIDSelectCreate =====");
+        console.log("currentPage:", currentPage);
+        console.log("callerChain received:", callerChain);
+        console.log("newChain built:", newChain);
+        params.set("callerChain", newChain.join(","));
+        const finalUrl = `/${createNew}/create?${params.toString()}`;
+        console.log("Final URL:", finalUrl);
+        console.log("===== End CustomIDSelectCreate =====");
+        return finalUrl;
     });
 
     // Map createNew type to corresponding store
     const storeMap = {
         companies: newlyCreatedCompanyId,
         people: newlyCreatedPersonId,
-        jobListings: newlyCreatedJoblistingId,
+        jobListings: newlyCreatedJobListingId,
         applications: newlyCreatedApplicationId,
         interactions: newlyCreatedInteractionId,
     };
@@ -96,10 +111,14 @@
         <Select.Root
             type="single"
             bind:value={selectValue}
-            disabled={noItemsAvailable}
+            disabled={isDisabled}
         >
             <Select.Trigger class="w-full">
-                {noItemsAvailable ? "No options available" : triggerContent}
+                {isDisabled
+                    ? noItemsAvailable
+                        ? "No options available"
+                        : "Select option"
+                    : triggerContent}
             </Select.Trigger>
             <Select.Content class="w-full">
                 <Select.Group>

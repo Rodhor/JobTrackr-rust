@@ -18,8 +18,8 @@
 
     let {
         applicationID,
-        caller,
-    }: { applicationID?: number; caller?: string | null } = $props();
+        callerChain = [],
+    }: { applicationID?: number; callerChain?: string[] } = $props();
 
     let form = $state<Application>({
         jobListingId: undefined,
@@ -42,10 +42,11 @@
                 displayLabel: j.title,
             })),
     );
-    const invalidSubmit = $derived(() => !form.appliedDate);
+
+    const invalidSubmit = $derived(!form.appliedDate);
 
     async function submit() {
-        if (invalidSubmit()) return;
+        if (invalidSubmit) return;
 
         let createdApplication: Application;
 
@@ -55,57 +56,79 @@
         } else {
             createdApplication = await createApplication(form);
         }
+
         console.log($state.snapshot(form));
-        if (caller && !applicationID) {
+        if (callerChain.length > 0 && !applicationID) {
             newlyCreatedApplicationId.set(createdApplication.id);
         }
 
-        if (caller) {
-            goto(`/${caller}/create`);
+        // Go back: pop last item from chain
+        if (callerChain.length > 1) {
+            const backToCaller = callerChain[callerChain.length - 2];
+            const newChain = callerChain.slice(0, -1);
+            const params = new URLSearchParams();
+            params.set("callerChain", newChain.join(","));
+            goto(`/${backToCaller}/create?${params.toString()}`);
+        } else if (callerChain.length === 1) {
+            goto(`/${callerChain[0]}/create`);
+        } else {
+            goto("/applications");
+        }
+    }
+
+    function handleCancel() {
+        if (callerChain.length > 0) {
+            goto(`/${callerChain[0]}/create`);
         } else {
             goto("/applications");
         }
     }
 </script>
 
-<section class="w-1/3 mx-auto flex flex-col justify-center gap-3">
-    <h1 class="text-xl font-extrabold py-4">Create a new Application</h1>
+<section class="w-1/3 mx-auto flex flex-col justify-center gap-4">
+    <h1 class="text-xl font-extrabold">
+        {applicationID ? "Edit Application" : "Create a new Application"}
+    </h1>
 
-    <div>
-        <Label for="joblisting" class="py-2">Joblisting</Label>
-        <CustomIDSelector
-            items={jobListingItems()}
-            bind:selectedId={form.jobListingId}
-        />
+    <div class="space-y-4">
+        <div>
+            <Label for="joblisting" class="py-2">Job Listing</Label>
+            <CustomIDSelector
+                items={jobListingItems()}
+                bind:selectedId={form.jobListingId}
+            />
+        </div>
+
+        <div>
+            <Label for="stage" class="py-2">Stage</Label>
+            <CustomEnumSelector
+                enumObject={Stage}
+                bind:selectedValue={form.stage as Stage | undefined}
+            />
+        </div>
+
+        <div>
+            <Label for="applicationDate" class="py-2 required"
+                >Date Applied</Label
+            >
+            <CustomDatePicker bind:selectedDate={form.appliedDate} />
+        </div>
+
+        <div>
+            <Label for="notes" class="py-2">Notes</Label>
+            <Textarea
+                id="notes"
+                class="! min-h-30"
+                bind:value={form.applicationNotes}
+                placeholder="Add notes or context..."
+            />
+        </div>
     </div>
 
-    <div>
-        <Label for="stage" class="py-2">Stage</Label>
-        <CustomEnumSelector
-            enumObject={Stage}
-            bind:selectedValue={form.stage as Stage | undefined}
-        />
-    </div>
-    <div>
-        <Label for="applicationDate" class="py-2 required">Date Applied</Label
-        ><CustomDatePicker bind:selectedDate={form.appliedDate} />
-    </div>
-
-    <div>
-        <Label for="notes" class="py-2">Notes</Label>
-        <Textarea
-            class="!min-h-30"
-            bind:value={form.applicationNotes}
-            placeholder="Add notes or context..."
-        />
-    </div>
-    <div class="flex justify-between mt-4">
-        <Button
-            variant="destructive"
-            href={caller ? `/${caller}/create?` : "/applications"}
-        >
-            Cancel
+    <div class="flex justify-between mt-6">
+        <Button variant="destructive" onclick={handleCancel}>Cancel</Button>
+        <Button disabled={invalidSubmit} onclick={submit}>
+            {applicationID ? "Update" : "Create"}
         </Button>
-        <Button disabled={invalidSubmit()} onclick={submit}>Submit</Button>
     </div>
 </section>

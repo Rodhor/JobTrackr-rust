@@ -11,8 +11,10 @@
     import { Input } from "../ui/input";
     import { Label } from "../ui/label";
 
-    let { personID, caller }: { personID?: number; caller?: string | null } =
-        $props();
+    let {
+        personID,
+        callerChain = [],
+    }: { personID?: number; callerChain?: string[] } = $props();
 
     const items = $derived(
         $companies
@@ -56,12 +58,27 @@
 
         console.log($state.snapshot(form));
 
-        if (caller && !personID) {
+        if (callerChain.length > 0 && !personID) {
             newlyCreatedPersonId.set(createdPerson.id);
         }
 
-        if (caller) {
-            goto(`/${caller}/create`);
+        // Go back: pop last item from chain
+        if (callerChain.length > 1) {
+            const backToCaller = callerChain[callerChain.length - 2];
+            const newChain = callerChain.slice(0, -1);
+            const params = new URLSearchParams();
+            params.set("callerChain", newChain.join(","));
+            goto(`/${backToCaller}/create?${params.toString()}`);
+        } else if (callerChain.length === 1) {
+            goto(`/${callerChain[0]}/create`);
+        } else {
+            goto("/people");
+        }
+    }
+
+    function handleCancel() {
+        if (callerChain.length > 0) {
+            goto(`/${callerChain[0]}/create`);
         } else {
             goto("/people");
         }
@@ -75,11 +92,11 @@
 
     <div class="space-y-4">
         <div>
-            <Label for="company" class="py-2 required">Company</Label>
+            <Label for="company" class="py-2">Company</Label>
             <CustomIDSelectCreate
                 {items}
                 bind:value={form.companyId}
-                caller="people"
+                {callerChain}
                 createNew="companies"
             />
         </div>
@@ -141,12 +158,7 @@
     </div>
 
     <div class="flex justify-between mt-6">
-        <Button
-            variant="destructive"
-            href={caller ? `/${caller}/create?` : "/people"}
-        >
-            Cancel
-        </Button>
+        <Button variant="destructive" onclick={handleCancel}>Cancel</Button>
         <Button disabled={invalidSubmit} onclick={submit}>
             {personID ? "Update" : "Create"}
         </Button>

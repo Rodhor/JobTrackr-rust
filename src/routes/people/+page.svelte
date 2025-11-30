@@ -15,8 +15,6 @@
         other: "bg-muted text-foreground",
     };
 
-    onMount(loadPeople);
-
     function getRoleColor(role?: Role): string {
         return role ? roleColorMap[role] : roleColorMap[Role.Other];
     }

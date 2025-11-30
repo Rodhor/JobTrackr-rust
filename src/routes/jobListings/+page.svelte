@@ -1,10 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import {
-        jobListings,
-        loadJobListings,
-        deleteJobListing,
-    } from "$lib/stores/jobListings";
+    import { jobListings, deleteJobListing } from "$lib/stores/jobListings";
     import { companies } from "$lib/stores/companies";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
@@ -13,10 +8,6 @@
         WorkTypeDisplay,
         SeniorityLevelDisplay,
     } from "$lib/types/enums";
-    import { loadCompanies } from "$lib/stores/companies";
-
-    onMount(loadJobListings);
-    onMount(loadCompanies);
 
     async function handleDelete(id: number) {
         try {

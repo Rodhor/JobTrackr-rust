@@ -1,49 +1,11 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import {
-        applications,
-        loadApplications,
-        deleteApplication,
-    } from "$lib/stores/applications";
+    import { applications, deleteApplication } from "$lib/stores/applications";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
     import { Stage } from "$lib/types/enums";
-    import type { Application } from "$lib/types/application";
-    import { writable } from "svelte/store";
-
-    // ----------------------------------------------------------
-    // State
-    // ----------------------------------------------------------
-    const dialogOpen = writable(false);
-    const mode = writable<"create" | "edit">("create");
-    const selectedApplication = writable<Application | null>(null);
-
-    // ----------------------------------------------------------
-    // Lifecycle
-    // ----------------------------------------------------------
-    onMount(loadApplications);
-
-    // ----------------------------------------------------------
-    // Handlers
-    // ----------------------------------------------------------
-    function handleCreate() {
-        selectedApplication.set(null);
-        mode.set("create");
-        dialogOpen.set(true);
-    }
-
-    function handleEdit(application: Application) {
-        selectedApplication.set(application);
-        mode.set("edit");
-        dialogOpen.set(true);
-    }
 
     async function handleDelete(id: number) {
-        try {
-            await deleteApplication(id);
-        } catch (err) {
-            console.error("Failed to delete application:", err);
-        }
+        await deleteApplication(id);
     }
 
     // ----------------------------------------------------------

@@ -1,11 +1,8 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
-    import { notes, loadNotes, deleteNote } from "$lib/stores/notes";
+    import { notes, deleteNote } from "$lib/stores/notes";
     import { NoteType, NoteTypeDisplay } from "$lib/types/enums";
-
-    onMount(loadNotes);
 
     async function handleDelete(id: number) {
         try {

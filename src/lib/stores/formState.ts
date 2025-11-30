@@ -6,7 +6,7 @@ export const newlyCreatedNoteId = writable<number | undefined>(undefined);
 export const newlyCreatedApplicationId = writable<number | undefined>(
   undefined,
 );
-export const newlyCreatedJoblistingId = writable<number | undefined>(undefined);
+export const newlyCreatedJobListingId = writable<number | undefined>(undefined);
 export const newlyCreatedInteractionId = writable<number | undefined>(
   undefined,
 );

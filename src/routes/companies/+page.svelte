@@ -1,23 +1,9 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import {
-        companies,
-        loadCompanies,
-        deleteCompany,
-    } from "$lib/stores/companies";
+    import { companies, deleteCompany } from "$lib/stores/companies";
     import { Button } from "$lib/components/ui/button";
 
-    // ----------------------------------------------------------
-    // Lifecycle
-    // ----------------------------------------------------------
-    onMount(loadCompanies);
-
     async function handleDelete(id: number) {
-        try {
-            await deleteCompany(id);
-        } catch (err) {
-            console.error("Failed to delete company:", err);
-        }
+        await deleteCompany(id);
     }
 
     function formatDate(dateStr: string) {

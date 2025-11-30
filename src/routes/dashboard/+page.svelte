@@ -1,12 +1,11 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { applications, loadApplications } from "$lib/stores/applications";
-    import { companies, loadCompanies } from "$lib/stores/companies";
-    import { jobListings, loadJobListings } from "$lib/stores/jobListings";
-    import { interactions, loadInteractions } from "$lib/stores/interactions";
-    import { notes, loadNotes } from "$lib/stores/notes";
-    import { reminders, loadReminders } from "$lib/stores/reminders";
-    import { people, loadPeople } from "$lib/stores/people";
+    import { applications } from "$lib/stores/applications";
+    import { companies } from "$lib/stores/companies";
+    import { jobListings } from "$lib/stores/jobListings";
+    import { interactions } from "$lib/stores/interactions";
+    import { notes } from "$lib/stores/notes";
+    import { reminders } from "$lib/stores/reminders";
+    import { people } from "$lib/stores/people";
     import { StageDisplay } from "$lib/types/enums";
     import {
         Card,
@@ -16,21 +15,6 @@
     } from "$lib/components/ui/card";
     import { Badge } from "$lib/components/ui/badge";
     import { Separator } from "$lib/components/ui/separator";
-
-    // ----------------------------------------------------------
-    // Lifecycle
-    // ----------------------------------------------------------
-    onMount(async () => {
-        await Promise.all([
-            loadApplications(),
-            loadCompanies(),
-            loadJobListings(),
-            loadInteractions(),
-            loadNotes(),
-            loadReminders(),
-            loadPeople(),
-        ]);
-    });
 
     // ----------------------------------------------------------
     // Derived statistics
