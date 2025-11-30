@@ -11,9 +11,9 @@
     } from "$lib/stores/interactions";
     import { InteractionType } from "$lib/types/enums";
     import type { Interaction } from "$lib/types/interaction";
-    import CustomEnumSelector from "../formDialogs/utils/CustomEnumSelector.svelte";
-    import CustomIDSelectCreate from "../formDialogs/utils/CustomIDSelectCreate.svelte";
-    import CustomDatePicker from "../formDialogs/utils/CustomDatePicker.svelte";
+    import CustomEnumSelector from "./utils/CustomEnumSelector.svelte";
+    import CustomIDSelectCreate from "./utils/CustomIDSelectCreate.svelte";
+    import CustomDatePicker from "./utils/CustomDatePicker.svelte";
     import { Input } from "../ui/input";
     import { Label } from "../ui/label";
     import { Textarea } from "../ui/textarea";

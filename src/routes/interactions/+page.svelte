@@ -2,7 +2,6 @@
     import { interactions, deleteInteraction } from "$lib/stores/interactions";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
-    import type { Interaction } from "$lib/types/interaction";
     import { InteractionType, InteractionTypeDisplay } from "$lib/types/enums";
     import Trash2Icon from "lucide-svelte/icons/trash-2";
     import PencilIcon from "lucide-svelte/icons/pencil";

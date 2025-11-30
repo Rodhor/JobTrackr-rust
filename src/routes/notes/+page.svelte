@@ -9,11 +9,7 @@
     import CalendarIcon from "lucide-svelte/icons/calendar";
 
     async function handleDelete(id: number) {
-        try {
-            await deleteNote(id);
-        } catch (err) {
-            console.error("Failed to delete note:", err);
-        }
+        await deleteNote(id);
     }
 
     function formatDate(dateStr?: string) {

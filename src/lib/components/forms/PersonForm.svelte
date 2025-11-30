@@ -6,8 +6,8 @@
     import { people, createPerson, updatePerson } from "$lib/stores/people";
     import { Role } from "$lib/types/enums";
     import type { Person } from "$lib/types/person";
-    import CustomEnumSelector from "../formDialogs/utils/CustomEnumSelector.svelte";
-    import CustomIDSelectCreate from "../formDialogs/utils/CustomIDSelectCreate.svelte";
+    import CustomEnumSelector from "./utils/CustomEnumSelector.svelte";
+    import CustomIDSelectCreate from "./utils/CustomIDSelectCreate.svelte";
     import { Input } from "../ui/input";
     import { Label } from "../ui/label";
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Label } from "$lib/components/ui/label";
     import { Input } from "$lib/components/ui/input";
-    import CustomEnumSelector from "$lib/components/formDialogs/utils/CustomEnumSelector.svelte";
+    import CustomEnumSelector from "./utils/CustomEnumSelector.svelte";
     import { WorkType } from "$lib/types/enums";
     import type { Company } from "$lib/types/company";
     import { Button } from "$lib/components/ui/button";

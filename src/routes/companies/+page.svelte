@@ -2,11 +2,24 @@
     import { companies, deleteCompany } from "$lib/stores/companies";
     import { jobListings } from "$lib/stores/jobListings";
     import { Button } from "$lib/components/ui/button";
-    import Trash2Icon from "lucide-svelte/icons/trash-2";
     import PencilIcon from "lucide-svelte/icons/pencil";
     import BuildingIcon from "lucide-svelte/icons/building-2";
     import CalendarIcon from "lucide-svelte/icons/calendar";
     import LinkIcon from "lucide-svelte/icons/link";
+    import DeleteAlert from "$lib/components/forms/utils/DeleteAlert.svelte";
+
+    let confirmDelete = $state(false);
+    let selectedCompanyId: number | null = $state(null);
+    let selectedCompanyName: string = $state("");
+
+    $effect(() => {
+        if (confirmDelete && selectedCompanyId) {
+            handleDelete(selectedCompanyId);
+            confirmDelete = false;
+            selectedCompanyId = null;
+            selectedCompanyName = "";
+        }
+    });
 
     async function handleDelete(id: number) {
         await deleteCompany(id);
@@ -164,16 +177,20 @@ Empty State
                                     <PencilIcon class="size-4" />
                                     Edit
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    class="gap-2"
-                                    onclick={() =>
-                                        company.id && handleDelete(company.id)}
-                                >
-                                    <Trash2Icon class="size-4" />
-                                    Delete
-                                </Button>
+                                <DeleteAlert
+                                    objectText="'{company.name}'"
+                                    description="This will also delete all job listings for this company."
+                                    onDelete={async () => {
+                                        await deleteCompany(company.id!);
+                                        jobListings.update((listings) =>
+                                            listings.filter(
+                                                (listing) =>
+                                                    listing.companyId !==
+                                                    company.id,
+                                            ),
+                                        );
+                                    }}
+                                />
                             </div>
                         </td>
                     </tr>

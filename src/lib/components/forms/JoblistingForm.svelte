@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import CustomIDSelectCreate from "$lib/components/formDialogs/utils/CustomIDSelectCreate.svelte";
+    import CustomIDSelectCreate from "./utils/CustomIDSelectCreate.svelte";
     import { Button } from "$lib/components/ui/button";
     import { companies } from "$lib/stores/companies";
     import { newlyCreatedJobListingId } from "$lib/stores/formState";
@@ -11,7 +11,7 @@
     } from "$lib/stores/jobListings";
     import { Currency, SeniorityLevel, WorkType } from "$lib/types/enums";
     import type { JobListing } from "$lib/types/jobListing";
-    import CustomEnumSelector from "../formDialogs/utils/CustomEnumSelector.svelte";
+    import CustomEnumSelector from "./utils/CustomEnumSelector.svelte";
     import { Input } from "../ui/input";
     import { Label } from "../ui/label";
     import { Textarea } from "../ui/textarea";

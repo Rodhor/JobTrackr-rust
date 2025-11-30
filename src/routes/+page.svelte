@@ -22,42 +22,20 @@
     import { applications, loadApplications } from "$lib/stores/applications";
     import { reminders, loadReminders } from "$lib/stores/reminders";
     import { notes, loadNotes } from "$lib/stores/notes";
-    import { companies, loadCompanies } from "$lib/stores/companies";
-    import { jobListings, loadJobListings } from "$lib/stores/jobListings";
-    import { interactions, loadInteractions } from "$lib/stores/interactions";
-    import { people, loadPeople } from "$lib/stores/people";
+    import { loadCompanies } from "$lib/stores/companies";
+    import { loadJobListings } from "$lib/stores/jobListings";
+    import { loadInteractions } from "$lib/stores/interactions";
+    import { loadPeople } from "$lib/stores/people";
 
     onMount(async () => {
-        try {
-            // Load essential stores first and wait
-            await Promise.all([
-                loadApplications(),
-                loadReminders(),
-                loadNotes(),
-            ]);
+        await Promise.all([loadApplications(), loadReminders(), loadNotes()]);
 
-            // Then load background data in parallel (doesn't block UI)
-            Promise.allSettled([
-                loadCompanies(),
-                loadJobListings(),
-                loadInteractions(),
-                loadPeople(),
-            ])
-                .then((results) => {
-                    // Log any failures for debugging
-                    results.forEach((result, index) => {
-                        if (result.status === "rejected") {
-                            console.error(
-                                `Background store ${index} failed:`,
-                                result.reason,
-                            );
-                        }
-                    });
-                })
-                .catch(console.error);
-        } catch (error) {
-            console.error("Failed to load essential stores:", error);
-        }
+        Promise.allSettled([
+            loadCompanies(),
+            loadJobListings(),
+            loadInteractions(),
+            loadPeople(),
+        ]);
     });
 
     function formatDate(dateString?: string) {

@@ -13,8 +13,8 @@
         updateReminder,
     } from "$lib/stores/reminders";
     import type { Reminder } from "$lib/types/reminder";
-    import CustomIDSelectCreate from "../formDialogs/utils/CustomIDSelectCreate.svelte";
-    import CustomDatePicker from "../formDialogs/utils/CustomDatePicker.svelte";
+    import CustomIDSelectCreate from "./utils/CustomIDSelectCreate.svelte";
+    import CustomDatePicker from "./utils/CustomDatePicker.svelte";
     import { Input } from "../ui/input";
     import { Label } from "../ui/label";
     import { Textarea } from "../ui/textarea";

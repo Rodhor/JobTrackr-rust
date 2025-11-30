@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Label } from "$lib/components/ui/label";
-    import CustomEnumSelector from "$lib/components/formDialogs/utils/CustomEnumSelector.svelte";
+    import CustomEnumSelector from "./utils/CustomEnumSelector.svelte";
     import { Stage } from "$lib/types/enums";
     import { Button } from "$lib/components/ui/button";
     import { goto } from "$app/navigation";
@@ -10,9 +10,9 @@
         applications,
     } from "$lib/stores/applications";
     import type { Application } from "$lib/types/application";
-    import CustomIDSelector from "../formDialogs/utils/CustomIDSelector.svelte";
+    import CustomIDSelector from "./utils/CustomIDSelector.svelte";
     import { jobListings } from "$lib/stores/jobListings";
-    import CustomDatePicker from "../formDialogs/utils/CustomDatePicker.svelte";
+    import CustomDatePicker from "./utils/CustomDatePicker.svelte";
     import { Textarea } from "../ui/textarea";
     import { newlyCreatedApplicationId } from "$lib/stores/formState";
 

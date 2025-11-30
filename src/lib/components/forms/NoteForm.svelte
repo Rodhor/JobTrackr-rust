@@ -9,8 +9,8 @@
     import { interactions } from "$lib/stores/interactions";
     import { NoteType } from "$lib/types/enums";
     import type { Note } from "$lib/types/note";
-    import CustomEnumSelector from "../formDialogs/utils/CustomEnumSelector.svelte";
-    import CustomIDSelectCreate from "../formDialogs/utils/CustomIDSelectCreate.svelte";
+    import CustomEnumSelector from "./utils/CustomEnumSelector.svelte";
+    import CustomIDSelectCreate from "./utils/CustomIDSelectCreate.svelte";
     import { Input } from "../ui/input";
     import { Label } from "../ui/label";
     import { Textarea } from "../ui/textarea";

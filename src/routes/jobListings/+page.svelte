@@ -15,11 +15,7 @@
     import DollarSignIcon from "lucide-svelte/icons/dollar-sign";
 
     async function handleDelete(id: number) {
-        try {
-            await deleteJobListing(id);
-        } catch (err) {
-            console.error("Failed to delete job listing:", err);
-        }
+        await deleteJobListing(id);
     }
 
     function formatDate(dateStr: string) {
