@@ -249,10 +249,7 @@ Table
                                 <Badge
                                     class={`${status.color} cursor-pointer flex items-center gap-1. 5`}
                                 >
-                                    <svelte:component
-                                        this={status.icon}
-                                        class="size-3"
-                                    />
+                                    <svelte this={status.icon} class="size-3" />
                                     {status.label}
                                 </Badge>
                             </button>
