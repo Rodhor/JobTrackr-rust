@@ -7,12 +7,25 @@
         updateReminder,
     } from "$lib/stores/reminders";
     import type { Reminder } from "$lib/types/reminder";
-    import Trash2Icon from "lucide-svelte/icons/trash-2";
     import PencilIcon from "lucide-svelte/icons/pencil";
     import CalendarIcon from "lucide-svelte/icons/calendar";
     import CheckCircleIcon from "lucide-svelte/icons/check-circle";
     import AlertCircleIcon from "lucide-svelte/icons/alert-circle";
     import ClockIcon from "lucide-svelte/icons/clock";
+    import DeleteAlert from "$lib/components/forms/utils/DeleteAlert.svelte";
+
+    let confirmDelete = $state(false);
+    let selectedReminderId: number | null = $state(null);
+    let selectedReminderTitle: string = $state("");
+
+    $effect(() => {
+        if (confirmDelete && selectedReminderId) {
+            handleDelete(selectedReminderId);
+            confirmDelete = false;
+            selectedReminderId = null;
+            selectedReminderTitle = "";
+        }
+    });
 
     async function handleDelete(id: number) {
         await deleteReminder(id);
@@ -257,15 +270,13 @@ Table
                                     <PencilIcon class="size-4" />
                                     Edit
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    class="gap-2"
-                                    onclick={() => r.id && handleDelete(r.id)}
-                                >
-                                    <Trash2Icon class="size-4" />
-                                    Delete
-                                </Button>
+                                <DeleteAlert
+                                    objectText="'{r.title || 'Reminder'}'"
+                                    description="This will delete the reminder record."
+                                    onDelete={async () => {
+                                        await deleteReminder(r.id!);
+                                    }}
+                                />
                             </div>
                         </td>
                     </tr>

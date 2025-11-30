@@ -8,11 +8,24 @@
         WorkTypeDisplay,
         SeniorityLevelDisplay,
     } from "$lib/types/enums";
-    import Trash2Icon from "lucide-svelte/icons/trash-2";
     import PencilIcon from "lucide-svelte/icons/pencil";
     import BriefcaseIcon from "lucide-svelte/icons/briefcase";
     import CalendarIcon from "lucide-svelte/icons/calendar";
     import DollarSignIcon from "lucide-svelte/icons/dollar-sign";
+    import DeleteAlert from "$lib/components/forms/utils/DeleteAlert.svelte";
+
+    let confirmDelete = $state(false);
+    let selectedJobListingId: number | null = $state(null);
+    let selectedJobListingTitle: string = $state("");
+
+    $effect(() => {
+        if (confirmDelete && selectedJobListingId) {
+            handleDelete(selectedJobListingId);
+            confirmDelete = false;
+            selectedJobListingId = null;
+            selectedJobListingTitle = "";
+        }
+    });
 
     async function handleDelete(id: number) {
         await deleteJobListing(id);
@@ -209,16 +222,13 @@ Empty State
                                     <PencilIcon class="size-4" />
                                     Edit
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    class="gap-2"
-                                    onclick={() =>
-                                        listing.id && handleDelete(listing.id)}
-                                >
-                                    <Trash2Icon class="size-4" />
-                                    Delete
-                                </Button>
+                                <DeleteAlert
+                                    objectText="'{listing.title}'"
+                                    description="This will delete the job listing record."
+                                    onDelete={async () => {
+                                        await deleteJobListing(listing.id!);
+                                    }}
+                                />
                             </div>
                         </td>
                     </tr>

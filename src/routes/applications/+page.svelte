@@ -3,10 +3,23 @@
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
     import { Stage } from "$lib/types/enums";
-    import Trash2Icon from "lucide-svelte/icons/trash-2";
     import PencilIcon from "lucide-svelte/icons/pencil";
     import CheckSquareIcon from "lucide-svelte/icons/check-square";
     import CalendarIcon from "lucide-svelte/icons/calendar";
+    import DeleteAlert from "$lib/components/forms/utils/DeleteAlert.svelte";
+
+    let confirmDelete = $state(false);
+    let selectedApplicationId: number | null = $state(null);
+    let selectedApplicationLabel: string = $state("");
+
+    $effect(() => {
+        if (confirmDelete && selectedApplicationId) {
+            handleDelete(selectedApplicationId);
+            confirmDelete = false;
+            selectedApplicationId = null;
+            selectedApplicationLabel = "";
+        }
+    });
 
     async function handleDelete(id: number) {
         await deleteApplication(id);
@@ -206,17 +219,17 @@ Empty State
                                     <PencilIcon class="size-4" />
                                     Edit
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    class="gap-2"
-                                    onclick={() =>
-                                        application.id &&
-                                        handleDelete(application.id)}
-                                >
-                                    <Trash2Icon class="size-4" />
-                                    Delete
-                                </Button>
+                                <DeleteAlert
+                                    objectText="'{application.displayLabel ??
+                                        application.jobListingId ??
+                                        'Application'}'"
+                                    description="This will delete the application record."
+                                    onDelete={async () => {
+                                        await deleteApplication(
+                                            application.id!,
+                                        );
+                                    }}
+                                />
                             </div>
                         </td>
                     </tr>

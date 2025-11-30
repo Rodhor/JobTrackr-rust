@@ -10,11 +10,11 @@
         applications,
     } from "$lib/stores/applications";
     import type { Application } from "$lib/types/application";
-    import CustomIDSelector from "./utils/CustomIDSelector.svelte";
     import { jobListings } from "$lib/stores/jobListings";
     import CustomDatePicker from "./utils/CustomDatePicker.svelte";
     import { Textarea } from "../ui/textarea";
     import { newlyCreatedApplicationId } from "$lib/stores/formState";
+    import CustomIDSelectCreate from "./utils/CustomIDSelectCreate.svelte";
 
     let {
         applicationID,
@@ -34,17 +34,20 @@
         if (found) Object.assign(form, found);
     });
 
-    const jobListingItems = $derived(() =>
-        $jobListings
+    const jobListingItems = $derived.by(() => {
+        return $jobListings
             .filter((j) => j.id !== undefined)
             .map((j) => ({
                 id: j.id!,
                 displayLabel: j.title,
-            })),
-    );
+            }));
+    });
 
+    let jobListingId = $state<number | undefined>(undefined);
     const invalidSubmit = $derived(!form.appliedDate);
-
+    $effect(() => {
+        form.jobListingId = jobListingId;
+    });
     async function submit() {
         if (invalidSubmit) return;
 
@@ -92,10 +95,13 @@
 
     <div class="space-y-4">
         <div>
-            <Label for="joblisting" class="py-2">Job Listing</Label>
-            <CustomIDSelector
-                items={jobListingItems()}
-                bind:selectedId={form.jobListingId}
+            <Label for="jobListing" class="py-2">Job Listing</Label>
+            <CustomIDSelectCreate
+                items={jobListingItems}
+                bind:value={jobListingId}
+                {callerChain}
+                currentPage="applications"
+                createNew="jobListings"
             />
         </div>
 

@@ -3,10 +3,23 @@
     import { Badge } from "$lib/components/ui/badge";
     import { people, deletePerson } from "$lib/stores/people";
     import { Role, RoleDisplay } from "$lib/types/enums";
-    import Trash2Icon from "lucide-svelte/icons/trash-2";
     import PencilIcon from "lucide-svelte/icons/pencil";
     import UserIcon from "lucide-svelte/icons/user";
     import LinkedinIcon from "lucide-svelte/icons/linkedin";
+    import DeleteAlert from "$lib/components/forms/utils/DeleteAlert.svelte";
+
+    let confirmDelete = $state(false);
+    let selectedPersonId: number | null = $state(null);
+    let selectedPersonName: string = $state("");
+
+    $effect(() => {
+        if (confirmDelete && selectedPersonId) {
+            handleDelete(selectedPersonId);
+            confirmDelete = false;
+            selectedPersonId = null;
+            selectedPersonName = "";
+        }
+    });
 
     const roleColorMap: Record<Role, string> = {
         recruiter: "bg-blue-100 text-blue-800",
@@ -172,16 +185,13 @@ Empty State
                                     <PencilIcon class="size-4" />
                                     Edit
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    class="gap-2"
-                                    onclick={() =>
-                                        person.id && handleDelete(person.id)}
-                                >
-                                    <Trash2Icon class="size-4" />
-                                    Delete
-                                </Button>
+                                <DeleteAlert
+                                    objectText="'{person.firstName} {person.lastName}'"
+                                    description="This will delete the person record."
+                                    onDelete={async () => {
+                                        await deletePerson(person.id!);
+                                    }}
+                                />
                             </div>
                         </td>
                     </tr>

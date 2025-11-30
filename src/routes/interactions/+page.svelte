@@ -3,10 +3,23 @@
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
     import { InteractionType, InteractionTypeDisplay } from "$lib/types/enums";
-    import Trash2Icon from "lucide-svelte/icons/trash-2";
     import PencilIcon from "lucide-svelte/icons/pencil";
     import MessageSquareIcon from "lucide-svelte/icons/message-square";
     import CalendarIcon from "lucide-svelte/icons/calendar";
+    import DeleteAlert from "$lib/components/forms/utils/DeleteAlert.svelte";
+
+    let confirmDelete = $state(false);
+    let selectedInteractionId: number | null = $state(null);
+    let selectedInteractionSubject: string = $state("");
+
+    $effect(() => {
+        if (confirmDelete && selectedInteractionId) {
+            handleDelete(selectedInteractionId);
+            confirmDelete = false;
+            selectedInteractionId = null;
+            selectedInteractionSubject = "";
+        }
+    });
 
     async function handleDelete(id: number) {
         await deleteInteraction(id);
@@ -166,17 +179,16 @@ Empty State
                                     <PencilIcon class="size-4" />
                                     Edit
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    class="gap-2"
-                                    onclick={() =>
-                                        interaction.id &&
-                                        handleDelete(interaction.id)}
-                                >
-                                    <Trash2Icon class="size-4" />
-                                    Delete
-                                </Button>
+                                <DeleteAlert
+                                    objectText="'{interaction.subject ||
+                                        'Interaction'}'"
+                                    description="This will delete the interaction record."
+                                    onDelete={async () => {
+                                        await deleteInteraction(
+                                            interaction.id!,
+                                        );
+                                    }}
+                                />
                             </div>
                         </td>
                     </tr>
