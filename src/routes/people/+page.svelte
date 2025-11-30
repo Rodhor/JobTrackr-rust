@@ -1,9 +1,12 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
-    import { people, loadPeople, deletePerson } from "$lib/stores/people";
+    import { people, deletePerson } from "$lib/stores/people";
     import { Role, RoleDisplay } from "$lib/types/enums";
+    import Trash2Icon from "lucide-svelte/icons/trash-2";
+    import PencilIcon from "lucide-svelte/icons/pencil";
+    import UserIcon from "lucide-svelte/icons/user";
+    import LinkedinIcon from "lucide-svelte/icons/linkedin";
 
     const roleColorMap: Record<Role, string> = {
         recruiter: "bg-blue-100 text-blue-800",
@@ -24,97 +27,166 @@
     }
 </script>
 
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold tracking-tight">People</h1>
-        <Button href="/people/create">New Person</Button>
+<!-- ----------------------------------------------------------
+Header
+----------------------------------------------------------- -->
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-3xl font-bold tracking-tight">People</h1>
+        <p class="text-muted-foreground mt-1">
+            Manage your contacts and network
+        </p>
     </div>
+    <Button href="/people/create" size="lg">+ New Person</Button>
+</div>
 
-    <!-- Table -->
+<!-- ----------------------------------------------------------
+Stats Card
+----------------------------------------------------------- -->
+<div class="mb-8 rounded-lg border border-border bg-background p-4">
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="text-sm font-medium text-muted-foreground mb-1">
+                Total People
+            </div>
+            <div class="text-3xl font-bold">{$people.length}</div>
+        </div>
+        <UserIcon class="size-12 text-muted-foreground opacity-30" />
+    </div>
+</div>
+
+<!-- ----------------------------------------------------------
+Empty State
+----------------------------------------------------------- -->
+{#if $people.length === 0}
+    <div
+        class="rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center"
+    >
+        <UserIcon
+            class="mx-auto mb-4 size-12 text-muted-foreground opacity-50"
+        />
+        <h3 class="font-semibold text-foreground mb-1">No people yet</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+            Start building your network by adding contacts
+        </p>
+        <Button href="/people/create">Add First Person</Button>
+    </div>
+{:else}
+    <!-- ----------------------------------------------------------
+    Table
+    ----------------------------------------------------------- -->
     <div
         class="overflow-hidden rounded-lg border border-border bg-background shadow-sm"
     >
-        <table class="min-w-full text-sm">
+        <table class="w-full text-sm">
             <thead
-                class="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground"
+                class="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border"
             >
                 <tr>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Email</th>
-                    <th class="px-4 py-3">Phone</th>
-                    <th class="px-4 py-3">Role</th>
-                    <th class="px-4 py-3">LinkedIn</th>
-                    <th class="px-4 py-3 text-right">Actions</th>
+                    <th class="px-6 py-4 font-semibold">Name</th>
+                    <th class="px-6 py-4 font-semibold">Email</th>
+                    <th class="px-6 py-4 font-semibold">Phone</th>
+                    <th class="px-6 py-4 font-semibold">Role</th>
+                    <th class="px-6 py-4 font-semibold">LinkedIn</th>
+                    <th class="px-6 py-4 text-right font-semibold">Actions</th>
                 </tr>
             </thead>
 
             <tbody>
-                {#each $people as p (p.id)}
-                    <tr class="border-t transition-colors hover:bg-muted/30">
-                        <td class="px-4 py-3 font-medium">
-                            {p.firstName}
-                            {p.lastName}
+                {#each $people as person (person.id)}
+                    <tr
+                        class="border-t border-border hover:bg-muted/50 transition-colors"
+                    >
+                        <!-- Name -->
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-foreground">
+                                {person.firstName}
+                                {person.lastName}
+                            </div>
                         </td>
-                        <td class="px-4 py-3 text-muted-foreground">
-                            {p.email || "—"}
-                        </td>
-                        <td class="px-4 py-3 text-muted-foreground">
-                            {p.phoneNumber || "—"}
-                        </td>
-                        <td class="px-4 py-3">
-                            <Badge class={getRoleColor(p.role)}>
-                                {p.role ? RoleDisplay[p.role] : "—"}
-                            </Badge>
-                        </td>
-                        <td
-                            class="px-4 py-3 truncate max-w-[200px] text-muted-foreground"
-                        >
-                            {#if p.linkedinUrl}
+
+                        <!-- Email -->
+                        <td class="px-6 py-4">
+                            {#if person.email}
                                 <a
-                                    href={p.linkedinUrl}
-                                    class="text-blue-600 hover:underline"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    href="mailto:{person.email}"
+                                    class="text-blue-600 hover:underline truncate block"
                                 >
-                                    {p.linkedinUrl}
+                                    {person.email}
+                                </a>
+                            {:else}
+                                <span class="text-muted-foreground">—</span>
+                            {/if}
+                        </td>
+
+                        <!-- Phone -->
+                        <td class="px-6 py-4 text-muted-foreground">
+                            {#if person.phoneNumber}
+                                <a
+                                    href="tel:{person.phoneNumber}"
+                                    class="text-blue-600 hover:underline"
+                                >
+                                    {person.phoneNumber}
                                 </a>
                             {:else}
                                 —
                             {/if}
                         </td>
-                        <td class="px-4 py-3 text-right">
+
+                        <!-- Role -->
+                        <td class="px-6 py-4">
+                            <Badge class={getRoleColor(person.role)}>
+                                {person.role ? RoleDisplay[person.role] : "—"}
+                            </Badge>
+                        </td>
+
+                        <!-- LinkedIn -->
+                        <td class="px-6 py-4">
+                            {#if person.linkedinUrl}
+                                <a
+                                    href={person.linkedinUrl}
+                                    class="inline-flex items-center gap-2 text-blue-600 hover:underline"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={person.linkedinUrl}
+                                >
+                                    <LinkedinIcon class="size-4" />
+                                    <span class="truncate max-w-[150px]"
+                                        >Profile</span
+                                    >
+                                </a>
+                            {:else}
+                                <span class="text-muted-foreground">—</span>
+                            {/if}
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="px-6 py-4">
                             <div class="flex justify-end gap-2">
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    href="/people/{p.id}"
+                                    class="gap-2"
+                                    href="/people/{person.id}"
                                 >
+                                    <PencilIcon class="size-4" />
                                     Edit
                                 </Button>
                                 <Button
                                     size="sm"
                                     variant="destructive"
-                                    onclick={() => p.id && handleDelete(p.id)}
+                                    class="gap-2"
+                                    onclick={() =>
+                                        person.id && handleDelete(person.id)}
                                 >
+                                    <Trash2Icon class="size-4" />
                                     Delete
                                 </Button>
                             </div>
                         </td>
                     </tr>
                 {/each}
-
-                {#if $people.length === 0}
-                    <tr>
-                        <td
-                            colspan="6"
-                            class="px-4 py-10 text-center text-sm text-muted-foreground"
-                        >
-                            No people yet.
-                        </td>
-                    </tr>
-                {/if}
             </tbody>
         </table>
     </div>
-</div>
+{/if}

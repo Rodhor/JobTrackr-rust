@@ -8,6 +8,11 @@
         WorkTypeDisplay,
         SeniorityLevelDisplay,
     } from "$lib/types/enums";
+    import Trash2Icon from "lucide-svelte/icons/trash-2";
+    import PencilIcon from "lucide-svelte/icons/pencil";
+    import BriefcaseIcon from "lucide-svelte/icons/briefcase";
+    import CalendarIcon from "lucide-svelte/icons/calendar";
+    import DollarSignIcon from "lucide-svelte/icons/dollar-sign";
 
     async function handleDelete(id: number) {
         try {
@@ -33,109 +38,196 @@
         return $companies.find((c) => c.id === companyId)?.name ?? "—";
     }
 
-    function typeColor(type?: WorkType) {
-        switch (type) {
-            case WorkType.Remote:
-                return "bg-blue-100 text-blue-800";
-            case WorkType.InOffice:
-                return "bg-green-100 text-green-800";
-            case WorkType.Hybrid:
-                return "bg-yellow-100 text-yellow-800";
-            default:
-                return "bg-muted text-foreground";
-        }
+    const typeColorMap: Record<WorkType, string> = {
+        [WorkType.Remote]: "bg-blue-100 text-blue-800",
+        [WorkType.InOffice]: "bg-green-100 text-green-800",
+        [WorkType.Hybrid]: "bg-yellow-100 text-yellow-800",
+        [WorkType.Other]: "bg-gray-100 text-gray-800",
+        [WorkType.FullTime]: "bg-indigo-100 text-indigo-800",
+        [WorkType.PartTime]: "bg-cyan-100 text-cyan-800",
+        [WorkType.Internship]: "bg-amber-100 text-amber-800",
+        [WorkType.Contract]: "bg-rose-100 text-rose-800",
+        [WorkType.Freelance]: "bg-teal-100 text-teal-800",
+    };
+
+    function typeColor(type?: WorkType): string {
+        return type ? typeColorMap[type] : "bg-muted text-foreground";
+    }
+
+    function formatSalary(
+        salaryMin?: number,
+        salaryMax?: number,
+        currency?: string,
+    ): string {
+        if (!salaryMin || !salaryMax) return "—";
+        return `${salaryMin.toLocaleString()}–${salaryMax.toLocaleString()} ${currency || ""}`.trim();
     }
 </script>
 
 <!-- ----------------------------------------------------------
 Header
-<!-- ----------------------------------------------------------- -->
-<div class="mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-semibold tracking-tight">Listings</h1>
-    <Button href="jobListings/create">New Listing</Button>
+----------------------------------------------------------- -->
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-3xl font-bold tracking-tight">Job Listings</h1>
+        <p class="text-muted-foreground mt-1">
+            Manage and track job opportunities
+        </p>
+    </div>
+    <Button href="/jobListings/create" size="lg">+ New Listing</Button>
 </div>
 
 <!-- ----------------------------------------------------------
-Table
+Stats Card
 ----------------------------------------------------------- -->
-<div
-    class="overflow-hidden rounded-lg border border-border bg-background shadow-sm"
->
-    <table class="min-w-full text-sm">
-        <thead
-            class="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground"
-        >
-            <tr>
-                <th class="px-4 py-3">Title</th>
-                <th class="px-4 py-3">Company</th>
-                <th class="px-4 py-3">Work Type</th>
-                <th class="px-4 py-3">Seniority</th>
-                <th class="px-4 py-3">Salary</th>
-                <th class="px-4 py-3">Created</th>
-                <th class="px-4 py-3 text-right">Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {#each $jobListings as j (j.id)}
-                <tr class="border-t hover:bg-muted/30 transition-colors">
-                    <td class="px-4 py-3 font-medium text-foreground"
-                        >{j.title}</td
-                    >
-                    <td class="px-4 py-3 text-muted-foreground">
-                        {getCompanyName(j.companyId)}
-                    </td>
-                    <td class="px-4 py-3">
-                        <Badge class={typeColor(j.workType as WorkType)}>
-                            {WorkTypeDisplay[j.workType as WorkType] || "—"}
-                        </Badge>
-                    </td>
-                    <td class="px-4 py-3">
-                        {#if j.seniorityLevel}
-                            {SeniorityLevelDisplay[j.seniorityLevel]}
-                        {:else}
-                            —
-                        {/if}
-                    </td>
-                    <td class="px-4 py-3 text-muted-foreground">
-                        {#if j.salaryMin && j.salaryMax}
-                            {j.salaryMin}–{j.salaryMax} {j.currency}
-                        {:else}
-                            —
-                        {/if}
-                    </td>
-                    <td class="px-4 py-3">
-                        {j.createdAt ? formatDate(j.createdAt) : "—"}
-                    </td>
-                    <td class="px-4 py-3 text-right flex justify-end gap-2">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            href="/jobListings/{j.id}"
-                        >
-                            Edit
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="destructive"
-                            onclick={() => j.id && handleDelete(j.id)}
-                        >
-                            Delete
-                        </Button>
-                    </td>
-                </tr>
-            {/each}
-
-            {#if $jobListings.length === 0}
-                <tr>
-                    <td
-                        colspan="7"
-                        class="px-4 py-10 text-center text-sm text-muted-foreground"
-                    >
-                        No job listings yet.
-                    </td>
-                </tr>
-            {/if}
-        </tbody>
-    </table>
+<div class="mb-8 rounded-lg border border-border bg-background p-4">
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="text-sm font-medium text-muted-foreground mb-1">
+                Total Listings
+            </div>
+            <div class="text-3xl font-bold">{$jobListings.length}</div>
+        </div>
+        <BriefcaseIcon class="size-12 text-muted-foreground opacity-30" />
+    </div>
 </div>
+
+<!-- ----------------------------------------------------------
+Empty State
+----------------------------------------------------------- -->
+{#if $jobListings.length === 0}
+    <div
+        class="rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center"
+    >
+        <BriefcaseIcon
+            class="mx-auto mb-4 size-12 text-muted-foreground opacity-50"
+        />
+        <h3 class="font-semibold text-foreground mb-1">No job listings yet</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+            Start tracking job opportunities
+        </p>
+        <Button href="/jobListings/create">Create First Listing</Button>
+    </div>
+{:else}
+    <!-- ----------------------------------------------------------
+    Table
+    ----------------------------------------------------------- -->
+    <div
+        class="overflow-hidden rounded-lg border border-border bg-background shadow-sm"
+    >
+        <table class="w-full text-sm">
+            <thead
+                class="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border"
+            >
+                <tr>
+                    <th class="px-6 py-4 font-semibold">Title</th>
+                    <th class="px-6 py-4 font-semibold">Company</th>
+                    <th class="px-6 py-4 font-semibold">Work Type</th>
+                    <th class="px-6 py-4 font-semibold">Seniority</th>
+                    <th class="px-6 py-4 font-semibold">Salary</th>
+                    <th class="px-6 py-4 font-semibold">Created</th>
+                    <th class="px-6 py-4 text-right font-semibold">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {#each $jobListings as listing (listing.id)}
+                    <tr
+                        class="border-t border-border hover:bg-muted/50 transition-colors"
+                    >
+                        <!-- Title -->
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-foreground">
+                                {listing.title}
+                            </div>
+                        </td>
+
+                        <!-- Company -->
+                        <td class="px-6 py-4 text-muted-foreground">
+                            {getCompanyName(listing.companyId)}
+                        </td>
+
+                        <!-- Work Type -->
+                        <td class="px-6 py-4">
+                            <Badge
+                                class={typeColor(listing.workType as WorkType)}
+                            >
+                                {WorkTypeDisplay[
+                                    listing.workType as WorkType
+                                ] || "—"}
+                            </Badge>
+                        </td>
+
+                        <!-- Seniority -->
+                        <td class="px-6 py-4">
+                            {#if listing.seniorityLevel}
+                                <span class="text-foreground"
+                                    >{SeniorityLevelDisplay[
+                                        listing.seniorityLevel
+                                    ]}</span
+                                >
+                            {:else}
+                                <span class="text-muted-foreground">—</span>
+                            {/if}
+                        </td>
+
+                        <!-- Salary -->
+                        <td class="px-6 py-4">
+                            <div
+                                class="flex items-center gap-2 text-foreground"
+                            >
+                                <DollarSignIcon
+                                    class="size-4 text-muted-foreground"
+                                />
+                                {formatSalary(
+                                    listing.salaryMin,
+                                    listing.salaryMax,
+                                    listing.currency,
+                                )}
+                            </div>
+                        </td>
+
+                        <!-- Created Date -->
+                        <td class="px-6 py-4">
+                            <div
+                                class="flex items-center gap-2 text-foreground"
+                            >
+                                <CalendarIcon
+                                    class="size-4 text-muted-foreground"
+                                />
+                                {listing.createdAt
+                                    ? formatDate(listing.createdAt)
+                                    : "—"}
+                            </div>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="px-6 py-4">
+                            <div class="flex justify-end gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    class="gap-2"
+                                    href="/jobListings/{listing.id}"
+                                >
+                                    <PencilIcon class="size-4" />
+                                    Edit
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    class="gap-2"
+                                    onclick={() =>
+                                        listing.id && handleDelete(listing.id)}
+                                >
+                                    <Trash2Icon class="size-4" />
+                                    Delete
+                                </Button>
+                            </div>
+                        </td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    </div>
+{/if}
