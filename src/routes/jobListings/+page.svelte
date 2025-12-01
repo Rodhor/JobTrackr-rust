@@ -12,6 +12,8 @@
     import BriefcaseIcon from "lucide-svelte/icons/briefcase";
     import CalendarIcon from "lucide-svelte/icons/calendar";
     import DollarSignIcon from "lucide-svelte/icons/dollar-sign";
+    import EuroIcon from "lucide-svelte/icons/euro";
+    import PoundSterlingIcon from "lucide-svelte/icons/pound-sterling";
     import DeleteAlert from "$lib/components/forms/utils/DeleteAlert.svelte";
 
     let confirmDelete = $state(false);
@@ -63,13 +65,40 @@
         return type ? typeColorMap[type] : "bg-muted text-foreground";
     }
 
+    const currencyIconMap: Record<string, any> = {
+        USD: DollarSignIcon,
+        EUR: EuroIcon,
+        GBP: PoundSterlingIcon,
+        DKK: DollarSignIcon,
+        other: DollarSignIcon,
+    };
+
+    function getCurrencyIcon(currency?: string) {
+        return currency
+            ? currencyIconMap[currency] || DollarSignIcon
+            : DollarSignIcon;
+    }
+
     function formatSalary(
         salaryMin?: number,
         salaryMax?: number,
         currency?: string,
     ): string {
-        if (!salaryMin || !salaryMax) return "—";
-        return `${salaryMin.toLocaleString()}–${salaryMax.toLocaleString()} ${currency || ""}`.trim();
+        if (!salaryMin && !salaryMax) return "—";
+
+        if (salaryMin && salaryMax) {
+            return `${salaryMin.toLocaleString()} – ${salaryMax.toLocaleString()} ${currency || ""}`.trim();
+        }
+
+        if (salaryMin) {
+            return `${salaryMin.toLocaleString()} ${currency || ""}`.trim();
+        }
+
+        if (salaryMax) {
+            return `Up to ${salaryMax.toLocaleString()} ${currency || ""}`.trim();
+        }
+
+        return "—";
     }
 </script>
 
@@ -185,9 +214,19 @@ Empty State
                             <div
                                 class="flex items-center gap-2 text-foreground"
                             >
-                                <DollarSignIcon
-                                    class="size-4 text-muted-foreground"
-                                />
+                                {#if getCurrencyIcon(listing.currency) === DollarSignIcon}
+                                    <DollarSignIcon
+                                        class="size-4 text-muted-foreground"
+                                    />
+                                {:else if getCurrencyIcon(listing.currency) === EuroIcon}
+                                    <EuroIcon
+                                        class="size-4 text-muted-foreground"
+                                    />
+                                {:else if getCurrencyIcon(listing.currency) === PoundSterlingIcon}
+                                    <PoundSterlingIcon
+                                        class="size-4 text-muted-foreground"
+                                    />
+                                {/if}
                                 {formatSalary(
                                     listing.salaryMin,
                                     listing.salaryMax,

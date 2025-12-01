@@ -7,6 +7,11 @@
     import FileTextIcon from "lucide-svelte/icons/file-text";
     import CalendarIcon from "lucide-svelte/icons/calendar";
     import DeleteAlert from "$lib/components/forms/utils/DeleteAlert.svelte";
+    import { applications } from "$lib/stores/applications";
+    import { jobListings } from "$lib/stores/jobListings";
+    import { interactions } from "$lib/stores/interactions";
+    import { people } from "$lib/stores/people";
+    import { companies } from "$lib/stores/companies";
 
     let confirmDelete = $state(false);
     let selectedNoteId: number | null = $state(null);
@@ -48,27 +53,45 @@
         return type ? typeColorMap[type] : "bg-gray-200 text-gray-800";
     }
 
-    function getLinkedEntity(note: (typeof $notes)[0]): {
-        label: string;
-        type: string;
-    } {
-        if (note.applicationId)
-            return {
-                label: `Application #${note.applicationId}`,
-                type: "application",
-            };
-        if (note.jobListingId)
-            return { label: `Job Listing #${note.jobListingId}`, type: "job" };
-        if (note.interactionId)
-            return {
-                label: `Interaction #${note.interactionId}`,
-                type: "interaction",
-            };
-        if (note.personId)
-            return { label: `Person #${note.personId}`, type: "person" };
-        if (note.companyId)
-            return { label: `Company #${note.companyId}`, type: "company" };
-        return { label: "—", type: "none" };
+    function getLinkedEntities(note: (typeof $notes)[0]): string {
+        const entities: string[] = [];
+
+        if (note.companyId) {
+            const company = $companies.find((c) => c.id === note.companyId);
+            entities.push(`Company: ${company?.name ?? `#${note.companyId}`}`);
+        }
+
+        if (note.personId) {
+            const person = $people.find((p) => p.id === note.personId);
+            entities.push(
+                `Person: ${person ? `${person.firstName} ${person.lastName}` : `#${note.personId}`}`,
+            );
+        }
+
+        if (note.jobListingId) {
+            const job = $jobListings.find((j) => j.id === note.jobListingId);
+            entities.push(
+                `Job Listing: ${job?.title ?? `#${note.jobListingId}`}`,
+            );
+        }
+
+        if (note.applicationId) {
+            const app = $applications.find((a) => a.id === note.applicationId);
+            entities.push(
+                `Application: ${app?.displayLabel ?? `#${note.applicationId}`}`,
+            );
+        }
+
+        if (note.interactionId) {
+            const interaction = $interactions.find(
+                (i) => i.id === note.interactionId,
+            );
+            entities.push(
+                `Interaction: ${interaction?.subject ?? `#${note.interactionId}`}`,
+            );
+        }
+
+        return entities.length > 0 ? entities.join("\n") : "—";
     }
 </script>
 
@@ -138,10 +161,7 @@ Empty State
             </thead>
             <tbody>
                 {#each $notes as note (note.id)}
-                    {@const linkedEntity = getLinkedEntity(note)}
-                    <tr
-                        class="border-t border-border hover:bg-muted/50 transition-colors"
-                    >
+                    <tr>
                         <!-- Type -->
                         <td class="px-6 py-4">
                             <Badge class={typeColor(note.noteType)}>
@@ -153,31 +173,25 @@ Empty State
 
                         <!-- Title -->
                         <td class="px-6 py-4">
-                            <div class="font-semibold text-foreground">
+                            <div class="font-semibold">
                                 {note.title || "—"}
                             </div>
                         </td>
 
                         <!-- Content -->
-                        <td
-                            class="px-6 py-4 truncate max-w-[300px] text-muted-foreground"
-                        >
+                        <td class="px-6 py-4 truncate max-w-[300px]">
                             {note.content || "—"}
                         </td>
 
                         <!-- Linked Entity -->
-                        <td class="px-6 py-4 text-sm text-muted-foreground">
-                            {linkedEntity.label}
+                        <td class="px-6 py-4 text-sm whitespace-pre-line">
+                            {getLinkedEntities(note)}
                         </td>
 
                         <!-- Created Date -->
                         <td class="px-6 py-4">
-                            <div
-                                class="flex items-center gap-2 text-foreground"
-                            >
-                                <CalendarIcon
-                                    class="size-4 text-muted-foreground"
-                                />
+                            <div class="flex items-center gap-2">
+                                <CalendarIcon class="size-4" />
                                 {formatDate(note.createdAt)}
                             </div>
                         </td>

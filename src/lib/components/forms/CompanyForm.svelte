@@ -22,6 +22,7 @@
         name: "",
         industry: "",
         streetAddress: "",
+        city: "",
         zipCode: "",
         country: "",
         defaultWorkType: WorkType.Other,
@@ -122,6 +123,10 @@
         <div>
             <Label for="zipCode" class="py-2">Zip Code</Label>
             <Input id="zipCode" bind:value={form.zipCode} placeholder="12345" />
+        </div>
+        <div>
+            <Label for="city" class="py-2">City</Label>
+            <Input id="city" bind:value={form.city} placeholder="London" />
         </div>
 
         <div>
